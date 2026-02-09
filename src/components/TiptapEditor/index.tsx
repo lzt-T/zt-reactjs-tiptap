@@ -22,6 +22,7 @@ import CommandMenu from './CommandMenu'
 import TableMenu from './TableMenu'
 import BubbleMenu from './BubbleMenu/index'
 import MathDialog from './MathDialog'
+import ImageUploadDialog from './ImageUploadDialog'
 import './TiptapEditor.css'
 import 'katex/dist/katex.min.css'
 import { useState, useCallback, useRef, useEffect } from 'react'
@@ -29,9 +30,10 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 interface TiptapEditorProps {
   value?: string
   onChange?: (html: string) => void
+  onImageUpload?: (file: File) => Promise<string>
 }
 
-const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
+const TiptapEditor = ({ value, onChange, onImageUpload }: TiptapEditorProps) => {
   const [showCommandMenu, setShowCommandMenu] = useState(false)
   const [commandQuery, setCommandQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -42,6 +44,11 @@ const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
   const [mathDialogType, setMathDialogType] = useState<'inline' | 'block'>('inline')
   const [mathDialogInitialValue, setMathDialogInitialValue] = useState('')
   const [mathDialogCallback, setMathDialogCallback] = useState<((latex: string) => void) | null>(null)
+  
+  // Image upload dialog states
+  const [showImageDialog, setShowImageDialog] = useState(false)
+  const [imageDialogCallback, setImageDialogCallback] = useState<((src: string, alt?: string) => void) | null>(null)
+  
   const editorRef = useRef<ReturnType<typeof useEditor>>(null)
   const isExternalUpdateRef = useRef(false) // 标记是否为外部更新
 
@@ -109,6 +116,25 @@ const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
     openMathDialogCallbackRef.current(type, initialValue, callback)
   }, [])
 
+  // Image upload dialog handlers
+  const openImageDialog = useCallback((callback: (src: string, alt?: string) => void) => {
+    setImageDialogCallback(() => callback)
+    setShowImageDialog(true)
+  }, [])
+
+  const handleImageConfirm = useCallback((src: string, alt?: string) => {
+    if (imageDialogCallback) {
+      imageDialogCallback(src, alt)
+    }
+    setShowImageDialog(false)
+    setImageDialogCallback(null)
+  }, [imageDialogCallback])
+
+  const handleImageCancel = useCallback(() => {
+    setShowImageDialog(false)
+    setImageDialogCallback(null)
+  }, [])
+
   const handleMathConfirm = useCallback((latex: string) => {
     if (mathDialogCallback) {
       mathDialogCallback(latex)
@@ -164,6 +190,7 @@ const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
         onClientRect: handleClientRect,
         onExit: handleExit,
         onMathDialog: handleMathDialogFromSlash,
+        onImageUpload: openImageDialog,
       }),
     ],
     content: value || '<p></p>',
@@ -187,7 +214,7 @@ const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
       if (currentContent !== value) {
         // 标记为外部更新
         isExternalUpdateRef.current = true
-        editor.commands.setContent(value, false)
+        editor.commands.setContent(value)
         // 使用 setTimeout 确保更新完成后再重置标志
         setTimeout(() => {
           isExternalUpdateRef.current = false
@@ -223,6 +250,11 @@ const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
               editor.chain().focus().insertBlockMath({ latex }).run()
             }
           })
+        } else if (item.imageUpload) {
+          // Handle image upload
+          openImageDialog((src, alt) => {
+            editor.chain().focus().setImage({ src, alt }).run()
+          })
         } else {
           item.command({ editor })
         }
@@ -230,7 +262,7 @@ const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
         setShowCommandMenu(false)
       }
     },
-    [editor, openMathDialog]
+    [editor, openMathDialog, openImageDialog]
   )
 
   return (
@@ -254,6 +286,12 @@ const TiptapEditor = ({ value, onChange }: TiptapEditorProps) => {
         initialValue={mathDialogInitialValue}
         onConfirm={handleMathConfirm}
         onCancel={handleMathCancel}
+      />
+      <ImageUploadDialog
+        isOpen={showImageDialog}
+        onConfirm={handleImageConfirm}
+        onCancel={handleImageCancel}
+        onUpload={onImageUpload}
       />
     </div>
   )

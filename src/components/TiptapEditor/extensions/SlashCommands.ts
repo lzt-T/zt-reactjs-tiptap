@@ -9,6 +9,7 @@ export interface CommandItem {
   icon?: string
   command: ({ editor }: { editor: Editor }) => void
   mathType?: 'inline' | 'block'
+  imageUpload?: boolean
 }
 
 export interface SlashCommandsOptions {
@@ -18,6 +19,7 @@ export interface SlashCommandsOptions {
   onExit: () => void
   onClientRect: (rect: DOMRect | null) => void
   onMathDialog?: (type: 'inline' | 'block', initialValue: string, callback: (latex: string) => void) => void
+  onImageUpload?: (callback: (src: string, alt?: string) => void) => void
 }
 
 export const defaultCommands: CommandItem[] = [
@@ -105,6 +107,16 @@ export const defaultCommands: CommandItem[] = [
       editor.chain().focus().run()
     },
   },
+  {
+    title: '图片',
+    description: '上传或插入图片',
+    icon: '🖼️',
+    imageUpload: true,
+    command: ({ editor }) => {
+      // This will be handled by the image upload dialog
+      editor.chain().focus().run()
+    },
+  },
 ]
 
 export const SlashCommands = Extension.create<SlashCommandsOptions>({
@@ -117,6 +129,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
       onExit: () => {},
       onClientRect: () => {},
       onMathDialog: undefined,
+      onImageUpload: undefined,
     }
   },
   addProseMirrorPlugins() {
@@ -198,9 +211,16 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
                           currentEditor.chain().focus().insertBlockMath({ latex }).run()
                         }
                       })
+                    } else if (item.imageUpload && this.options.onImageUpload) {
+                      // Handle image upload
+                      this.options.onImageUpload((src, alt) => {
+                        currentEditor.chain().focus().setImage({ src, alt }).run()
+                      })
                     } else {
                       item.command({ editor: currentEditor })
                     }
+                    // Close the command menu after executing command
+                    this.options.onExit()
                   }
                   return true
                 case 'Escape':

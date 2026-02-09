@@ -10,6 +10,29 @@ function App() {
     console.log('✏️ onChange 被触发 - 用户编辑:', html)
   }
 
+  // 自定义图片上传函数示例
+  // 如果不提供此函数，图片会自动转换为 Base64
+  const handleImageUpload = async (file: File): Promise<string> => {
+    console.log('📤 上传图片:', file.name, file.size, 'bytes')
+    
+    // 模拟上传到服务器（实际使用时替换为真实的上传逻辑）
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // 模拟 80% 成功率
+        if (Math.random() > 0.2) {
+          // 这里应该返回服务器上的图片 URL
+          // 示例中我们返回一个在线图片 URL 作为演示
+          const mockUrl = `https://picsum.photos/seed/${Date.now()}/800/600`
+          console.log('✅ 上传成功:', mockUrl)
+          resolve(mockUrl)
+        } else {
+          console.log('❌ 上传失败')
+          reject(new Error('模拟上传失败，请重试'))
+        }
+      }, 1500) // 模拟 1.5 秒的上传时间
+    })
+  }
+
 
   useEffect(() => {
     console.log('📡 准备从接口加载数据...')
@@ -23,7 +46,11 @@ function App() {
     <div className="app">
       <h1>Tiptap Markdown Editor</h1>
       <div style={{ height: 'calc(100vh - 200px)' }}>
-        <TiptapEditor value={content} onChange={handleEditorChange} />
+        <TiptapEditor 
+          value={content} 
+          onChange={handleEditorChange}
+          onImageUpload={handleImageUpload}
+        />
       </div>
     </div>
   )
