@@ -1,35 +1,35 @@
-/* Dialog 内容滚动条样式 */
-[data-slot="dialog-content"] {
+/* 弹窗内容区滚动条（仅内容区滚动，弹窗本身不滚动） */
+.math-dialog-body {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 }
 
-[data-slot="dialog-content"]::-webkit-scrollbar {
+.math-dialog-body::-webkit-scrollbar {
   width: 4px;
 }
 
-[data-slot="dialog-content"]::-webkit-scrollbar-track {
+.math-dialog-body::-webkit-scrollbar-track {
   background: transparent;
 }
 
-[data-slot="dialog-content"]::-webkit-scrollbar-thumb {
+.math-dialog-body::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 2px;
 }
 
-[data-slot="dialog-content"]::-webkit-scrollbar-thumb:hover {
+.math-dialog-body::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.dark [data-slot="dialog-content"] {
+.dark .math-dialog-body {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
-.dark [data-slot="dialog-content"]::-webkit-scrollbar-thumb {
+.dark .math-dialog-body::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-.dark [data-slot="dialog-content"]::-webkit-scrollbar-thumb:hover {
+.dark .math-dialog-body::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.25);
 }
 

@@ -78,12 +78,12 @@ const MathDialog = ({ isOpen, initialValue = '', type, onConfirm, onCancel }: Ma
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" showCloseButton={false}>
+        <DialogHeader className="shrink-0">
           <DialogTitle>{type === 'inline' ? '插入行内公式' : '插入块级公式'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="math-dialog-body space-y-4 min-h-0 flex-1 overflow-y-auto">
           <div className="space-y-2">
             <label htmlFor="latex-input" className="text-sm font-medium">
               LaTeX 公式:
@@ -110,7 +110,7 @@ const MathDialog = ({ isOpen, initialValue = '', type, onConfirm, onCancel }: Ma
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0">
           <Button variant="outline" onClick={handleCancel}>
             取消
           </Button>
