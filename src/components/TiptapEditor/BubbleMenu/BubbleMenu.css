@@ -23,6 +23,7 @@
 .bubble-menu button {
   background: transparent;
   border: none;
+  outline: none;
   color: #374151;
   padding: 6px 10px;
   border-radius: 6px;
@@ -97,8 +98,6 @@
 .color-picker-container {
   position: fixed;
   z-index: 10001;
-  animation: fadeIn 0.15s ease;
-  /* 位置通过内联样式动态设置 */
 }
 
 /* 更多菜单样式 */
@@ -133,6 +132,7 @@
   width: 100%;
   padding: 8px 12px;
   border: none;
+  outline: none;
   background: transparent;
   color: #374151;
   border-radius: 6px;

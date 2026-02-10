@@ -24,14 +24,8 @@ import BubbleMenu from './BubbleMenu/index'
 import MathDialog from './MathDialog'
 import ImageUploadDialog from './ImageUploadDialog'
 import './TiptapEditor.css'
-import 'katex/dist/katex.min.css'
 import { useState, useCallback, useRef, useEffect } from 'react'
-
-interface TiptapEditorProps {
-  value?: string
-  onChange?: (html: string) => void
-  onImageUpload?: (file: File) => Promise<string>
-}
+import type { TiptapEditorProps } from './types'
 
 const TiptapEditor = ({ value, onChange, onImageUpload }: TiptapEditorProps) => {
   const [showCommandMenu, setShowCommandMenu] = useState(false)

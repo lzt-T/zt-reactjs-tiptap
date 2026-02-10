@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import TiptapEditor from "./components/TiptapEditor";
+import TiptapEditor from "@/components/TiptapEditor";
 import "./App.css";
 
 function App() {
@@ -47,7 +47,7 @@ function App() {
     <div className="app">
       <h1>Tiptap Markdown Editor</h1>
 
-      <div className="flex-1" style={{ height: "calc(100vh - 200px)" }}>
+      <div className="flex-1" style={{ height: "calc(100vh - 200px)",width:"600px" }}>
         <TiptapEditor
           value={content}
           onChange={handleEditorChange}

@@ -1,4 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import './ImageUploadDialog.css'
 
 interface ImageUploadDialogProps {
@@ -11,35 +20,28 @@ interface ImageUploadDialogProps {
 const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploadDialogProps) => {
   const [uploadType, setUploadType] = useState<'file' | 'url'>('file')
   const [imageUrl, setImageUrl] = useState('')
-  const [imageAlt, setImageAlt] = useState('')
   const [previewUrl, setPreviewUrl] = useState('')
   const [error, setError] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
 
-  // 重置所有状态的辅助函数
   const resetStates = useCallback(() => {
     setUploadType('file')
     setImageUrl('')
-    setImageAlt('')
     setPreviewUrl('')
     setError('')
     setIsUploading(false)
+    setIsDragOver(false)
   }, [])
 
-  // 处理文件选择
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // 验证文件类型
+  const processFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
       setError('请选择图片文件')
       return
     }
 
-    // 验证文件大小（限制为 5MB）
     if (file.size > 5 * 1024 * 1024) {
       setError('图片大小不能超过 5MB')
       return
@@ -47,7 +49,6 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
 
     setError('')
 
-    // 如果提供了自定义上传函数，使用它
     if (onUpload) {
       try {
         setIsUploading(true)
@@ -60,7 +61,6 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
         setError(err instanceof Error ? err.message : '上传失败，请重试')
       }
     } else {
-      // 否则使用默认的 Base64 转换
       const reader = new FileReader()
       reader.onload = (event) => {
         const base64 = event.target?.result as string
@@ -74,13 +74,41 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
     }
   }, [onUpload])
 
-  // 处理 URL 输入
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) processFile(file)
+    e.target.value = ''
+  }, [processFile])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.dataTransfer.dropEffect = 'copy'
+    if (!isUploading) setIsDragOver(true)
+  }, [isUploading])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+    if (isUploading) return
+    const file = e.dataTransfer.files?.[0]
+    if (file) processFile(file)
+  }, [isUploading, processFile])
+
   const handleUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value
     setImageUrl(url)
-    
+
     if (url) {
-      // 简单验证 URL 格式
       try {
         new URL(url)
         setPreviewUrl(url)
@@ -94,7 +122,6 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
     }
   }, [])
 
-  // 处理确认
   const handleConfirm = useCallback(() => {
     if (!imageUrl) {
       setError('请选择图片或输入图片 URL')
@@ -106,17 +133,15 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
       return
     }
 
-    onConfirm(imageUrl, imageAlt || undefined)
+    onConfirm(imageUrl)
     resetStates()
-  }, [imageUrl, imageAlt, isUploading, onConfirm, resetStates])
+  }, [imageUrl, isUploading, onConfirm, resetStates])
 
-  // 处理取消
   const handleCancel = useCallback(() => {
     onCancel()
     resetStates()
   }, [onCancel, resetStates])
 
-  // 处理键盘事件
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -127,35 +152,33 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
     }
   }, [handleConfirm, handleCancel])
 
-  // 切换上传方式时聚焦输入框
   useEffect(() => {
-    if (isOpen) {
-      if (uploadType === 'url') {
-        urlInputRef.current?.focus()
-      }
+    if (isOpen && uploadType === 'url') {
+      urlInputRef.current?.focus()
     }
   }, [uploadType, isOpen])
 
-  if (!isOpen) return null
-
   return (
-    <div className="image-upload-overlay" onClick={handleCancel}>
-      <div className="image-upload-dialog" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
-        <div className="image-upload-header">
-          <h3>插入图片</h3>
-          <button className="image-upload-close" onClick={handleCancel} aria-label="关闭">
-            ×
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+      <DialogContent
+        className="image-upload-dialog-content max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+        showCloseButton={false}
+        onKeyDown={handleKeyDown}
+      >
+        <DialogHeader>
+          <DialogTitle>插入图片</DialogTitle>
+        </DialogHeader>
 
         <div className="image-upload-tabs">
           <button
+            type="button"
             className={`image-upload-tab ${uploadType === 'file' ? 'active' : ''}`}
             onClick={() => setUploadType('file')}
           >
             上传文件
           </button>
           <button
+            type="button"
             className={`image-upload-tab ${uploadType === 'url' ? 'active' : ''}`}
             onClick={() => setUploadType('url')}
           >
@@ -174,13 +197,17 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
                 className="image-upload-input-hidden"
                 id="imageFileInput"
               />
-              <label htmlFor="imageFileInput" className="image-upload-file-label">
+              <label
+                htmlFor="imageFileInput"
+                className={`image-upload-file-label ${isDragOver ? 'is-drag-over' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 {isUploading ? (
                   <>
                     <div className="image-upload-file-icon">⏳</div>
-                    <div className="image-upload-file-text">
-                      正在上传图片...
-                    </div>
+                    <div className="image-upload-file-text">正在上传图片...</div>
                   </>
                 ) : (
                   <>
@@ -196,10 +223,8 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
               </label>
             </div>
           ) : (
-            <div className="image-upload-url">
-              <label htmlFor="imageUrlInput" className="image-upload-label">
-                图片 URL
-              </label>
+            <div className="image-upload-url space-y-2">
+              <Label htmlFor="imageUrlInput">图片 URL</Label>
               <input
                 ref={urlInputRef}
                 id="imageUrlInput"
@@ -212,52 +237,35 @@ const ImageUploadDialog = ({ isOpen, onConfirm, onCancel, onUpload }: ImageUploa
             </div>
           )}
 
-          <div className="image-upload-alt">
-            <label htmlFor="imageAltInput" className="image-upload-label">
-              图片描述（可选）
-            </label>
-            <input
-              id="imageAltInput"
-              type="text"
-              placeholder="为图片添加描述文字"
-              value={imageAlt}
-              onChange={(e) => setImageAlt(e.target.value)}
-              className="image-upload-input"
-            />
-          </div>
-
-          {/* 错误提示 */}
           {error && (
-            <div className="image-upload-error">
+            <div className="image-upload-error" role="alert">
               ⚠️ {error}
             </div>
           )}
 
-          {/* 预览 */}
           {previewUrl && (
-            <div className="image-upload-preview">
-              <label className="image-upload-label">预览</label>
+            <div className="image-upload-preview space-y-2">
+              <Label>预览</Label>
               <div className="image-upload-preview-wrapper">
-                <img src={previewUrl} alt={imageAlt || '图片预览'} />
+                <img src={previewUrl} alt="图片预览" />
               </div>
             </div>
           )}
         </div>
 
-        <div className="image-upload-footer">
-          <button className="image-upload-button secondary" onClick={handleCancel}>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCancel}>
             取消
-          </button>
-          <button 
-            className="image-upload-button primary" 
+          </Button>
+          <Button
             onClick={handleConfirm}
             disabled={!imageUrl || !!error || isUploading}
           >
             {isUploading ? '上传中...' : '插入图片'}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

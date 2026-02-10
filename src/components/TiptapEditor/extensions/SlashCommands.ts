@@ -2,11 +2,24 @@ import { Extension } from '@tiptap/core'
 import Suggestion from '@tiptap/suggestion'
 import type { SuggestionProps } from '@tiptap/suggestion'
 import type { Editor } from '@tiptap/react'
+import { 
+  Heading1, 
+  Heading2, 
+  Heading3, 
+  List, 
+  ListOrdered, 
+  Code, 
+  Table, 
+  Sigma, 
+  SquareFunction, 
+  Image,
+  type LucideIcon
+} from 'lucide-react'
 
 export interface CommandItem {
   title: string
   description?: string
-  icon?: string
+  icon?: LucideIcon
   command: ({ editor }: { editor: Editor }) => void
   mathType?: 'inline' | 'block'
   imageUpload?: boolean
@@ -26,7 +39,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '标题 1',
     description: '大标题',
-    icon: 'H1',
+    icon: Heading1,
     command: ({ editor }) => {
       editor.chain().focus().setNode('heading', { level: 1 }).run()
     },
@@ -34,7 +47,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '标题 2',
     description: '中等标题',
-    icon: 'H2',
+    icon: Heading2,
     command: ({ editor }) => {
       editor.chain().focus().setNode('heading', { level: 2 }).run()
     },
@@ -42,7 +55,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '标题 3',
     description: '小标题',
-    icon: 'H3',
+    icon: Heading3,
     command: ({ editor }) => {
       editor.chain().focus().setNode('heading', { level: 3 }).run()
     },
@@ -50,7 +63,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '无序列表',
     description: '项目符号列表',
-    icon: '•',
+    icon: List,
     command: ({ editor }) => {
       editor.chain().focus().toggleBulletList().run()
     },
@@ -58,7 +71,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '有序列表',
     description: '编号列表',
-    icon: '1.',
+    icon: ListOrdered,
     command: ({ editor }) => {
       editor.chain().focus().toggleOrderedList().run()
     },
@@ -66,7 +79,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '行内代码',
     description: '代码标记',
-    icon: '</>',
+    icon: Code,
     command: ({ editor }) => {
       editor.chain().focus().toggleCode().run()
     },
@@ -74,7 +87,7 @@ export const defaultCommands: CommandItem[] = [
   // {
   //   title: '代码块',
   //   description: '代码片段',
-  //   icon: '</>',
+  //   icon: Code,
   //   command: ({ editor }) => {
   //     editor.chain().focus().toggleCodeBlock().run()
   //   },
@@ -82,7 +95,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '表格',
     description: '添加表格',
-    icon: '▦',
+    icon: Table,
     command: ({ editor }) => {
       editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
     },
@@ -90,7 +103,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '行内公式',
     description: '插入数学公式',
-    icon: '∑',
+    icon: Sigma,
     mathType: 'inline',
     command: ({ editor }) => {
       // This will be handled by the custom dialog
@@ -100,7 +113,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '块级公式',
     description: '插入数学公式块',
-    icon: '∫',
+    icon: SquareFunction,
     mathType: 'block',
     command: ({ editor }) => {
       // This will be handled by the custom dialog
@@ -110,7 +123,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '图片',
     description: '上传或插入图片',
-    icon: '🖼️',
+    icon: Image,
     imageUpload: true,
     command: ({ editor }) => {
       // This will be handled by the image upload dialog

@@ -1,0 +1,22 @@
+/* 
+ * TipTap Editor Minimal Styles (不包含 Tailwind 和 shadcn)
+ * 
+ * 如果您的项目已经使用 Tailwind CSS 和 shadcn，使用此文件：
+ * import 'md-tiptap/style-minimal.css'
+ * 
+ * 您需要确保项目中已经配置了：
+ * 1. Tailwind CSS
+ * 2. shadcn 主题变量
+ */
+
+/* 仅组件样式 */
+@import './components/TiptapEditor/TiptapEditor.css';
+@import './components/TiptapEditor/BubbleMenu/BubbleMenu.css';
+@import './components/TiptapEditor/CommandMenu/CommandMenu.css';
+@import './components/TiptapEditor/TableMenu/TableMenu.css';
+@import './components/TiptapEditor/MathDialog/MathDialog.css';
+@import './components/TiptapEditor/ImageUploadDialog/ImageUploadDialog.css';
+@import './components/TiptapEditor/ColorPicker/ColorPicker.css';
+
+/* Katex 数学公式样式 */
+@import 'katex/dist/katex.min.css';

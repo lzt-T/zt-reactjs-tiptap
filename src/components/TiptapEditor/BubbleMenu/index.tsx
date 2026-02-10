@@ -2,6 +2,22 @@ import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
 import { useEffect, useState } from "react";
 import { useFloating, flip, shift, offset } from "@floating-ui/react";
+import {
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Code,
+  Highlighter,
+  Palette,
+  MoreHorizontal,
+  Superscript,
+  Subscript,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+} from "lucide-react";
 import ColorPicker from "../ColorPicker";
 import "./BubbleMenu.css";
 
@@ -91,7 +107,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           className={editor.isActive("bold") ? "is-active" : ""}
           title="粗体 (Ctrl+B)"
         >
-          <strong>B</strong>
+          <Bold size={16} />
         </button>
         <button
           onClick={() =>
@@ -100,7 +116,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           className={editor.isActive("italic") ? "is-active" : ""}
           title="斜体 (Ctrl+I)"
         >
-          <em>I</em>
+          <Italic size={16} />
         </button>
         <button
           onClick={() =>
@@ -109,7 +125,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           className={editor.isActive("underline") ? "is-active" : ""}
           title="下划线 (Ctrl+U)"
         >
-          <u>U</u>
+          <Underline size={16} />
         </button>
         <button
           onClick={() =>
@@ -118,7 +134,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           className={editor.isActive("strike") ? "is-active" : ""}
           title="删除线"
         >
-          <s>S</s>
+          <Strikethrough size={16} />
         </button>
         <button
           onClick={() =>
@@ -127,7 +143,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           className={editor.isActive("code") ? "is-active" : ""}
           title="行内代码"
         >
-          {"</>"}
+          <Code size={16} />
         </button>
         <span className="separator" />
         {/* 官方是免费的 */}
@@ -145,7 +161,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           className={editor.isActive("highlight") ? "is-active" : ""}
           title="高亮颜色"
         >
-          🖍️
+          <Highlighter size={16} />
         </button>
         {/* 官方的需要钱 */}
         <button
@@ -159,7 +175,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           }
           title="文字颜色"
         >
-          🎨
+          <Palette size={16} />
         </button>
         <span className="separator" />
         <button
@@ -172,11 +188,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           className={showMoreMenu ? "is-active" : ""}
           title="更多"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <circle cx="3" cy="8" r="1.5" />
-            <circle cx="8" cy="8" r="1.5" />
-            <circle cx="13" cy="8" r="1.5" />
-          </svg>
+          <MoreHorizontal size={16} />
         </button>
       </TiptapBubbleMenu>
 
@@ -233,7 +245,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               }}
               className={editor.isActive("superscript") ? "is-active" : ""}
             >
-              <span className="more-menu-icon">x²</span>
+              <span className="more-menu-icon">
+                <Superscript size={16} />
+              </span>
               <span className="more-menu-label">上标</span>
             </button>
             <button
@@ -245,7 +259,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               }}
               className={editor.isActive("subscript") ? "is-active" : ""}
             >
-              <span className="more-menu-icon">x₂</span>
+              <span className="more-menu-icon">
+                <Subscript size={16} />
+              </span>
               <span className="more-menu-label">下标</span>
             </button>
             <div className="more-menu-separator" />
@@ -260,14 +276,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 editor.isActive({ textAlign: "left" }) ? "is-active" : ""
               }
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
-                <path d="M2 3h12v1H2V3zm0 3h8v1H2V6zm0 3h12v1H2V9zm0 3h8v1H2v-1z" />
-              </svg>
+              <span className="more-menu-icon">
+                <AlignLeft size={16} />
+              </span>
               <span className="more-menu-label">左对齐</span>
             </button>
             <button
@@ -281,14 +292,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 editor.isActive({ textAlign: "center" }) ? "is-active" : ""
               }
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
-                <path d="M2 3h12v1H2V3zm2 3h8v1H4V6zm-2 3h12v1H2V9zm2 3h8v1H4v-1z" />
-              </svg>
+              <span className="more-menu-icon">
+                <AlignCenter size={16} />
+              </span>
               <span className="more-menu-label">居中对齐</span>
             </button>
             <button
@@ -302,14 +308,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 editor.isActive({ textAlign: "right" }) ? "is-active" : ""
               }
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
-                <path d="M2 3h12v1H2V3zm4 3h8v1H6V6zm-4 3h12v1H2V9zm4 3h8v1H6v-1z" />
-              </svg>
+              <span className="more-menu-icon">
+                <AlignRight size={16} />
+              </span>
               <span className="more-menu-label">右对齐</span>
             </button>
             <button
@@ -323,14 +324,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 editor.isActive({ textAlign: "justify" }) ? "is-active" : ""
               }
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
-                <path d="M2 3h12v1H2V3zm0 3h12v1H2V6zm0 3h12v1H2V9zm0 3h12v1H2v-1z" />
-              </svg>
+              <span className="more-menu-icon">
+                <AlignJustify size={16} />
+              </span>
               <span className="more-menu-label">两端对齐</span>
             </button>
           </div>
