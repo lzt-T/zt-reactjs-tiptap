@@ -9,16 +9,18 @@
 
 ## 特性
 
-- ✨ 丰富的文本格式化选项（粗体、斜体、下划线、删除线等）
-- 📝 支持标题、列表、引用、代码块
-- 🖼️ 图片插入和管理
-- 📊 表格支持（插入/删除行列、表头切换）
-- ✅ 任务列表（待办事项）
-- 🎨 文本颜色和高亮
-- 🔢 数学公式支持（行内和块级公式）
-- ⚡ 斜杠命令（输入 `/` 快速插入内容）
-- 🎯 气泡菜单（选中文本时显示）
-- 🔄 撤销/重做
+- ✨ 丰富的文本格式化选项（粗体、斜体、下划线、删除线、行内代码）
+- 📝 支持标题（H1、H2、H3）、列表（有序/无序）、引用、代码块
+- 🖼️ 图片插入和管理（支持文件上传和 URL 插入）
+- 📊 完整表格支持（插入/删除行列、切换表头、删除表格）
+- ✅ 任务列表（带复选框的可交互待办事项）
+- 🎨 文本颜色和背景高亮
+- 🔢 数学公式支持（行内和块级 LaTeX 公式，基于 KaTeX）
+- ⚡ 斜杠命令（输入 `/` 快速插入各种内容块）
+- 🎯 气泡菜单（选中文本时显示格式化工具栏）
+- 🔄 撤销/重做支持
+- 📐 文本对齐（左对齐、居中、右对齐、两端对齐）
+- ⬆️⬇️ 上标/下标支持
 
 ## 安装
 
@@ -32,11 +34,11 @@ yarn add md-tiptap
 
 ## 使用
 
-### 基础使用（推荐）
+### 基础使用
 
 ```tsx
 import { TiptapEditor } from 'md-tiptap'
-import 'md-tiptap/style.css'  // 包含所有必需样式
+import 'md-tiptap/style.css'  // 必须导入样式
 
 function App() {
   const [content, setContent] = useState('<p>Hello World!</p>')
@@ -49,28 +51,6 @@ function App() {
   )
 }
 ```
-
-### 如果你的项目已使用 Tailwind CSS
-
-如果你的项目已经配置了 Tailwind CSS，可以使用最小样式版本避免冲突：
-
-```tsx
-import { TiptapEditor } from 'md-tiptap'
-import 'md-tiptap/style-minimal.css'  // 仅组件样式，不包含 Tailwind 基础样式
-
-function App() {
-  const [content, setContent] = useState('<p>Hello World!</p>')
-
-  return (
-    <TiptapEditor
-      value={content}
-      onChange={setContent}
-    />
-  )
-}
-```
-
-> **注意**：使用 `style-minimal.css` 时，你的项目需要已配置 Tailwind CSS v4+。
 
 ### 带图片上传
 
@@ -103,94 +83,179 @@ function App() {
 }
 ```
 
+### 受控组件完整示例
+
+```tsx
+import { useState } from 'react'
+import { TiptapEditor } from 'md-tiptap'
+import 'md-tiptap/style.css'
+
+function EditorExample() {
+  const [content, setContent] = useState('<p>开始编辑...</p>')
+
+  const handleImageUpload = async (file: File): Promise<string> => {
+    // 示例：上传到服务器
+    const formData = new FormData()
+    formData.append('image', file)
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    })
+    
+    const data = await response.json()
+    return data.url
+  }
+
+  return (
+    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <h1>我的编辑器</h1>
+      <TiptapEditor
+        value={content}
+        onChange={(html) => {
+          setContent(html)
+          console.log('内容已更新:', html)
+        }}
+        onImageUpload={handleImageUpload}
+      />
+      <div style={{ marginTop: '20px' }}>
+        <h3>当前 HTML 内容：</h3>
+        <pre style={{ background: '#f5f5f5', padding: '10px', overflow: 'auto' }}>
+          {content}
+        </pre>
+      </div>
+    </div>
+  )
+}
+```
+
 ## Props
 
-| 属性 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `value` | `string` | 否 | 编辑器的 HTML 内容 |
-| `onChange` | `(html: string) => void` | 否 | 内容变化时的回调函数 |
-| `onImageUpload` | `(file: File) => Promise<string>` | 否 | 图片上传处理函数，需返回图片 URL |
+| 属性 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `value` | `string` | 否 | - | 编辑器的 HTML 内容 |
+| `onChange` | `(html: string) => void` | 否 | - | 内容变化时的回调函数，参数为 HTML 字符串 |
+| `onImageUpload` | `(file: File) => Promise<string>` | 否 | - | 图片上传处理函数，需返回图片 URL。如果不提供，图片将以 Base64 格式插入 |
 
 ## 功能说明
 
 ### 斜杠命令
 
-在编辑器中输入 `/` 可以打开命令菜单，快速插入：
-- 标题（H1、H2、H3）
-- 列表（有序、无序）
-- 任务列表
-- 引用
-- 代码块
-- 表格
-- 图片
-- 数学公式
-- 分割线
+在编辑器中输入 `/` 可以打开命令菜单，快速插入以下内容：
 
-### 格式化工具栏
+- **标题**：H1、H2、H3
+- **列表**：有序列表、无序列表、任务列表
+- **引用块**：带左边框的引用样式
+- **代码块**：语法高亮的代码块
+- **表格**：插入 3x3 表格
+- **图片**：打开图片上传对话框
+- **数学公式**：行内公式、块级公式
+- **分割线**：水平分隔线
 
-选中文本时会显示气泡菜单，包含：
-- 文本样式：粗体、斜体、下划线、删除线、代码
-- 颜色：文本颜色、背景高亮
-- 对齐：左对齐、居中、右对齐、两端对齐
-- 标题级别选择
-- 清除格式
+**操作方式**：
+- 输入 `/` 打开命令菜单
+- 使用 ↑ ↓ 方向键选择
+- 按 Enter 确认插入
+- 按 Escape 关闭菜单
+
+### 气泡菜单
+
+选中文本时会显示浮动工具栏，包含以下功能：
+
+- **文本样式**：粗体、斜体、下划线、删除线、行内代码
+- **颜色**：文本颜色（10种预设 + 自定义）、背景高亮
+- **对齐**：左对齐、居中、右对齐、两端对齐
+- **标题**：快速切换 H1/H2/H3/正文
+- **上标/下标**：数学公式常用
+- **清除格式**：一键移除所有格式
 
 ### 表格操作
 
-插入表格后，点击表格可以：
-- 添加/删除行
-- 添加/删除列
-- 切换表头
-- 合并单元格
+插入表格后，点击表格任意位置会显示表格工具栏，支持：
+
+- 在上方/下方插入行
+- 在左侧/右侧插入列
+- 删除当前行/列
+- 切换表头行
 - 删除整个表格
+
+**提示**：鼠标悬停在表格上会显示操作按钮。
 
 ### 数学公式
 
-支持 LaTeX 格式的数学公式：
-- 行内公式：使用斜杠命令选择"行内公式"
-- 块级公式：使用斜杠命令选择"块级公式"
+基于 KaTeX 支持 LaTeX 格式的数学公式：
+
+- **行内公式**：使用斜杠命令选择"行内公式"，例如：`E = mc^2`
+- **块级公式**：使用斜杠命令选择"块级公式"，例如：
+  ```
+  \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+  ```
+- **编辑公式**：点击已插入的公式可以打开编辑对话框修改
+- **实时预览**：编辑时实时渲染公式效果
+
+### 图片上传
+
+支持两种方式插入图片：
+
+1. **文件上传**：拖拽或选择本地图片文件
+2. **URL 插入**：通过图片链接地址插入
+
+**图片处理**：
+- 如果提供 `onImageUpload` 函数，图片将上传到服务器并返回 URL
+- 如果没有提供，图片将以 Base64 格式直接嵌入（适合小图片）
+- 支持 JPG、PNG、GIF 等常见格式
+- 建议图片大小不超过 5MB
+
+### 任务列表
+
+支持创建可交互的待办事项列表：
+- 使用斜杠命令插入"任务列表"
+- 点击复选框可切换完成状态
+- 支持嵌套任务（任务列表内再插入任务列表）
+
+### 快捷键
+
+| 快捷键 | 功能 |
+|--------|------|
+| `Ctrl/Cmd + B` | 粗体 |
+| `Ctrl/Cmd + I` | 斜体 |
+| `Ctrl/Cmd + U` | 下划线 |
+| `Ctrl/Cmd + Z` | 撤销 |
+| `Ctrl/Cmd + Shift + Z` | 重做 |
+| `/` | 打开斜杠命令菜单 |
+| `Tab` | 增加列表缩进 |
+| `Shift + Tab` | 减少列表缩进 |
 
 ## 依赖要求
 
 - React >= 18.0.0
 - React DOM >= 18.0.0
-- （可选）Tailwind CSS >= 4.0.0（如果使用 `style-minimal.css`）
 
-## 样式选项
+## 样式系统
 
-本包提供两种样式导入方式：
-
-### 1. 完整样式（推荐用于新项目）
+### 样式导入
 
 ```tsx
 import 'md-tiptap/style.css'
 ```
 
-包含：
-- ✅ Tailwind CSS 基础样式
-- ✅ shadcn 主题变量
-- ✅ 所有组件样式
+样式文件包含：
+- ✅ Tailwind CSS v4 基础样式
+- ✅ shadcn/ui 主题变量
+- ✅ 编辑器组件样式
 - ✅ KaTeX 数学公式样式
 
-**优点**：开箱即用，无需额外配置  
-**缺点**：CSS 文件较大（~1.5MB，gzip 后 ~950KB）
-
-### 2. 最小样式（计划中）
-
-```tsx
-import 'md-tiptap/style-minimal.css'
-```
-
-> **注意**：v0.1.0 版本中，`style-minimal.css` 与 `style.css` 相同。  
-> 如果你的项目已有 Tailwind CSS 并遇到样式冲突，请参考 [SHADCN_GUIDE.md](./SHADCN_GUIDE.md) 中的解决方案。
-
-未来版本将提供真正的最小样式版本。
+**文件大小**：CSS 约 1.5MB（gzip 后约 950KB）
 
 ### 在其它项目中使用时样式不对？
 
-- **务必导入样式**：使用 `import 'md-tiptap/style.css'`（在入口文件如 `main.tsx` 或使用编辑器的组件顶部导入一次即可）。
-- **导入顺序**：若希望用自己项目的主题覆盖编辑器主题，请先导入 `md-tiptap/style.css`，再导入你的全局样式，并在你的 `:root` 中定义或覆盖变量（如 `--primary`、`--background`、`--border` 等）。
-- **弹层/对话框**：插入图片、公式等弹层通过 Portal 渲染到 `document.body`，库的样式为全局样式，会一并生效；若仍被覆盖，可检查是否有全局 reset 或更高优先级的选择器影响弹层。
+1. **务必导入样式**：在使用编辑器的组件或入口文件顶部导入 `import 'md-tiptap/style.css'`
+
+2. **导入顺序**：若希望用自己项目的主题覆盖编辑器主题，请先导入 `md-tiptap/style.css`，再导入你的全局样式
+
+3. **CSS 变量覆盖**：在你的全局样式中定义或覆盖 CSS 变量（如 `--primary`、`--background`、`--border` 等）
+
+4. **弹层/对话框**：插入图片、公式等弹层通过 Portal 渲染到 `document.body`，库的样式为全局样式。若仍被覆盖，检查是否有全局 reset 或更高优先级的选择器影响弹层
 
 📖 详细说明请查看 [SHADCN_GUIDE.md](./SHADCN_GUIDE.md)
 
@@ -200,21 +265,15 @@ import 'md-tiptap/style-minimal.css'
 # 安装依赖
 pnpm install
 
-# 开发模式
+# 开发模式（启动示例应用）
 pnpm dev
 
-# 构建库
+# 构建库（用于发布）
 pnpm build:lib
 
 # 代码检查
 pnpm lint
 ```
-
-## 开发和发布
-
-查看 [PUBLISH.md](./PUBLISH.md) 了解如何发布此包到 npm。
-
-查看 [EXAMPLE.md](./EXAMPLE.md) 查看更多使用示例。
 
 ## License
 
