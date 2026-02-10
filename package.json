@@ -1,7 +1,7 @@
 {
   "name": "md-tiptap",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "A powerful Markdown editor based on TipTap with Notion-like features",
   "author": "",
@@ -37,8 +37,7 @@
       "import": "./dist/md-tiptap.js",
       "require": "./dist/md-tiptap.umd.cjs"
     },
-    "./style.css": "./dist/md-tiptap.css",
-    "./style-minimal.css": "./dist/md-tiptap-minimal.css"
+    "./style.css": "./dist/md-tiptap.css"
   },
   "files": [
     "dist",
@@ -47,7 +46,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:lib": "tsc --project tsconfig.lib.json && vite build && node scripts/build-minimal-css.js",
+    "build:lib": "tsc --project tsconfig.lib.json && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepublishOnly": "pnpm run build:lib"

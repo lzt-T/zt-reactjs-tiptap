@@ -186,6 +186,12 @@ import 'md-tiptap/style-minimal.css'
 
 未来版本将提供真正的最小样式版本。
 
+### 在其它项目中使用时样式不对？
+
+- **务必导入样式**：使用 `import 'md-tiptap/style.css'`（在入口文件如 `main.tsx` 或使用编辑器的组件顶部导入一次即可）。
+- **导入顺序**：若希望用自己项目的主题覆盖编辑器主题，请先导入 `md-tiptap/style.css`，再导入你的全局样式，并在你的 `:root` 中定义或覆盖变量（如 `--primary`、`--background`、`--border` 等）。
+- **弹层/对话框**：插入图片、公式等弹层通过 Portal 渲染到 `document.body`，库的样式为全局样式，会一并生效；若仍被覆盖，可检查是否有全局 reset 或更高优先级的选择器影响弹层。
+
 📖 详细说明请查看 [SHADCN_GUIDE.md](./SHADCN_GUIDE.md)
 
 ## 开发

@@ -1,26 +1,6 @@
-/* 
- * TipTap Editor Library Styles
- * 
- * 注意：此文件包含所有必需的样式，包括 Tailwind CSS 和 shadcn 主题
- * 如果您的项目已经使用 Tailwind CSS 或 shadcn，可能需要：
- * 1. 使用 @layer 隔离样式
- * 2. 或者只导入组件样式（见下方说明）
- */
 
-/* Tailwind CSS 基础样式 */
-@import "tailwindcss";
 
-/* shadcn 主题变量 */
-@import "shadcn/tailwind.css";
+/* 导入共享主题（包含 Tailwind、shadcn、KaTeX 和所有 CSS 变量） */
+@import "./theme.css";
 
-/* 组件样式 */
-@import './components/TiptapEditor/TiptapEditor.css';
-@import './components/TiptapEditor/BubbleMenu/BubbleMenu.css';
-@import './components/TiptapEditor/CommandMenu/CommandMenu.css';
-@import './components/TiptapEditor/TableMenu/TableMenu.css';
-@import './components/TiptapEditor/MathDialog/MathDialog.css';
-@import './components/TiptapEditor/ImageUploadDialog/ImageUploadDialog.css';
-@import './components/TiptapEditor/ColorPicker/ColorPicker.css';
 
-/* Katex 数学公式样式 */
-@import 'katex/dist/katex.min.css';
