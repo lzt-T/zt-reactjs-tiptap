@@ -79,7 +79,6 @@ const CommandMenu = ({ items, command, selectedIndex, position }: CommandMenuPro
       className="command-menu"
       style={floatingStyles}
     >
-      <div className="command-menu-header">基础块</div>
       {items.map((item, index) => (
         <button
           key={item.title}
@@ -88,12 +87,7 @@ const CommandMenu = ({ items, command, selectedIndex, position }: CommandMenuPro
           onClick={() => command(item)}
         >
           <div className="command-menu-icon">{item.icon}</div>
-          <div className="command-menu-content">
-            <div className="command-menu-title">{item.title}</div>
-            {item.description && (
-              <div className="command-menu-description">{item.description}</div>
-            )}
-          </div>
+          <div className="command-menu-title">{item.title}</div>
         </button>
       ))}
     </div>,

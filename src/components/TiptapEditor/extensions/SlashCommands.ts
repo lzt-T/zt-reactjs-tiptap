@@ -66,7 +66,7 @@ export const defaultCommands: CommandItem[] = [
   {
     title: '行内代码',
     description: '代码标记',
-    icon: '`',
+    icon: '</>',
     command: ({ editor }) => {
       editor.chain().focus().toggleCode().run()
     },
