@@ -43,5 +43,10 @@ export interface TiptapEditorProps {
    * 是否禁用编辑器（只读）
    */
   disabled?: boolean
+
+  /**
+   * onChange 防抖延迟（毫秒），默认 300ms
+   */
+  onChangeDebounceMs?: number
 }
 

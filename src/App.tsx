@@ -4,9 +4,12 @@ import "./App.css";
 
 function App() {
   const [content, setContent] = useState("");
+  const [count, setCount] = useState(0);
 
   const handleEditorChange = (html: string) => {
+    setCount(count + 1);
     setContent(html);
+    console.log("count", count);
     console.log("✏️ onChange 被触发 - 用户编辑:", html);
   };
 
