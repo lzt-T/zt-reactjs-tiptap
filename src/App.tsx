@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
+import {
+  EditorMode,
+  HeadlessToolbarMode,
+} from "@/components/TiptapEditor/types";
 import "./App.css";
 
 function App() {
@@ -50,20 +54,22 @@ function App() {
     <div className="app">
       <h1>Tiptap Markdown Editor</h1>
 
-      <div className="h-[500px] overflow-y-auto">
+      {/* <div className="h-[500px] overflow-y-auto"> */}
       <div
         className="flex-1"
-        style={{ height: "calc(100vh - 400px)" }}
+        style={{ height: "calc(100vh - 400px)", width: "500px" }}
       >
         <TiptapEditor
           // border={false}
           // disabled={true}
+          editorMode={EditorMode.Headless}
+          headlessToolbarMode={HeadlessToolbarMode.OnFocus}
           value={content}
           onChange={handleEditorChange}
           onImageUpload={handleImageUpload}
         />
-        </div>
       </div>
+      {/* </div> */}
       <div className="h-[900px]"></div>
     </div>
   );

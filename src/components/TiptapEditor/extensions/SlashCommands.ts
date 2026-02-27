@@ -2,18 +2,25 @@ import { Extension } from '@tiptap/core'
 import Suggestion from '@tiptap/suggestion'
 import type { SuggestionProps } from '@tiptap/suggestion'
 import type { Editor } from '@tiptap/react'
-import { 
-  Heading1, 
-  Heading2, 
-  Heading3, 
-  List, 
-  ListOrdered, 
-  Code, 
-  Table, 
-  Sigma, 
-  SquareFunction, 
+import {
+  setHeading,
+  toggleBulletList,
+  toggleOrderedList,
+  toggleCode,
+  insertTable,
+} from '../editorCommands'
+import {
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Code,
+  Table,
+  Sigma,
+  SquareFunction,
   Image,
-  type LucideIcon
+  type LucideIcon,
 } from 'lucide-react'
 
 export interface CommandItem {
@@ -40,65 +47,43 @@ export const defaultCommands: CommandItem[] = [
     title: 'Heading 1',
     description: 'Large heading',
     icon: Heading1,
-    command: ({ editor }) => {
-      editor.chain().focus().setNode('heading', { level: 1 }).run()
-    },
+    command: ({ editor }) => setHeading(editor, 1),
   },
   {
     title: 'Heading 2',
     description: 'Medium heading',
     icon: Heading2,
-    command: ({ editor }) => {
-      editor.chain().focus().setNode('heading', { level: 2 }).run()
-    },
+    command: ({ editor }) => setHeading(editor, 2),
   },
   {
     title: 'Heading 3',
     description: 'Small heading',
     icon: Heading3,
-    command: ({ editor }) => {
-      editor.chain().focus().setNode('heading', { level: 3 }).run()
-    },
+    command: ({ editor }) => setHeading(editor, 3),
   },
   {
     title: 'Bullet List',
     description: 'Bullet list',
     icon: List,
-    command: ({ editor }) => {
-      editor.chain().focus().toggleBulletList().run()
-    },
+    command: ({ editor }) => toggleBulletList(editor),
   },
   {
     title: 'Numbered List',
     description: 'Numbered list',
     icon: ListOrdered,
-    command: ({ editor }) => {
-      editor.chain().focus().toggleOrderedList().run()
-    },
+    command: ({ editor }) => toggleOrderedList(editor),
   },
   {
     title: 'Inline Code',
     description: 'Code span',
     icon: Code,
-    command: ({ editor }) => {
-      editor.chain().focus().toggleCode().run()
-    },
+    command: ({ editor }) => toggleCode(editor),
   },
-  // {
-  //   title: 'Code Block',
-  //   description: 'Code block',
-  //   icon: Code,
-  //   command: ({ editor }) => {
-  //     editor.chain().focus().toggleCodeBlock().run()
-  //   },
-  // },
   {
     title: 'Table',
     description: 'Add table',
     icon: Table,
-    command: ({ editor }) => {
-      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
-    },
+    command: ({ editor }) => insertTable(editor),
   },
   {
     title: 'Inline Math',

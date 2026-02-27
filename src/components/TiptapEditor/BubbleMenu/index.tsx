@@ -18,6 +18,7 @@ import {
   AlignRight,
   AlignJustify,
 } from "lucide-react";
+import { useEditorCommands } from "@/hooks";
 import ColorPicker from "../ColorPicker";
 import "./BubbleMenu.css";
 
@@ -76,74 +77,56 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
     }
   }, [showMoreMenu]);
 
+  const { format } = useEditorCommands(editor, {});
+
+  const onTextColorSelect = (color: string) => {
+    format.setColor(color);
+    setShowColorPicker(null);
+  };
+
+  const onHighlightColorSelect = (color: string) => {
+    if (color === "") format.unsetHighlight();
+    else format.setHighlight(color);
+    setShowColorPicker(null);
+  };
+
   if (!editor) {
     return null;
   }
-
-  const handleFormat = (formatAction: () => void) => {
-    const { to } = editor.state.selection;
-    formatAction();
-    // 取消选中,将光标移到选中区域末尾
-    editor.commands.setTextSelection(to);
-  };
-
-  const handleTextColorSelect = (color: string) => {
-    handleFormat(() => editor.chain().focus().setColor(color).run());
-    setShowColorPicker(null);
-  };
-
-  const handleHighlightColorSelect = (color: string) => {
-    if (color === '') {
-      handleFormat(() => editor.chain().focus().unsetHighlight().run());
-    } else {
-      handleFormat(() => editor.chain().focus().setHighlight({ color }).run());
-    }
-    setShowColorPicker(null);
-  };
 
   return (
     <>
       <TiptapBubbleMenu editor={editor} className="bubble-menu">
         <button
-          onClick={() =>
-            handleFormat(() => editor.chain().focus().toggleBold().run())
-          }
+          onClick={() => format.toggleBold()}
           className={editor.isActive("bold") ? "is-active" : ""}
           title="粗体 (Ctrl+B)"
         >
           <Bold size={16} />
         </button>
         <button
-          onClick={() =>
-            handleFormat(() => editor.chain().focus().toggleItalic().run())
-          }
+          onClick={() => format.toggleItalic()}
           className={editor.isActive("italic") ? "is-active" : ""}
           title="斜体 (Ctrl+I)"
         >
           <Italic size={16} />
         </button>
         <button
-          onClick={() =>
-            handleFormat(() => editor.chain().focus().toggleUnderline().run())
-          }
+          onClick={() => format.toggleUnderline()}
           className={editor.isActive("underline") ? "is-active" : ""}
           title="下划线 (Ctrl+U)"
         >
           <Underline size={16} />
         </button>
         <button
-          onClick={() =>
-            handleFormat(() => editor.chain().focus().toggleStrike().run())
-          }
+          onClick={() => format.toggleStrike()}
           className={editor.isActive("strike") ? "is-active" : ""}
           title="删除线"
         >
           <Strikethrough size={16} />
         </button>
         <button
-          onClick={() =>
-            handleFormat(() => editor.chain().focus().toggleCode().run())
-          }
+          onClick={() => format.toggleCode()}
           className={editor.isActive("code") ? "is-active" : ""}
           title="行内代码"
         >
@@ -216,8 +199,8 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               type={showColorPicker}
               onColorSelect={
                 showColorPicker === "text"
-                  ? handleTextColorSelect
-                  : handleHighlightColorSelect
+                  ? onTextColorSelect
+                  : onHighlightColorSelect
               }
             />
           </div>
@@ -242,9 +225,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           >
             <button
               onClick={() => {
-                handleFormat(() =>
-                  editor.chain().focus().toggleSuperscript().run()
-                );
+                format.toggleSuperscript();
                 setShowMoreMenu(false);
               }}
               className={editor.isActive("superscript") ? "is-active" : ""}
@@ -254,9 +235,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
             </button>
             <button
               onClick={() => {
-                handleFormat(() =>
-                  editor.chain().focus().toggleSubscript().run()
-                );
+                format.toggleSubscript();
                 setShowMoreMenu(false);
               }}
               className={editor.isActive("subscript") ? "is-active" : ""}
@@ -267,9 +246,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
             <div className="more-menu-separator" />
             <button
               onClick={() => {
-                handleFormat(() =>
-                  editor.chain().focus().setTextAlign("left").run()
-                );
+                format.setTextAlign("left");
                 setShowMoreMenu(false);
               }}
               className={
@@ -281,9 +258,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
             </button>
             <button
               onClick={() => {
-                handleFormat(() =>
-                  editor.chain().focus().setTextAlign("center").run()
-                );
+                format.setTextAlign("center");
                 setShowMoreMenu(false);
               }}
               className={
@@ -295,9 +270,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
             </button>
             <button
               onClick={() => {
-                handleFormat(() =>
-                  editor.chain().focus().setTextAlign("right").run()
-                );
+                format.setTextAlign("right");
                 setShowMoreMenu(false);
               }}
               className={
@@ -309,9 +282,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
             </button>
             <button
               onClick={() => {
-                handleFormat(() =>
-                  editor.chain().focus().setTextAlign("justify").run()
-                );
+                format.setTextAlign("justify");
                 setShowMoreMenu(false);
               }}
               className={

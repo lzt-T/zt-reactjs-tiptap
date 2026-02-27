@@ -134,12 +134,27 @@ function EditorExample() {
 | `value` | `string` | 否 | - | 编辑器的 HTML 内容 |
 | `onChange` | `(html: string) => void` | 否 | - | 内容变化时的回调函数，参数为 HTML 字符串 |
 | `onImageUpload` | `(file: File) => Promise<string>` | 否 | - | 图片上传处理函数，需返回图片 URL。若不提供，图片将以 Base64 格式插入 |
+| `editorMode` | `'notion-like' \| 'headless'` | 否 | `'notion-like'` | 编辑器模式：Notion 风格（斜杠命令、块状编辑等）或无头模式 |
+| `headlessToolbarMode` | `'always' \| 'on-focus'` | 否 | `'always'` | **仅在 `editorMode='headless'` 时生效**。`always`：工具栏始终显示；`on-focus`：编辑器聚焦或点击工具栏时显示，失焦到编辑器区域外时隐藏 |
 | `commandMenuMaxHeight` | `number` | 否 | `240` | 斜杠命令菜单最大高度（px） |
 | `commandMenuMinHeight` | `number` | 否 | `160` | 斜杠命令菜单最小高度（px） |
 | `placeholder` | `string` | 否 | `"输入 '/' 查看命令..."` | 编辑器为空时的占位文本 |
 | `disabled` | `boolean` | 否 | `false` | 是否禁用编辑器（只读） |
 | `onChangeDebounceMs` | `number` | 否 | `300` | `onChange` 防抖延迟（毫秒） |
 | `border` | `boolean` | 否 | `true` | 是否显示编辑器容器边框 |
+
+### Headless 模式下的工具栏显示
+
+在 `editorMode="headless"` 时，可以通过 `headlessToolbarMode` 控制顶部工具栏的显示策略：
+
+- `headlessToolbarMode="always"`：工具栏始终显示。
+- `headlessToolbarMode="on-focus"`：当编辑器获得焦点或用户点击工具栏区域时显示；当焦点离开整个编辑器容器（包括工具栏）后隐藏。点击工具栏按钮本身不会导致工具栏立即消失。
+
+示例：
+
+```tsx
+<TiptapEditor editorMode="headless" headlessToolbarMode="on-focus" />
+```
 
 ## 功能说明
 
