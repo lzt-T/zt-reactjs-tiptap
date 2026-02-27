@@ -38,5 +38,10 @@ export interface TiptapEditorProps {
    * 编辑器为空时显示的占位文本，默认 "输入 '/' 查看命令..."
    */
   placeholder?: string
+
+  /**
+   * 是否禁用编辑器（只读）
+   */
+  disabled?: boolean
 }
 

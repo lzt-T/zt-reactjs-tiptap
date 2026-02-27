@@ -37,72 +37,72 @@ export interface SlashCommandsOptions {
 
 export const defaultCommands: CommandItem[] = [
   {
-    title: '标题 1',
-    description: '大标题',
+    title: 'Heading 1',
+    description: 'Large heading',
     icon: Heading1,
     command: ({ editor }) => {
       editor.chain().focus().setNode('heading', { level: 1 }).run()
     },
   },
   {
-    title: '标题 2',
-    description: '中等标题',
+    title: 'Heading 2',
+    description: 'Medium heading',
     icon: Heading2,
     command: ({ editor }) => {
       editor.chain().focus().setNode('heading', { level: 2 }).run()
     },
   },
   {
-    title: '标题 3',
-    description: '小标题',
+    title: 'Heading 3',
+    description: 'Small heading',
     icon: Heading3,
     command: ({ editor }) => {
       editor.chain().focus().setNode('heading', { level: 3 }).run()
     },
   },
   {
-    title: '无序列表',
-    description: '项目符号列表',
+    title: 'Bullet List',
+    description: 'Bullet list',
     icon: List,
     command: ({ editor }) => {
       editor.chain().focus().toggleBulletList().run()
     },
   },
   {
-    title: '有序列表',
-    description: '编号列表',
+    title: 'Numbered List',
+    description: 'Numbered list',
     icon: ListOrdered,
     command: ({ editor }) => {
       editor.chain().focus().toggleOrderedList().run()
     },
   },
   {
-    title: '行内代码',
-    description: '代码标记',
+    title: 'Inline Code',
+    description: 'Code span',
     icon: Code,
     command: ({ editor }) => {
       editor.chain().focus().toggleCode().run()
     },
   },
   // {
-  //   title: '代码块',
-  //   description: '代码片段',
+  //   title: 'Code Block',
+  //   description: 'Code block',
   //   icon: Code,
   //   command: ({ editor }) => {
   //     editor.chain().focus().toggleCodeBlock().run()
   //   },
   // },
   {
-    title: '表格',
-    description: '添加表格',
+    title: 'Table',
+    description: 'Add table',
     icon: Table,
     command: ({ editor }) => {
       editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
     },
   },
   {
-    title: '行内公式',
-    description: '插入数学公式',
+    title: 'Inline Math',
+    description: 'Insert inline math',
     icon: Sigma,
     mathType: 'inline',
     command: ({ editor }) => {
@@ -111,8 +111,8 @@ export const defaultCommands: CommandItem[] = [
     },
   },
   {
-    title: '块级公式',
-    description: '插入数学公式块',
+    title: 'Block Math',
+    description: 'Insert math block',
     icon: SquareFunction,
     mathType: 'block',
     command: ({ editor }) => {
@@ -121,8 +121,8 @@ export const defaultCommands: CommandItem[] = [
     },
   },
   {
-    title: '图片',
-    description: '上传或插入图片',
+    title: 'Image',
+    description: 'Upload or insert image',
     icon: Image,
     imageUpload: true,
     command: ({ editor }) => {

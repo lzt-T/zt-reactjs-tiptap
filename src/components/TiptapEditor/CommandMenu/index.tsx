@@ -65,7 +65,7 @@ const CommandMenu = ({
                   index === selectedIndex && "bg-accent text-accent-foreground"
                 )}
               >
-                {Icon && <Icon className="mr-2 h-4 w-4" />}
+                {Icon && <Icon className="mr-1 h-4 w-4" />}
                 {item.title}
               </CommandItem>
             );

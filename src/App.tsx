@@ -53,6 +53,7 @@ function App() {
           style={{ height: "calc(100vh - 400px)", width: "600px" }}
         >
           <TiptapEditor
+            // disabled={true}
             value={content}
             onChange={handleEditorChange}
             onImageUpload={handleImageUpload}

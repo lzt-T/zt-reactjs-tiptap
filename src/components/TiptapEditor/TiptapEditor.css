@@ -235,6 +235,23 @@
   outline-offset: 2px;
 }
 
+/* Disabled: no hover/click styles on math */
+.editor-container.is-disabled .tiptap-mathematics-render {
+  cursor: default;
+}
+
+.editor-container.is-disabled .tiptap-mathematics-render:hover {
+  background-color: transparent;
+}
+
+.editor-container.is-disabled .tiptap-mathematics-render[data-type="block-math"]:hover {
+  background-color: #f8fafc;
+}
+
+.editor-container.is-disabled .tiptap-mathematics-render.ProseMirror-selectednode {
+  outline: none;
+}
+
 /* KaTeX font adjustments */
 .editor-wrapper .ProseMirror .katex {
   font-size: 1.1em;

@@ -248,11 +248,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 setShowMoreMenu(false);
               }}
               className={editor.isActive("superscript") ? "is-active" : ""}
+              title="上标"
             >
-              <span className="more-menu-icon">
-                <Superscript size={16} />
-              </span>
-              <span className="more-menu-label">上标</span>
+              <Superscript size={16} />
             </button>
             <button
               onClick={() => {
@@ -262,11 +260,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 setShowMoreMenu(false);
               }}
               className={editor.isActive("subscript") ? "is-active" : ""}
+              title="下标"
             >
-              <span className="more-menu-icon">
-                <Subscript size={16} />
-              </span>
-              <span className="more-menu-label">下标</span>
+              <Subscript size={16} />
             </button>
             <div className="more-menu-separator" />
             <button
@@ -279,11 +275,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "left" }) ? "is-active" : ""
               }
+              title="左对齐"
             >
-              <span className="more-menu-icon">
-                <AlignLeft size={16} />
-              </span>
-              <span className="more-menu-label">左对齐</span>
+              <AlignLeft size={16} />
             </button>
             <button
               onClick={() => {
@@ -295,11 +289,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "center" }) ? "is-active" : ""
               }
+              title="居中对齐"
             >
-              <span className="more-menu-icon">
-                <AlignCenter size={16} />
-              </span>
-              <span className="more-menu-label">居中对齐</span>
+              <AlignCenter size={16} />
             </button>
             <button
               onClick={() => {
@@ -311,11 +303,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "right" }) ? "is-active" : ""
               }
+              title="右对齐"
             >
-              <span className="more-menu-icon">
-                <AlignRight size={16} />
-              </span>
-              <span className="more-menu-label">右对齐</span>
+              <AlignRight size={16} />
             </button>
             <button
               onClick={() => {
@@ -327,11 +317,9 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "justify" }) ? "is-active" : ""
               }
+              title="两端对齐"
             >
-              <span className="more-menu-icon">
-                <AlignJustify size={16} />
-              </span>
-              <span className="more-menu-label">两端对齐</span>
+              <AlignJustify size={16} />
             </button>
           </div>
         </>
