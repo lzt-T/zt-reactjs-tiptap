@@ -240,10 +240,46 @@
   border-radius: 8px;
   overflow-x: auto;
   text-align: center;
+  position: relative;
 }
 
 .editor-wrapper .ProseMirror .tiptap-mathematics-render[data-type="block-math"]:hover {
   background-color: #f1f5f9;
+}
+
+/* 块级公式 hover 时显示的删除按钮（容器由 useBlockMathDeleteButton 注入） */
+.editor-wrapper .ProseMirror .block-math-delete-btn-wrapper {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+}
+
+.editor-wrapper .ProseMirror .block-math-delete-btn {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.15s ease, color 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.editor-wrapper .ProseMirror .tiptap-mathematics-render[data-type="block-math"]:hover .block-math-delete-btn-wrapper .block-math-delete-btn {
+  opacity: 1;
+}
+
+.editor-container.is-disabled .block-math-delete-btn-wrapper {
+  display: none;
 }
 
 .editor-wrapper .ProseMirror .tiptap-mathematics-render.ProseMirror-selectednode {
@@ -266,6 +302,49 @@
 
 .editor-container.is-disabled .tiptap-mathematics-render.ProseMirror-selectednode {
   outline: none;
+}
+
+/* Image node wrapper */
+.editor-wrapper .ProseMirror .image-node-wrapper {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.editor-wrapper .ProseMirror .image-node-wrapper img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.editor-wrapper .ProseMirror .image-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.editor-wrapper .ProseMirror .image-node-wrapper:hover .image-delete-btn {
+  opacity: 1;
+}
+
+.editor-wrapper .ProseMirror .image-delete-btn:hover {
+  background: rgba(241, 245, 249, 0.98);
+  color: #475569;
 }
 
 /* KaTeX font adjustments */

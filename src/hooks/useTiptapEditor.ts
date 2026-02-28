@@ -1,6 +1,6 @@
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Image from "@tiptap/extension-image";
+import { ImageWithDelete } from "../components/TiptapEditor/extensions/ImageWithDelete";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
@@ -80,7 +80,7 @@ export function useTiptapEditor({
     editable: !disabled,
     extensions: [
       StarterKit,
-      Image,
+      ImageWithDelete,
       Table.configure({ resizable: true }),
       TableRow,
       TableCell,

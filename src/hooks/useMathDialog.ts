@@ -83,14 +83,16 @@ export function useMathDialog({
       }
       setShowMathDialog(false);
       setMathDialogCallback(null);
+      editorRef.current?.commands.focus();
     },
-    [mathDialogCallback]
+    [mathDialogCallback, editorRef]
   );
 
   const handleMathCancel = useCallback(() => {
     setShowMathDialog(false);
     setMathDialogCallback(null);
-  }, []);
+    editorRef.current?.commands.focus();
+  }, [editorRef]);
 
   return {
     showMathDialog,

@@ -1,3 +1,4 @@
+export { useBlockMathDeleteButton } from "./useBlockMathDeleteButton";
 export { useCommandMenu } from "./useCommandMenu";
 export { useMathDialog } from "./useMathDialog";
 export { useImageUploadDialog } from "./useImageUploadDialog";
