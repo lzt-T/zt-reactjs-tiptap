@@ -1,5 +1,6 @@
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
+import { NodeSelection } from "@tiptap/pm/state";
 import { useEffect, useState } from "react";
 import { useFloating, flip, shift, offset } from "@floating-ui/react";
 import {
@@ -96,7 +97,15 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
 
   return (
     <>
-      <TiptapBubbleMenu editor={editor} className="bubble-menu">
+      <TiptapBubbleMenu
+        editor={editor}
+        className="bubble-menu"
+        shouldShow={({ state }) => {
+          // 选中的是单个节点（图片、公式等）时不显示
+          if (state.selection instanceof NodeSelection) return false;
+          return !state.selection.empty;
+        }}
+      >
         <button
           onClick={() => format.toggleBold()}
           className={editor.isActive("bold") ? "is-active" : ""}

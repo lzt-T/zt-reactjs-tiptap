@@ -318,6 +318,13 @@
   border-radius: 4px;
 }
 
+.editor-wrapper .ProseMirror .image-node-wrapper img.image-selected,
+.editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode img {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .editor-wrapper .ProseMirror .image-delete-btn {
   position: absolute;
   top: 8px;

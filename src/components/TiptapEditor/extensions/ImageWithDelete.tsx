@@ -3,7 +3,7 @@ import type { NodeViewProps } from "@tiptap/react";
 import Image from "@tiptap/extension-image";
 import { Trash2 } from "lucide-react";
 
-function ImageView({ node, deleteNode, editor }: NodeViewProps) {
+function ImageView({ node, deleteNode, editor, selected }: NodeViewProps) {
   const { src, alt, title } = node.attrs as {
     src: string;
     alt?: string;
@@ -12,7 +12,12 @@ function ImageView({ node, deleteNode, editor }: NodeViewProps) {
 
   return (
     <NodeViewWrapper className="image-node-wrapper" contentEditable={false}>
-      <img src={src} alt={alt ?? ""} title={title ?? ""} />
+      <img
+        src={src}
+        alt={alt ?? ""}
+        title={title ?? ""}
+        className={selected ? "image-selected" : ""}
+      />
       {editor.isEditable && (
         <button
           type="button"
