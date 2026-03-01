@@ -17,6 +17,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Mathematics from "@tiptap/extension-mathematics";
 import { SlashCommands } from "../components/TiptapEditor/extensions/SlashCommands";
+import { TableBackspaceHandler } from "../components/TiptapEditor/extensions/TableBackspaceHandler";
 import { useRef, useEffect, useMemo } from "react";
 import type { Node } from "@tiptap/pm/model";
 import debounce from "lodash/debounce";
@@ -112,6 +113,7 @@ export function useTiptapEditor({
           throwOnError: false,
         },
       }),
+      TableBackspaceHandler,
       SlashCommands.configure({
         onStart,
         onUpdate,

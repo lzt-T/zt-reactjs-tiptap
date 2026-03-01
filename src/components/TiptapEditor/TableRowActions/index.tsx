@@ -28,8 +28,10 @@ interface TableRowActionsProps {
   editorWrapperRef: React.RefObject<HTMLDivElement | null>
 }
 
-/** 行操作按钮贴编辑器左侧，无需按行计算 left */
-const ROW_BUTTON_LEFT = 4
+/** 行操作按钮宽度，与 CSS 保持一致 */
+const ROW_BUTTON_WIDTH = 10
+/** 按钮与表格左边缘的间距 */
+const ROW_BUTTON_GAP = 2
 /** 行操作弹出菜单高度，用于在按钮上方定位 */
 const ROW_ACTION_MENU_HEIGHT = 36
 const ROW_ACTION_MENU_GAP = 4
@@ -61,9 +63,14 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
     if (!proseMirror) return
 
     const tables = proseMirror.querySelectorAll('table')
+    const wrapperRect = wrapper.getBoundingClientRect()
     const result: RowActionItem[] = []
     let tableIndex = 0
     for (const table of tables) {
+      /* 根据表格实际左边位置动态计算按钮 left，兼容任务列表等缩进场景 */
+      const tableRect = table.getBoundingClientRect()
+      const tableLeft = tableRect.left - wrapperRect.left + wrapper.scrollLeft
+      const left = Math.max(0, tableLeft - ROW_BUTTON_WIDTH - ROW_BUTTON_GAP)
       const trs = table.querySelectorAll('tr')
       trs.forEach((tr, rowIndex) => {
         const firstCell = (tr as HTMLTableRowElement).cells[0]
@@ -71,11 +78,10 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
         try {
           const pos = view.posAtDOM(firstCell, 0)
           const trRect = tr.getBoundingClientRect()
-          const wrapperRect = wrapper.getBoundingClientRect()
           const top = trRect.top - wrapperRect.top + wrapper.scrollTop
           result.push({
             top,
-            left: ROW_BUTTON_LEFT,
+            left,
             height: trRect.height,
             firstCellPos: pos + 1,
             tableIndex,

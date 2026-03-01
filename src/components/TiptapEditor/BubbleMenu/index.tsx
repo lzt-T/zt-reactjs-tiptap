@@ -101,9 +101,12 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
         editor={editor}
         className="bubble-menu"
         shouldShow={({ state }) => {
-          // 选中的是单个节点（图片、公式等）时不显示
-          if (state.selection instanceof NodeSelection) return false;
-          return !state.selection.empty;
+          const { selection } = state;
+          // NodeSelection（图片、公式、整个表格节点等）不显示
+          if (selection instanceof NodeSelection) return false;
+          // CellSelection（表格多单元格选中）不显示，$anchorCell 是 CellSelection 的专有属性
+          if ('$anchorCell' in selection) return false;
+          return !selection.empty;
         }}
       >
         <button
