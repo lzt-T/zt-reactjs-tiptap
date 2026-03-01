@@ -43,6 +43,8 @@
 .editor-wrapper .ProseMirror {
   outline: none;
   min-height: 100%;
+  /* 允许浏览器合成斜体：中文等无 italic 变体的字体也能显示倾斜 */
+  font-synthesis: style;
 }
 
 .editor-wrapper .ProseMirror p {
