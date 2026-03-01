@@ -128,7 +128,7 @@
   min-width: 0; /* 允许在窄容器内收缩，配合子元素滚动 */
 }
 
-/* 标签栏：宽度够时占满一行均分，宽度小时自动换行 */
+/* 标签栏：宽度够时占满一行均分，宽度小时自动换行；显式色值避免 npm 安装后宿主 :root 覆盖变量导致颜色不对 */
 .math-dialog-tabs-list {
   flex-shrink: 0;
   width: 100%;
@@ -137,9 +137,12 @@
   flex-wrap: wrap;
   height: auto;
   min-height: 2.25rem;
+  background: var(--muted, #f5f5f5);
+  border-radius: 0.5rem;
+  padding: 3px;
 }
 
-/* 每个标签：同排内均分宽度占满，有最小宽度；排不下时换行；极窄时省略号 */
+/* 每个标签：同排内均分宽度占满，有最小宽度；排不下时换行；极窄时省略号；未选中/选中用显式 fallback */
 .math-dialog-tabs-list [data-slot="tabs-trigger"] {
   flex: 1 1 0;
   min-width: 7rem;
@@ -147,6 +150,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--muted-foreground, #737373);
+  background: transparent;
+  border: 1px solid transparent;
+}
+.math-dialog-tabs-list [data-slot="tabs-trigger"]:hover {
+  color: var(--foreground, #171717);
+}
+.math-dialog-tabs-list [data-slot="tabs-trigger"][data-state="active"] {
+  background: var(--background, #ffffff);
+  color: var(--foreground, #171717);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .math-dialog-tabs-content {

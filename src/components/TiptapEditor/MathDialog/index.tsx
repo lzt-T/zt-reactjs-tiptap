@@ -41,12 +41,14 @@ const MathDialog = ({
     }
   }, [isOpen, initialValue]);
 
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isOpen]);
+  // 弹窗打开时把焦点放到公式输入框，避免 Radix 把焦点给第一个可聚焦元素（Operators 标签）
+  const handleOpenAutoFocus = (e: Event) => {
+    e.preventDefault();
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    });
+  };
 
   const previewResult = useMemo(() => {
     if (!latex) return { html: "", error: null as string | null };
@@ -103,6 +105,7 @@ const MathDialog = ({
       <DialogContent
         className="max-w-[calc(100%-2rem)] sm:max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
         showCloseButton={false}
+        onOpenAutoFocus={handleOpenAutoFocus}
       >
         <DialogHeader className="shrink-0">
           <DialogTitle>
