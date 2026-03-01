@@ -1,6 +1,6 @@
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { ImageWithDelete } from "../components/TiptapEditor/extensions/ImageWithDelete";
+import { ImageWithDelete } from "@/extensions/ImageWithDelete";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
@@ -16,8 +16,8 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Mathematics from "@tiptap/extension-mathematics";
-import { SlashCommands } from "../components/TiptapEditor/extensions/SlashCommands";
-import { TableBackspaceHandler } from "../components/TiptapEditor/extensions/TableBackspaceHandler";
+import { SlashCommands } from "@/extensions/SlashCommands";
+import { TableBackspaceHandler } from "@/extensions/TableBackspaceHandler";
 import { useRef, useEffect, useMemo } from "react";
 import type { Node } from "@tiptap/pm/model";
 import debounce from "lodash/debounce";

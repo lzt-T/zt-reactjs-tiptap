@@ -9,7 +9,7 @@ import {
   toggleTaskList,
   toggleCode,
   insertTable,
-} from '../editorCommands'
+} from '@/lib/editorCommands'
 import {
   Heading1,
   Heading2,

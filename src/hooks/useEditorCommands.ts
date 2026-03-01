@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
 import type { Editor } from "@tiptap/react";
-import * as cmd from "@/components/TiptapEditor/editorCommands";
-import type { TextAlignValue } from "@/components/TiptapEditor/editorCommands";
-import type { CommandItem } from "@/components/TiptapEditor/extensions/SlashCommands";
+import * as cmd from "@/lib/editorCommands";
+import type { TextAlignValue } from "@/lib/editorCommands";
+import type { CommandItem } from "@/extensions/SlashCommands";
 
 export interface UseEditorCommandsOptions {
   onOpenMathDialog?: (

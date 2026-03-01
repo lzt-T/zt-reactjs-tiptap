@@ -1,4 +1,4 @@
-import type { CommandItem as SlashCommandItem } from "../extensions/SlashCommands";
+import type { CommandItem as SlashCommandItem } from "@/extensions/SlashCommands";
 import { useEffect, useRef } from "react";
 import { Command, CommandList, CommandItem } from "@/components/ui/command";
 import { cn } from "@/lib/utils";

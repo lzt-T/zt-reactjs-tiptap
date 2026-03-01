@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { defaultCommands } from "../components/TiptapEditor/extensions/SlashCommands";
+import { defaultCommands } from "@/extensions/SlashCommands";
 import { MenuPlacement } from "../components/TiptapEditor/types";
 
 interface UseCommandMenuOptions {

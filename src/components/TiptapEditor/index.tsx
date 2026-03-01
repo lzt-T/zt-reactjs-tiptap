@@ -8,7 +8,7 @@
  * 功能：数学公式（行内/块级）、图片上传、表格、任务列表等。
  */
 import { useEditor, EditorContent } from "@tiptap/react";
-import { defaultCommands } from "./extensions/SlashCommands";
+import { defaultCommands } from "@/extensions/SlashCommands";
 import CommandMenu from "./CommandMenu";
 import Toolbar from "./Toolbar";
 import TableRowActions from "./TableRowActions";
