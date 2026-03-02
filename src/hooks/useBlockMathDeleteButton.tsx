@@ -54,7 +54,11 @@ export function useBlockMathDeleteButton({
         BLOCK_MATH_SELECTOR
       );
       blockMathNodes.forEach((el) => {
-        if (el.querySelector(`.${DELETE_BTN_WRAPPER_CLASS}`)) return;
+        const existing = el.querySelector(`.${DELETE_BTN_WRAPPER_CLASS}`);
+        if (existing) {
+          if (existing.childNodes.length > 0) return;
+          existing.remove();
+        }
         const container = document.createElement("div");
         container.className = DELETE_BTN_WRAPPER_CLASS;
         el.appendChild(container);
@@ -83,10 +87,11 @@ export function useBlockMathDeleteButton({
 
     return () => {
       editor.off("update", onUpdate);
-      roots.forEach((r) => {
-        r.unmount();
-      });
+      const rootsToUnmount = Array.from(roots);
       roots.clear();
+      queueMicrotask(() => {
+        rootsToUnmount.forEach((r) => r.unmount());
+      });
     };
   }, [editor, disabled, editorWrapperRef]);
 }

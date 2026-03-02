@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
-import { EditorMode, HeadlessToolbarMode } from "@/components/TiptapEditor/types";
+import {
+  EditorMode,
+  HeadlessToolbarMode,
+} from "@/components/TiptapEditor/types";
 import "./App.css";
 
 function App() {
   const [content, setContent] = useState("");
   const [count, setCount] = useState(0);
-
+  const [disabled, setDisabled] = useState(false);
   const handleEditorChange = (html: string) => {
     setCount(count + 1);
     setContent(html);
@@ -51,6 +54,8 @@ function App() {
     <div className="app">
       <h1>Tiptap Markdown Editor</h1>
 
+      <div onClick={() => setDisabled(true)}>disabled</div>
+      <div onClick={() => setDisabled(false)}> not disabled</div>
       {/* <div className="h-[500px] overflow-y-auto"> */}
       <div
         className="flex-1"
@@ -58,7 +63,7 @@ function App() {
       >
         <TiptapEditor
           // border={false}
-          // disabled={true}
+          disabled={disabled}
           // editorMode={EditorMode.Headless}
           headlessToolbarMode={HeadlessToolbarMode.OnFocus}
           value={content}

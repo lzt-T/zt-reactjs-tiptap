@@ -380,6 +380,17 @@
   outline: none;
 }
 
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper img.image-selected,
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode img,
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper .image-error-placeholder.image-selected,
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode .image-error-placeholder {
+  outline: none;
+}
+
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper .image-delete-btn {
+  display: none;
+}
+
 /* Disabled: 任务列表复选框不用指针样式 */
 .editor-container.is-disabled .editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"] {
   cursor: default;
