@@ -5,6 +5,8 @@
 [![npm version](https://img.shields.io/npm/v/md-tiptap.svg)](https://www.npmjs.com/package/md-tiptap)
 [![license](https://img.shields.io/npm/l/md-tiptap.svg)](https://www.npmjs.com/package/md-tiptap)
 
+**GitHub:** [https://github.com/lzt-T/md-tiptap](https://github.com/lzt-T/md-tiptap)
+
 ## 特性
 
 - ✨ 丰富的文本格式化选项（粗体、斜体、下划线、删除线、行内代码）
