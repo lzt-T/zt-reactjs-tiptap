@@ -161,7 +161,11 @@ const Toolbar = ({
   }
 
   return (
-    <div className="editor-toolbar" data-selection-key={selectionKey}>
+    <div
+      className="editor-toolbar"
+      data-selection-key={selectionKey}
+      onMouseDown={(e) => e.preventDefault()}
+    >
       <div className="editor-toolbar-inner">
         <button
           type="button"

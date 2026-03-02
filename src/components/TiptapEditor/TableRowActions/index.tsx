@@ -167,8 +167,8 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
   }, [])
 
   /**
-   * @param setSelectionToRow 行操作需先设选区到该行；列操作传 false 不抢选区
-   * @param rowFocusOffset 插行后焦点行偏移：0=留在本行（下方插行），1=下一行（上方插行），不传则不恢复列
+   * @param setSelectionToRow 行操作需先将选区移到目标行；列操作传 false 跳过此步骤
+   * @param rowFocusOffset 插行后光标行偏移：0=留在本行（下方插行），1=下一行（上方插行），不传则不恢复列
    */
   const runAndClose = useCallback(
     (fn: () => void, setSelectionToRow = true, rowFocusOffset?: number) => {
@@ -177,10 +177,9 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
         const target = menuTargetRef.current
         if (target) {
           const { state, view } = editor
-          /* 先读出当前列，再改选区，插行后用于恢复焦点到原列 */
+          /* 先读出当前列，插行后用于恢复光标到原列 */
           try {
-            const { from } = view.state.selection
-            const domAtPos = view.domAtPos(from)
+            const domAtPos = view.domAtPos(view.state.selection.from)
             const el =
               domAtPos.node instanceof Element
                 ? domAtPos.node
@@ -191,49 +190,34 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
             // ignore
           }
           const doc = state.doc
-          if (
-            target.firstCellPos >= 0 &&
-            target.firstCellPos <= doc.content.size
-          ) {
-            const tr = state.tr.setSelection(
-              TextSelection.create(doc, target.firstCellPos)
+          if (target.firstCellPos >= 0 && target.firstCellPos <= doc.content.size) {
+            view.dispatch(
+              state.tr.setSelection(TextSelection.create(doc, target.firstCellPos))
             )
-            view.dispatch(tr)
-            editor.commands.focus()
           }
         }
       }
       fn()
-      /* 插行后把焦点设回原列 */
-      if (
-        setSelectionToRow &&
-        rowFocusOffset !== undefined &&
-        columnIndex !== null
-      ) {
+      /* 插行后把光标移回原列 */
+      if (setSelectionToRow && rowFocusOffset !== undefined && columnIndex !== null) {
         const target = menuTargetRef.current
         if (target) {
-          const wrapper = editorWrapperRef.current
-          const proseMirror = wrapper?.querySelector('.ProseMirror')
-          const tables = proseMirror?.querySelectorAll('table')
-          const table = tables?.[target.tableIndex] as HTMLTableElement | undefined
-          const row = table?.rows[target.rowIndex + rowFocusOffset]
-          const cell = row?.cells[columnIndex]
-          if (cell) {
-            try {
-              /* fn() 已执行，用当前 view/state 定位到单元格内容末尾 */
-              const { view: viewAfter, state: stateAfter } = editor
-              const pos = viewAfter.posAtDOM(cell, cell.childNodes.length)
-              const doc = stateAfter.doc
-              if (pos >= 0 && pos <= doc.content.size) {
-                const tr = stateAfter.tr.setSelection(
-                  TextSelection.create(doc, pos)
+          try {
+            const proseMirror = editorWrapperRef.current?.querySelector('.ProseMirror')
+            const tables = proseMirror?.querySelectorAll('table')
+            const table = tables?.[target.tableIndex] as HTMLTableElement | undefined
+            const cell = table?.rows[target.rowIndex + rowFocusOffset]?.cells[columnIndex]
+            if (cell) {
+              const { view, state } = editor
+              const pos = view.posAtDOM(cell, cell.childNodes.length)
+              if (pos >= 0 && pos <= state.doc.content.size) {
+                view.dispatch(
+                  state.tr.setSelection(TextSelection.create(state.doc, pos))
                 )
-                viewAfter.dispatch(tr)
-                editor.commands.focus()
               }
-            } catch {
-              // ignore
             }
+          } catch {
+            // ignore
           }
         }
       }
@@ -294,6 +278,7 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
               left: `${item.left}px`,
               height: `${item.height}px`,
             }}
+            onMouseDown={e => e.preventDefault()}
             onClick={e => handleRowButtonClick(e, item)}
           >
             <EllipsisVertical className="table-row-action-icon" size={14} aria-hidden="true" />
@@ -306,17 +291,14 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
           className="table-row-action-menu"
           role="menu"
           style={{ top: `${menuPosition.top}px`, left: `${menuPosition.left}px` }}
+          onMouseDown={e => e.preventDefault()}
         >
           <button
             type="button"
             role="menuitem"
             title="在上方插入行"
             onClick={() =>
-              runAndClose(
-                () => editor.chain().focus().addRowBefore().run(),
-                true,
-                1
-              )
+              runAndClose(() => editor.chain().focus().addRowBefore().run(), true, 1)
             }
           >
             <ArrowUp size={16} />
@@ -326,11 +308,7 @@ const TableRowActions = ({ editor, editorWrapperRef }: TableRowActionsProps) => 
             role="menuitem"
             title="在下方插入行"
             onClick={() =>
-              runAndClose(
-                () => editor.chain().focus().addRowAfter().run(),
-                true,
-                0
-              )
+              runAndClose(() => editor.chain().focus().addRowAfter().run(), true, 0)
             }
           >
             <ArrowDown size={16} />
