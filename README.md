@@ -21,6 +21,7 @@
 - 🔄 撤销/重做支持
 - 📐 文本对齐（左对齐、居中、右对齐、两端对齐）
 - ⬆️⬇️ 上标/下标支持
+- 📄 HTML/DOM 转纯文本工具（与编辑器 `getText()` 一致）
 
 ## 安装
 
@@ -239,6 +240,35 @@ const customCategory: FormulaPickerCategory = {
   formulaCategories={[...FORMULA_CATEGORIES, customCategory]}
 />
 ```
+
+### HTML 转纯文本
+
+库导出 `htmlToPlainText` 与 `domToPlainText`，使用与编辑器相同的 schema 将 HTML 或 DOM 转为纯文本，结果与编辑器实例的 `getText()` 一致（如图片→`[image]`、公式→`[latex]`、表格→`[table]` 等）。
+
+```tsx
+import { htmlToPlainText, domToPlainText } from 'md-tiptap'
+
+// 从 HTML 字符串
+const text = htmlToPlainText('<p>Hello</p><p>World</p>')
+// => 'Hello\nWorld'
+
+// 从 DOM 元素（如编辑器内容区）
+const el = document.querySelector('.editor-content')
+const text2 = domToPlainText(el)
+
+// 单行模式（块之间用空格、换行替换为空格）
+const oneLine = htmlToPlainText(html, { singleLine: true })
+
+// 自定义块分隔符
+const custom = htmlToPlainText(html, { blockSeparator: '\n\n' })
+```
+
+**选项 `HtmlToPlainTextOptions`**：
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `blockSeparator` | `string` | `'\n'` | 块级节点之间的分隔符；`singleLine: true` 时视为 `' '` |
+| `singleLine` | `boolean` | `false` | 为 `true` 时块之间用空格连接，结果中的换行会替换为空格 |
 
 ### 图片上传
 

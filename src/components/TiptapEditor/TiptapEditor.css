@@ -14,7 +14,7 @@
 
 .editor-wrapper {
   position: relative;
-  padding: 1rem;
+  padding: 12px 14px;
   text-align: left;
   flex: 1;
   overflow-y: auto;
@@ -45,10 +45,6 @@
   min-height: 100%;
   /* 允许浏览器合成斜体：中文等无 italic 变体的字体也能显示倾斜 */
   font-synthesis: style;
-}
-
-.editor-wrapper .ProseMirror p {
-  margin: 0.5em 0;
 }
 
 .editor-wrapper .ProseMirror h1 {
@@ -278,13 +274,16 @@
   margin: 2em 0;
 }
 
-/* Block spacing for Notion-like feel */
-.editor-wrapper.notion-editor .ProseMirror > * {
+.editor-wrapper .ProseMirror > * {
   margin: 0.5em 0;
 }
 
-.editor-wrapper.notion-editor .ProseMirror > *:first-child {
+.editor-wrapper .ProseMirror > *:first-child {
   margin-top: 0;
+}
+
+.editor-wrapper .ProseMirror > *:last-child {
+  margin-bottom: 0;
 }
 
 /* Focus outline for blocks */
@@ -305,7 +304,10 @@
 
 .editor-wrapper .ProseMirror .tiptap-mathematics-render[data-type="inline-math"] {
   display: inline-block;
-  padding: 0 2px;
+  padding: 2px 6px;
+  margin: 0 4px;
+  background-color: #f1f5f9;
+  border-radius: 4px;
 }
 
 .editor-wrapper .ProseMirror .tiptap-mathematics-render[data-type="block-math"] {

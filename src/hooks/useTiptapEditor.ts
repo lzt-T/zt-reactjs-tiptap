@@ -5,7 +5,6 @@ import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
-import Underline from "@tiptap/extension-underline";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import Color from "@tiptap/extension-color";
@@ -86,7 +85,6 @@ export function useTiptapEditor({
       TableRow,
       TableCell,
       TableHeader,
-      Underline,
       Subscript,
       Superscript,
       TextStyle,
