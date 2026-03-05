@@ -12,6 +12,7 @@ import { defaultCommands } from "@/extensions/SlashCommands";
 import CommandMenu from "./CommandMenu";
 import Toolbar from "./Toolbar";
 import TableRowActions from "./TableRowActions";
+import TableColumnActions from "./TableColumnActions";
 import BubbleMenu from "./BubbleMenu/index";
 import MathDialog from "./MathDialog";
 import ImageUploadDialog from "./ImageUploadDialog";
@@ -271,10 +272,16 @@ const TiptapEditor = ({
           isNotionLike ? "notion-editor" : "headless-editor"
         )}
         ref={editorWrapperRef}
+        style={
+          {
+            '--table-action-padding': `${config.TABLE_ACTION_BUTTON_PADDING}px`,
+          } as React.CSSProperties
+        }
       >
         {editor && !disabled && (
           <>
             <TableRowActions editor={editor} editorWrapperRef={editorWrapperRef} />
+            <TableColumnActions editor={editor} editorWrapperRef={editorWrapperRef} />
           </>
         )}
         <EditorContent editor={editor} />

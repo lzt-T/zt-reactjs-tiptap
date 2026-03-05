@@ -156,12 +156,12 @@ export function useTiptapEditor({
     if (!editor || value === undefined) return;
 
     const currentContent = editor.getHTML();
-    // 若 value 与当前内容一致，无需 setContent，避免多余操作
+    // 若 value 与当前内容一致，无需 setContent
     if (currentContent === value) return;
-    // 若 value 来自我们刚通过 onChange 抛出的内容（父组件回传），说明是用户编辑触发的更新，
-    // 编辑器已有正确内容和光标，不应 setContent，否则会把光标移到文末
+    // 若 value 等于我们通过 onChange 抛出的内容（父组件回传），不 setContent，避免光标跳到文末
     if (value === lastEmittedHtmlRef.current) return;
-    
+    // 若当前文档内容等于我们已抛出的内容，而 value 不同，说明 value 是父组件尚未同步到的旧值（防抖未触发），不应用旧 value 覆盖新内容
+    if (currentContent === lastEmittedHtmlRef.current) return;
     lastEmittedHtmlRef.current = null;
     isExternalUpdateRef.current = true;
     editor.commands.setContent(value);

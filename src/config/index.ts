@@ -18,6 +18,12 @@ export const config = {
   PLACEHOLDER_HEADLESS: "开始输入...",
   /* 图片上传最大体积（字节），默认 5MB */
   IMAGE_MAX_SIZE_BYTES: 5 * 1024 * 1024,
+  /* 表格行/列操作按钮及下方、右侧加号条尺寸（px），默认 10 */
+  TABLE_ACTION_BUTTON_SIZE: 10,
+  /* 表格左侧/上方操作按钮与表格内容的间距（px），即 tableWrapper 预留区，默认 14 */
+  TABLE_ACTION_BUTTON_PADDING: 14,
+  /* 表格下方/右侧加号条与表格边缘的间距（px），默认 4 */
+  TABLE_ADD_BAR_GAP: 4,
   /* 文字颜色预设（ColorPicker type="text"） */
   TEXT_COLORS: [
     { name: "默认", value: "#000000" },

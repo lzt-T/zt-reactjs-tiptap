@@ -146,8 +146,13 @@
 }
 
 .editor-wrapper .ProseMirror .tableWrapper {
+  position: relative;
   overflow-x: auto;
+  overflow-y: hidden; /* 仅横向滚动，不出现纵向滚动条 */
   margin: 1em 0;
+  /* 为行/列操作按钮留出空间，由 config.TABLE_ACTION_BUTTON_PADDING 注入 */
+  padding-left: var(--table-action-padding, 14px);
+  padding-top: var(--table-action-padding, 14px);
   /* 隐藏水平滚动条但保留滚动功能 */
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;

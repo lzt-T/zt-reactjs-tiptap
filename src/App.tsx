@@ -65,10 +65,10 @@ function App() {
           // border={false}
           // disabled={disabled}
           editorMode={EditorMode.Headless}
-          headlessToolbarMode={HeadlessToolbarMode.OnFocus}
+          // headlessToolbarMode={HeadlessToolbarMode.OnFocus}
           value={content}
           onChange={handleEditorChange}
-          maxHeight="500px"
+          // maxHeight="500px"
           onImageUpload={handleImageUpload}
         />
       </div>

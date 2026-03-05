@@ -4,3 +4,7 @@ export { useMathDialog } from "./useMathDialog";
 export { useImageUploadDialog } from "./useImageUploadDialog";
 export { useTiptapEditor } from "./useTiptapEditor";
 export { useEditorCommands } from "./useEditorCommands";
+export { useTableInsertRowRunAndClose } from "./useTableInsertRowRunAndClose";
+export { useTableInsertColumnRunAndClose } from "./useTableInsertColumnRunAndClose";
+export type { TableRowMenuTarget } from "./useTableInsertRowRunAndClose";
+export type { TableColumnMenuTarget } from "./useTableInsertColumnRunAndClose";
