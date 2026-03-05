@@ -100,6 +100,14 @@
   display: list-item;
 }
 
+/* 明确设置列表符号，避免被全局 li { list-style: none } 等覆盖 */
+.editor-wrapper .ProseMirror ul li {
+  list-style-type: disc;
+}
+.editor-wrapper .ProseMirror ol li {
+  list-style-type: decimal;
+}
+
 /* 任务列表的 li 不显示列表符号，由复选框代替 */
 .editor-wrapper .ProseMirror ul[data-type="taskList"] li {
   list-style: none;
