@@ -17,7 +17,7 @@ export default defineConfig({
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "ReactjsTiptap",
       formats: ["es", "umd"],
-      fileName: (format) => `reactjs-tiptap.${format === "es" ? "js" : "umd.cjs"}`,
+      fileName: (format) => `zt-reactjs-tiptap.${format === "es" ? "js" : "umd.cjs"}`,
     },
     rollupOptions: {
       // 确保外部化处理那些你不想打包进库的依赖

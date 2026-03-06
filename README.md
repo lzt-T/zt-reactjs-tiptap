@@ -1,9 +1,9 @@
-# @lzt-top/reactjs-tiptap
+# zt-reactjs-tiptap
 
 基于 TipTap 的 React 富文本编辑器组件，支持 **Notion 风格**（斜杠命令、块状编辑）与 **Headless**（顶部工具栏、可嵌入自定义 UI）两种模式。
 
-[![npm version](https://img.shields.io/npm/v/@lzt-top/reactjs-tiptap.svg)](https://www.npmjs.com/package/@lzt-top/reactjs-tiptap)
-[![license](https://img.shields.io/npm/l/@lzt-top/reactjs-tiptap.svg)](https://www.npmjs.com/package/@lzt-top/reactjs-tiptap)
+[![npm version](https://img.shields.io/npm/v/zt-reactjs-tiptap.svg)](https://www.npmjs.com/package/zt-reactjs-tiptap)
+[![license](https://img.shields.io/npm/l/zt-reactjs-tiptap.svg)](https://www.npmjs.com/package/zt-reactjs-tiptap)
 
 **GitHub:** [https://github.com/lzt-T/md-tiptap](https://github.com/lzt-T/md-tiptap)
 
@@ -26,11 +26,11 @@
 ## 安装
 
 ```bash
-npm install @lzt-top/reactjs-tiptap
+npm install zt-reactjs-tiptap
 # 或
-pnpm add @lzt-top/reactjs-tiptap
+pnpm add zt-reactjs-tiptap
 # 或
-yarn add @lzt-top/reactjs-tiptap
+yarn add zt-reactjs-tiptap
 ```
 
 ## 使用
@@ -38,8 +38,8 @@ yarn add @lzt-top/reactjs-tiptap
 ### 基础使用
 
 ```tsx
-import { TiptapEditor } from '@lzt-top/reactjs-tiptap'
-import '@lzt-top/reactjs-tiptap/style.css'  // 必须导入样式
+import { TiptapEditor } from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'  // 必须导入样式
 
 function App() {
   const [content, setContent] = useState('<p>Hello World!</p>')
@@ -56,8 +56,8 @@ function App() {
 ### 带图片上传
 
 ```tsx
-import { TiptapEditor } from '@lzt-top/reactjs-tiptap'
-import '@lzt-top/reactjs-tiptap/style.css'
+import { TiptapEditor } from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
 
 function App() {
   const [content, setContent] = useState('<p>Hello World!</p>')
@@ -88,8 +88,8 @@ function App() {
 
 ```tsx
 import { useState } from 'react'
-import { TiptapEditor } from '@lzt-top/reactjs-tiptap'
-import '@lzt-top/reactjs-tiptap/style.css'
+import { TiptapEditor } from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
 
 function EditorExample() {
   const [content, setContent] = useState('<p>开始编辑...</p>')
@@ -238,8 +238,8 @@ import {
   FORMULA_CATEGORIES,
   type FormulaPickerCategory,
   type FormulaSnippetItem,
-} from '@lzt-top/reactjs-tiptap'
-import '@lzt-top/reactjs-tiptap/style.css'
+} from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
 
 const customCategory: FormulaPickerCategory = {
   id: 'custom',
@@ -259,7 +259,7 @@ const customCategory: FormulaPickerCategory = {
 库导出 `htmlToPlainText` 与 `domToPlainText`，使用与编辑器相同的 schema 将 HTML 或 DOM 转为纯文本，结果与编辑器实例的 `getText()` 一致（如图片→`[image]`、公式→`[latex]`、表格→`[table]` 等）。
 
 ```tsx
-import { htmlToPlainText, domToPlainText } from '@lzt-top/reactjs-tiptap'
+import { htmlToPlainText, domToPlainText } from 'zt-reactjs-tiptap'
 
 // 从 HTML 字符串
 const text = htmlToPlainText('<p>Hello</p><p>World</p>')
@@ -326,7 +326,7 @@ const custom = htmlToPlainText(html, { blockSeparator: '\n\n' })
 ### 样式导入
 
 ```tsx
-import '@lzt-top/reactjs-tiptap/style.css'
+import 'zt-reactjs-tiptap/style.css'
 ```
 
 样式文件包含：
@@ -339,9 +339,9 @@ import '@lzt-top/reactjs-tiptap/style.css'
 
 ### 在其它项目中使用时样式不对？
 
-1. **务必导入样式**：在使用编辑器的组件或入口文件顶部导入 `import '@lzt-top/reactjs-tiptap/style.css'`
+1. **务必导入样式**：在使用编辑器的组件或入口文件顶部导入 `import 'zt-reactjs-tiptap/style.css'`
 
-2. **导入顺序**：若希望用自己项目的主题覆盖编辑器主题，请先导入 `@lzt-top/reactjs-tiptap/style.css`，再导入你的全局样式
+2. **导入顺序**：若希望用自己项目的主题覆盖编辑器主题，请先导入 `zt-reactjs-tiptap/style.css`，再导入你的全局样式
 
 3. **CSS 变量覆盖**：在你的全局样式中定义或覆盖 CSS 变量（如 `--primary`、`--background`、`--border` 等）
 

@@ -1,4 +1,4 @@
-# Agent Guidelines for @lzt-top/reactjs-tiptap
+# Agent Guidelines for zt-reactjs-tiptap
 
 ## Project Overview
 React + TypeScript + Vite application for markdown editing with TipTap.
