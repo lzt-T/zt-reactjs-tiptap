@@ -2,6 +2,7 @@ import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { ImageWithDelete } from "@/extensions/ImageWithDelete";
 import { FileAttachment } from "@/extensions/FileAttachment";
+import { DeletionCallbacks } from "@/extensions/DeletionCallbacks";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
@@ -31,6 +32,8 @@ interface UseTiptapEditorOptions {
   disabled: boolean;
   editorRef: React.MutableRefObject<ReturnType<typeof useEditor> | null>;
   onChange: ((html: string) => void) | undefined;
+  onImageDelete?: (params: { src: string; alt?: string; title?: string }) => void;
+  onFileDelete?: (params: { url: string; name: string }) => void;
   onStart: () => void;
   onUpdate: (query: string) => void;
   onIndexChange: (index: number) => void;
@@ -55,6 +58,8 @@ export function useTiptapEditor({
   disabled,
   editorRef,
   onChange,
+  onImageDelete,
+  onFileDelete,
   onStart,
   onUpdate,
   onIndexChange,
@@ -86,6 +91,7 @@ export function useTiptapEditor({
       StarterKit,
       ImageWithDelete,
       FileAttachment.configure({ onClick: onFileAttachmentClick }),
+      DeletionCallbacks.configure({ onImageDelete, onFileDelete }),
       Table.configure({ resizable: true }),
       TableRow,
       TableCell,

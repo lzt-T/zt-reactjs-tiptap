@@ -45,11 +45,23 @@ export interface TiptapEditorProps {
   onImageUpload?: (file: File) => Promise<string>
 
   /**
+   * 图片删除时触发（点击图片右上角删除按钮）
+   * @param params - { src, alt?, title? }
+   */
+  onImageDelete?: (params: { src: string; alt?: string; title?: string }) => void
+
+  /**
    * 附件上传处理函数（Word/PDF），插入为文件块链接
    * @param file - 要上传的文件
    * @returns Promise<{ url: string; name: string }> - 返回文件 URL 与显示名称
    */
   onFileUpload?: (file: File) => Promise<{ url: string; name: string }>
+
+  /**
+   * 附件删除时触发（点击附件右侧删除按钮）
+   * @param params - { url: 文件地址, name: 显示名称 }
+   */
+  onFileDelete?: (params: { url: string; name: string }) => void
 
   /**
    * 点击文件块（附件链接）时触发。传入后不再默认打开链接，由你自行处理（如预览、下载、弹窗等）

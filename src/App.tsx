@@ -4,6 +4,7 @@ import {
   EditorMode,
   HeadlessToolbarMode,
 } from "@/components/TiptapEditor/types";
+import { htmlToPlainText } from "@/lib/htmlToPlainText";
 import "./App.css";
 
 function App() {
@@ -13,6 +14,12 @@ function App() {
   const handleEditorChange = (html: string) => {
     setCount(count + 1);
     setContent(html);
+    console.log(
+      "htmlToPlainText",
+      htmlToPlainText(html, {
+        singleLine: true,
+      })
+    );
     console.log("count", count);
     console.log("✏️ onChange 被触发 - 用户编辑:", html);
   };
@@ -34,13 +41,15 @@ function App() {
           resolve(mockUrl);
         } else {
           console.log("❌ 上传失败");
-          reject(new Error("模拟上传失败，请重试"));
+          reject(new Error("Mock upload failed, please retry"));
         }
       }, 1500); // 模拟 1.5 秒的上传时间
     });
   };
 
-    const onFileUpload = async (file: File): Promise<{ url: string; name: string }> => {
+  const onFileUpload = async (
+    file: File
+  ): Promise<{ url: string; name: string }> => {
     console.log("📤 上传文件:", file.name, file.size, "bytes");
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -49,17 +58,30 @@ function App() {
     });
   };
 
-  const onFileAttachmentClick = ({ url, name }: { url: string; name: string }) => {
+  const onFileAttachmentClick = ({
+    url,
+    name,
+  }: {
+    url: string;
+    name: string;
+  }) => {
     console.log("📤 点击文件:", { url, name });
   };
 
+  const onImageDelete = (params: { src: string; alt?: string; title?: string }) => {
+    console.log("🗑️ 删除图片:", params);
+  };
+
+  const onFileDelete = (params: { url: string; name: string }) => {
+    console.log("🗑️ 删除附件:", params);
+  };
 
   useEffect(() => {
     console.log("📡 准备从接口加载数据...");
     setTimeout(() => {
       console.log("📥 接口数据返回，设置 content（此操作不应触发 onChange）");
       setContent(
-        '<p>欢迎使用 Tiptap 编辑器！asd</p><p></p><div data-latex="\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}" data-type="block-math"></div><p></p>'
+        '<p>Welcome to Tiptap Editor! asd</p><p></p><div data-latex="\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}" data-type="block-math"></div><p></p>'
       );
     }, 2000);
   }, []);
@@ -78,13 +100,15 @@ function App() {
         <TiptapEditor
           // border={false}
           disabled={disabled}
-          // editorMode={EditorMode.Headless}
+          editorMode={EditorMode.Headless}
           headlessToolbarMode={HeadlessToolbarMode.OnFocus}
           value={content}
           onChange={handleEditorChange}
-          // maxHeight="500px"
           onImageUpload={handleImageUpload}
+          onImageDelete={onImageDelete}
+          maxHeight="500px"
           onFileUpload={onFileUpload}
+          onFileDelete={onFileDelete}
           onFileAttachmentClick={onFileAttachmentClick}
         />
       </div>
