@@ -3,6 +3,10 @@ import StarterKit from "@tiptap/starter-kit";
 import { ImageWithDelete } from "@/extensions/ImageWithDelete";
 import { FileAttachment } from "@/extensions/FileAttachment";
 import { DeletionCallbacks } from "@/extensions/DeletionCallbacks";
+import {
+  clearEditorCallbacks,
+  setEditorCallbacks,
+} from "@/extensions/editorCallbackRegistry";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
@@ -133,11 +137,8 @@ export function useTiptapEditor({
     extensions: [
       StarterKit,
       ImageWithDelete,
-      FileAttachment.configure({ onClick: onFileAttachmentClick }),
-      DeletionCallbacks.configure({
-        onImageDelete: handleImageDeleteAfterChange,
-        onFileDelete: handleFileDeleteAfterChange,
-      }),
+      FileAttachment,
+      DeletionCallbacks,
       Table.configure({ resizable: true }),
       TableRow,
       TableCell,
@@ -197,6 +198,23 @@ export function useTiptapEditor({
   useEffect(() => {
     editorRef.current = editor;
   }, [editor, editorRef]);
+
+  useEffect(() => {
+    if (!editor) return;
+    setEditorCallbacks(editor, {
+      onFileAttachmentClick,
+      onImageDelete: handleImageDeleteAfterChange,
+      onFileDelete: handleFileDeleteAfterChange,
+    });
+    return () => {
+      clearEditorCallbacks(editor);
+    };
+  }, [
+    editor,
+    onFileAttachmentClick,
+    handleImageDeleteAfterChange,
+    handleFileDeleteAfterChange,
+  ]);
 
   useEffect(() => {
     if (editor) {

@@ -1,6 +1,7 @@
 import { Extension } from '@tiptap/core'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import { Plugin } from '@tiptap/pm/state'
+import { getEditorCallbacks } from './editorCallbackRegistry'
 
 type ImageDeleteParams = { src: string; alt?: string; title?: string }
 type FileDeleteParams = { url: string; name: string }
@@ -52,22 +53,15 @@ function hasSameNodeInRange(
   return found
 }
 
-export const DeletionCallbacks = Extension.create<DeletionCallbacksOptions>({
+export const DeletionCallbacks = Extension.create({
   name: 'deletionCallbacks',
 
-  addOptions() {
-    return {
-      onImageDelete: undefined,
-      onFileDelete: undefined,
-    }
-  },
-
   addProseMirrorPlugins() {
+    const editor = this.editor
     return [
       new Plugin({
         appendTransaction: (transactions, oldState, newState) => {
-          const onImageDelete = this.options.onImageDelete
-          const onFileDelete = this.options.onFileDelete
+          const { onImageDelete, onFileDelete } = getEditorCallbacks(editor)
           if (!onImageDelete && !onFileDelete) return null
           if (!transactions.some((tr) => tr.docChanged)) return null
 

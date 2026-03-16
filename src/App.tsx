@@ -24,6 +24,8 @@ function App() {
   // 选择文件时触发：执行预上传，返回图片 URL
   const handleImagePreUpload = async (file: File): Promise<string> => {
     console.log("📤 上传图片:", file.name, file.size, "bytes");
+    console.log("count", count);
+    
 
     // 模拟上传到服务器（实际使用时替换为真实的上传逻辑）
     return new Promise((resolve, reject) => {
@@ -45,12 +47,14 @@ function App() {
 
   // 仅在点击 Confirm 后触发
   const onImageUpload = (payload: { file: File; url: string; alt?: string }) => {
+    console.log("count", count);
     console.log("✅ 图片 Confirm 回调:", payload);
   };
 
   // 选择文件时触发：执行预上传，返回文件 URL + 名称
   const onFilePreUpload = async (file: File): Promise<{ url: string; name: string }> => {
     console.log("📤 上传文件:", file.name, file.size, "bytes");
+    console.log("count", count);
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({ url: "https://example.com/file.pdf", name: file.name });
@@ -60,18 +64,25 @@ function App() {
 
   // 仅在点击 Confirm/Insert Link 后触发
   const onFileUpload = (payload: { file: File; url: string; name: string }) => {
+    console.log("count", count);
     console.log("✅ 文件 Confirm 回调:", payload);
   };
 
   const onFileAttachmentClick = ({ url, name }: { url: string; name: string }) => {
+   
+     console.log(count,'count');
+     
+   
     console.log("📤 点击文件:", { url, name });
   };
 
   const onImageDelete = (params: { src: string; alt?: string; title?: string }) => {
+    console.log("count", count);
     console.log("🗑️ 删除图片:", params);
   };
 
   const onFileDelete = (params: { url: string; name: string }) => {
+    console.log("count", count);
     console.log("🗑️ 删除附件:", params);
   };
 
@@ -104,7 +115,7 @@ function App() {
           value={content}
           onChange={(str)=>{
             console.log("str", str);
-            // handleEditorChange(str);
+            handleEditorChange(str);
           }}
           onImagePreUpload={handleImagePreUpload}
           onImageUpload={onImageUpload}

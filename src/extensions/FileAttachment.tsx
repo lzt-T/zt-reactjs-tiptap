@@ -4,6 +4,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FileText, ExternalLink, Trash2 } from "lucide-react";
+import { getEditorCallbacks } from "./editorCallbackRegistry";
 
 export interface FileAttachmentAttributes {
   url: string;
@@ -20,13 +21,13 @@ function FileAttachmentView({
   deleteNode,
   editor,
   selected,
-  onClick: onFileClick,
 }: FileAttachmentViewProps) {
   const { url, name } = node.attrs as FileAttachmentAttributes;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    const onFileClick = getEditorCallbacks(editor).onFileAttachmentClick;
     if (onFileClick) {
       onFileClick({ url: url ?? "", name: name || "Untitled" });
     } else if (url) {
@@ -51,7 +52,7 @@ function FileAttachmentView({
       }
       contentEditable={false}
     >
-      {onFileClick ? (
+      {getEditorCallbacks(editor).onFileAttachmentClick ? (
         <span
           role="button"
           tabIndex={0}
@@ -106,9 +107,7 @@ export const FileAttachment = Node.create({
   atom: true,
 
   addOptions() {
-    return {
-      onClick: undefined as ((params: { url: string; name: string }) => void) | undefined,
-    };
+    return {};
   },
 
   addAttributes() {
@@ -149,10 +148,7 @@ export const FileAttachment = Node.create({
   },
 
   addNodeView() {
-    const onClick = this.options.onClick;
-    return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <FileAttachmentView {...props} onClick={onClick} />
-    ));
+    return ReactNodeViewRenderer((props: NodeViewProps) => <FileAttachmentView {...props} />);
   },
 
   addCommands(): Partial<RawCommands> {
