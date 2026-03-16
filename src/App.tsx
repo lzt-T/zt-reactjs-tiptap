@@ -117,6 +117,7 @@ function App() {
             console.log("str", str);
             handleEditorChange(str);
           }}
+          fileUploadTypes={["pdf"]}
           onImagePreUpload={handleImagePreUpload}
           onImageUpload={onImageUpload}
           onImageDelete={onImageDelete}

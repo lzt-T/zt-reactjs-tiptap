@@ -132,10 +132,16 @@ export interface TiptapEditorProps {
   imageMaxSizeBytes?: number
 
   /**
-   * 附件上传（Word/PDF）最大体积（字节），超过则拒绝并提示
+   * 附件上传最大体积（字节），超过则拒绝并提示
    * @default config.FILE_UPLOAD_MAX_SIZE_BYTES（10MB）
    */
   fileMaxSizeBytes?: number
+
+  /**
+   * 附件可上传的扩展名列表（不区分大小写），例如 ['pdf', 'docx']。
+   * 内部会自动去空格、去重、去掉前导 "."；当不传或为空时默认仅允许 ['pdf']。
+   */
+  fileUploadTypes?: string[]
 
   /**
    * 公式选择器的分类列表。不传则使用默认 FORMULA_CATEGORIES；

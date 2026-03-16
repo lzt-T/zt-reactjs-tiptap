@@ -33,7 +33,7 @@ export interface CommandItem {
   command: ({ editor }: { editor: Editor }) => void
   mathType?: 'inline' | 'block'
   imageUpload?: boolean
-  /** 上传附件（Word/PDF），插入文件块链接 */
+  /** Upload attachment and insert file block link */
   fileAttachment?: boolean
   /** 为 true 时在斜杠菜单中灰显，且方向键会跳过该项 */
   disabled?: boolean
@@ -135,8 +135,8 @@ export const defaultCommands: CommandItem[] = [
     },
   },
   {
-    title: 'Upload file',
-    description: 'Upload Word or PDF as attachment link',
+    title: 'Upload attachment',
+    description: 'Upload attachment as file link',
     icon: FileUp,
     fileAttachment: true,
     command: ({ editor }) => {
@@ -259,8 +259,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
                     
                     // Check if it's a math command
                     if (item.mathType && this.options.onMathDialog) {
-                      const defaultValue = item.mathType === 'inline' ? 'E = mc^2' : '\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}'
-                      this.options.onMathDialog(item.mathType, defaultValue, (latex) => {
+                      this.options.onMathDialog(item.mathType, '', (latex) => {
                         if (item.mathType === 'inline') {
                           currentEditor.chain().focus().insertInlineMath({ latex }).run()
                         } else {

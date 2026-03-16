@@ -47,6 +47,17 @@ const noopImageUpload = noop as (
   cb: (src: string, alt?: string) => void
 ) => void;
 
+function normalizeFileUploadTypes(fileUploadTypes?: string[]): string[] {
+  const normalized = Array.from(
+    new Set(
+      (fileUploadTypes ?? [])
+        .map((item) => item.trim().toLowerCase().replace(/^\.+/, ""))
+        .filter(Boolean)
+    )
+  );
+  return normalized.length > 0 ? normalized : config.DEFAULT_FILE_UPLOAD_TYPES;
+}
+
 const TiptapEditor = ({
   editorMode = EditorMode.NotionLike,
   headlessToolbarMode = HeadlessToolbarMode.Always,
@@ -67,6 +78,7 @@ const TiptapEditor = ({
   border = true,
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
+  fileUploadTypes,
   formulaCategories,
   maxHeight,
 }: TiptapEditorProps) => {
@@ -107,6 +119,7 @@ const TiptapEditor = ({
 
   const imageDialog = useImageUploadDialog();
   const fileUploadDialog = useFileUploadDialog();
+  const resolvedFileUploadTypes = normalizeFileUploadTypes(fileUploadTypes);
 
   const resolvedPlaceholder =
     placeholder !== undefined
@@ -372,6 +385,7 @@ const TiptapEditor = ({
           onPreUpload={onFilePreUpload}
           onUpload={handleFileUploadAfterChange}
           fileMaxSizeBytes={fileMaxSizeBytes}
+          fileUploadTypes={resolvedFileUploadTypes}
         />
       )}
     </div>

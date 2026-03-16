@@ -296,6 +296,7 @@
   margin: 2em 0;
 }
 
+/* Block spacing（两种模式统一，保证段落/块可读性） */
 .editor-wrapper .ProseMirror > * {
   margin: 0.5em 0;
 }

@@ -104,6 +104,7 @@ function App() {
       onImageUpload={handleImageUpload}
       onFilePreUpload={handleFilePreUpload}
       onFileUpload={handleFileUpload}
+      fileUploadTypes={['pdf', 'docx']}
     />
   )
 }
@@ -180,6 +181,8 @@ function EditorExample() {
 | `onChangeDebounceMs` | `number` | 否 | `300` | `onChange` 防抖延迟（毫秒） |
 | `border` | `boolean` | 否 | `true` | 是否显示编辑器容器边框 |
 | `imageMaxSizeBytes` | `number` | 否 | `5242880`（5MB） | 图片上传最大体积（字节），超过则拒绝并提示 |
+| `fileMaxSizeBytes` | `number` | 否 | `10485760`（10MB） | 附件上传最大体积（字节），超过则拒绝并提示 |
+| `fileUploadTypes` | `string[]` | 否 | `['pdf']` | 附件可上传扩展名列表（不区分大小写），如 `['pdf', 'docx']`。会自动去空格、去重、去掉前导 `.`；为空时回落到默认 `['pdf']` |
 | `formulaCategories` | `FormulaPickerCategory[]` | 否 | 内置默认分类 | 公式选择器的分类列表。不传则使用内置分类；传入时可完全自定义或在默认基础上扩展（见下方「扩展公式分类」） |
 | `maxHeight` | `number \| string` | 否 | - | 编辑器容器的最大高度。不配置时容器为 `height: 100%`；配置后高度限制为该值，内容超出时在编辑区内滚动。数字为像素（如 `400`），字符串为任意合法 CSS 长度（如 `"50vh"`、`"20rem"`） |
 
@@ -318,6 +321,13 @@ const custom = htmlToPlainText(html, { blockSeparator: '\n\n' })
 - `onImageUpload` 仅在点击 Confirm 后触发，不负责执行上传
 - 支持 JPG、PNG、GIF 等常见格式
 - 建议图片大小不超过 5MB
+
+### 附件上传
+
+- 附件上传通过 `onFilePreUpload` + `onFileUpload` 配置
+- 默认仅允许 `pdf`
+- 可通过 `fileUploadTypes` 自定义可上传扩展名（如 `['pdf', 'docx']`）
+- 拖拽上传与文件选择共用同一套类型校验和大小校验
 
 ### 任务列表
 

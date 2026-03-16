@@ -12,17 +12,16 @@ export const config = {
   COMMAND_MENU_DEFAULT_MIN_HEIGHT: 160,
   /* onChange 防抖延迟（毫秒），默认 300ms */
   DEFAULT_ON_CHANGE_DEBOUNCE_MS: 300,
-  /* 编辑器为空时显示的占位文本（NotionLike 模式），默认 "输入 '/' 查看命令..." */
-  DEFAULT_PLACEHOLDER: "输入 '/' 查看命令...",
+  /* 编辑器为空时显示的占位文本（NotionLike 模式），默认 "Type '/' for commands..." */
+  DEFAULT_PLACEHOLDER: "Type '/' for commands...",
   /* Headless 模式下的默认占位文本 */
-  PLACEHOLDER_HEADLESS: "开始输入...",
+  PLACEHOLDER_HEADLESS: "Start typing...",
   /* 图片上传最大体积（字节），默认 5MB */
   IMAGE_MAX_SIZE_BYTES: 5 * 1024 * 1024,
-  /* 附件上传（Word/PDF）最大体积（字节），默认 10MB */
+  /* 附件上传最大体积（字节），默认 10MB */
   FILE_UPLOAD_MAX_SIZE_BYTES: 10 * 1024 * 1024,
-  /* 附件上传接受的 MIME 类型 */
-  FILE_UPLOAD_ACCEPT:
-    '.docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf',
+  /* 附件上传默认扩展名（不含 "."），默认仅 PDF */
+  DEFAULT_FILE_UPLOAD_TYPES: ["pdf"] as string[],
   /* 表格行/列操作按钮及下方、右侧加号条尺寸（px），默认 10 */
   TABLE_ACTION_BUTTON_SIZE: 10,
   /* 表格左侧/上方操作按钮与表格内容的间距（px），即 tableWrapper 预留区，默认 14 */
@@ -31,27 +30,27 @@ export const config = {
   TABLE_ADD_BAR_GAP: 4,
   /* 文字颜色预设（ColorPicker type="text"） */
   TEXT_COLORS: [
-    { name: "默认", value: "#000000" },
-    { name: "灰色", value: "#6B7280" },
-    { name: "棕色", value: "#92400E" },
-    { name: "橙色", value: "#EA580C" },
-    { name: "黄色", value: "#CA8A04" },
-    { name: "绿色", value: "#16A34A" },
-    { name: "蓝色", value: "#2563EB" },
-    { name: "紫色", value: "#9333EA" },
-    { name: "粉色", value: "#DB2777" },
-    { name: "红色", value: "#DC2626" },
+    { name: "Default", value: "#000000" },
+    { name: "Gray", value: "#6B7280" },
+    { name: "Brown", value: "#92400E" },
+    { name: "Orange", value: "#EA580C" },
+    { name: "Yellow", value: "#CA8A04" },
+    { name: "Green", value: "#16A34A" },
+    { name: "Blue", value: "#2563EB" },
+    { name: "Purple", value: "#9333EA" },
+    { name: "Pink", value: "#DB2777" },
+    { name: "Red", value: "#DC2626" },
   ] as ColorOption[],
   /* 高亮颜色预设（ColorPicker type="highlight"） */
   HIGHLIGHT_COLORS: [
-    { name: "无色", value: "" },
-    { name: "黄色", value: "#FEF08A" },
-    { name: "灰色", value: "#E5E7EB" },
-    { name: "棕色", value: "#FED7AA" },
-    { name: "绿色", value: "#BBF7D0" },
-    { name: "蓝色", value: "#BFDBFE" },
-    { name: "紫色", value: "#E9D5FF" },
-    { name: "粉色", value: "#FBCFE8" },
-    { name: "红色", value: "#FECACA" },
+    { name: "None", value: "" },
+    { name: "Yellow", value: "#FEF08A" },
+    { name: "Gray", value: "#E5E7EB" },
+    { name: "Brown", value: "#FED7AA" },
+    { name: "Green", value: "#BBF7D0" },
+    { name: "Blue", value: "#BFDBFE" },
+    { name: "Purple", value: "#E9D5FF" },
+    { name: "Pink", value: "#FBCFE8" },
+    { name: "Red", value: "#FECACA" },
   ] as ColorOption[],
 }

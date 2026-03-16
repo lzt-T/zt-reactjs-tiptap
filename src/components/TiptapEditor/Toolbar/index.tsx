@@ -90,7 +90,6 @@ const Toolbar = ({
         editor.isActive("inlineMath") ||
         editor.isActive("blockMath") ||
         editor.isActive("image") ||
-        editor.isActive("fileAttachment") ||
         editor.isActive("code")
       ) {
         setShowHeadingMenu(false);
@@ -233,7 +232,7 @@ const Toolbar = ({
             (showHeadingMenu || currentHeadingLevel !== null) && "is-active",
             isFocusNodeOnly && "is-disabled"
           )}
-          title="标题"
+          title="Heading"
         >
           <span className="editor-toolbar-heading-btn">H</span>
           <ChevronDown size={14} className="editor-toolbar-chevron" />
@@ -250,7 +249,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             block.toggleBulletList();
           }}
-          title="无序列表"
+          title="Bullet list"
         >
           <List size={16} />
         </button>
@@ -265,7 +264,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             block.toggleOrderedList();
           }}
-          title="有序列表"
+          title="Ordered list"
         >
           <ListOrdered size={16} />
         </button>
@@ -280,7 +279,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             block.toggleTaskList();
           }}
-          title="任务列表"
+          title="Task list"
         >
           <ListTodo size={16} />
         </button>
@@ -299,7 +298,7 @@ const Toolbar = ({
             if (editor.isActive("table") || isFocusNodeOnly) return;
             setShowTableSizePicker(true);
           }}
-          title="插入表格"
+          title="Insert table"
         >
           <Table size={16} />
         </button>
@@ -313,7 +312,7 @@ const Toolbar = ({
             if (!onOpenMathDialog || isFocusNodeOnly) return;
             dialogs.openInlineMath();
           }}
-          title="行内公式"
+          title="Inline math"
         >
           <Sigma size={16} />
         </button>
@@ -327,7 +326,7 @@ const Toolbar = ({
             if (!onOpenMathDialog || isFocusNodeOnly) return;
             dialogs.openBlockMath();
           }}
-          title="块公式"
+          title="Block math"
         >
           <SquareFunction size={16} />
         </button>
@@ -341,7 +340,7 @@ const Toolbar = ({
             if (!onOpenImageDialog || isFocusNodeOnly) return;
             dialogs.openImage();
           }}
-          title="图片"
+          title="Image"
         >
           <Image size={16} />
         </button>
@@ -350,19 +349,19 @@ const Toolbar = ({
             type="button"
             className={cn(
               "editor-toolbar-btn",
-              editor.isActive("fileAttachment") && "is-active"
+              isFocusNodeOnly && "is-disabled"
             )}
-            onMouseDown={(e) => e.preventDefault()}
             onClick={() => {
+              if (isFocusNodeOnly) return;
               dialogs.openFileUpload();
             }}
-            title="上传文件 (Word/PDF)"
+            title="Upload attachment"
           >
             <FileUp size={16} />
           </button>
         )}
         <span className="editor-toolbar-separator" />
-        <button
+                <button
           type="button"
           className={cn(
             "editor-toolbar-btn",
@@ -373,7 +372,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleBold();
           }}
-          title="粗体 (Ctrl+B)"
+          title="Bold (Ctrl+B)"
         >
           <Bold size={16} />
         </button>
@@ -388,7 +387,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleItalic();
           }}
-          title="斜体 (Ctrl+I)"
+          title="Italic (Ctrl+I)"
         >
           <Italic size={16} />
         </button>
@@ -403,7 +402,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleUnderline();
           }}
-          title="下划线 (Ctrl+U)"
+          title="Underline (Ctrl+U)"
         >
           <Underline size={16} />
         </button>
@@ -418,7 +417,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleStrike();
           }}
-          title="删除线"
+          title="Strikethrough"
         >
           <Strikethrough size={16} />
         </button>
@@ -433,7 +432,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.toggleCode();
           }}
-          title="行内代码"
+          title="Inline code"
         >
           <Code size={16} />
         </button>
@@ -456,7 +455,7 @@ const Toolbar = ({
             editor.isActive("highlight") && "is-active",
             (isFocusNodeOnly || isInsideCode) && "is-disabled"
           )}
-          title="高亮颜色"
+          title="Highlight"
         >
           <Highlighter size={16} />
         </button>
@@ -476,7 +475,7 @@ const Toolbar = ({
             !!editor.getAttributes("textStyle").color && "is-active",
             (isFocusNodeOnly || isInsideCode) && "is-disabled"
           )}
-          title="文字颜色"
+          title="Text color"
         >
           <Palette size={16} />
         </button>
@@ -492,7 +491,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleSuperscript();
           }}
-          title="上标"
+          title="Superscript"
         >
           <Superscript size={16} />
         </button>
@@ -507,7 +506,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleSubscript();
           }}
-          title="下标"
+          title="Subscript"
         >
           <Subscript size={16} />
         </button>
@@ -523,7 +522,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("left");
           }}
-          title="左对齐"
+          title="Align left"
         >
           <AlignLeft size={16} />
         </button>
@@ -538,7 +537,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("center");
           }}
-          title="居中对齐"
+          title="Align center"
         >
           <AlignCenter size={16} />
         </button>
@@ -553,7 +552,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("right");
           }}
-          title="右对齐"
+          title="Align right"
         >
           <AlignRight size={16} />
         </button>
@@ -568,7 +567,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("justify");
           }}
-          title="两端对齐"
+          title="Justify"
         >
           <AlignJustify size={16} />
         </button>

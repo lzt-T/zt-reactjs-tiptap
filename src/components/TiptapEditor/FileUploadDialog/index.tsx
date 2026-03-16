@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,19 +12,57 @@ import { config } from "@/config";
 import { formatFileSize } from "@/lib/utils";
 import "./FileUploadDialog.css";
 
-const ACCEPT = config.FILE_UPLOAD_ACCEPT;
-const ALLOWED_EXTENSIONS = [".docx", ".pdf"];
+const EXTENSION_MIME_MAP: Record<string, string[]> = {
+  pdf: ["application/pdf"],
+  docx: ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  doc: ["application/msword"],
+  xlsx: ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+  xls: ["application/vnd.ms-excel"],
+  pptx: ["application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+  ppt: ["application/vnd.ms-powerpoint"],
+  txt: ["text/plain"],
+};
 
-function isAllowedFile(file: File): boolean {
+function normalizeFileUploadTypes(fileUploadTypes?: string[]): string[] {
+  const normalized = Array.from(
+    new Set(
+      (fileUploadTypes ?? [])
+        .map((item) => item.trim().toLowerCase().replace(/^\.+/, ""))
+        .filter(Boolean)
+    )
+  );
+
+  return normalized.length > 0 ? normalized : config.DEFAULT_FILE_UPLOAD_TYPES;
+}
+
+function buildAllowedMimeTypeSet(fileUploadTypes: string[]): Set<string> {
+  return new Set(
+    fileUploadTypes.flatMap((ext) => EXTENSION_MIME_MAP[ext] ?? [])
+  );
+}
+
+function isAllowedFile(
+  file: File,
+  fileUploadTypes: string[],
+  allowedMimeTypes: Set<string>
+): boolean {
   const name = file.name.toLowerCase();
-  if (ALLOWED_EXTENSIONS.some((ext) => name.endsWith(ext))) return true;
-  const mime = file.type;
-  if (
-    mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    mime === "application/pdf"
-  )
+  if (fileUploadTypes.some((ext) => name.endsWith(`.${ext}`))) {
     return true;
+  }
+  const mime = file.type.toLowerCase();
+  if (mime && allowedMimeTypes.has(mime)) {
+    return true;
+  }
   return false;
+}
+
+function formatAcceptedTypes(fileUploadTypes: string[]): string {
+  return fileUploadTypes.map((ext) => `.${ext.toUpperCase()}`).join(", ");
+}
+
+function formatAcceptedTypeTag(ext: string): string {
+  return ext.toUpperCase();
 }
 
 export interface FileUploadDialogProps {
@@ -34,6 +72,7 @@ export interface FileUploadDialogProps {
   onPreUpload: (file: File) => Promise<{ url: string; name: string }>;
   onUpload?: (payload: { file: File; url: string; name: string }) => void | Promise<void>;
   fileMaxSizeBytes?: number;
+  fileUploadTypes?: string[];
 }
 
 const FileUploadDialog = ({
@@ -43,7 +82,29 @@ const FileUploadDialog = ({
   onPreUpload,
   onUpload,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
+  fileUploadTypes,
 }: FileUploadDialogProps) => {
+  const resolvedFileUploadTypes = useMemo(
+    () => normalizeFileUploadTypes(fileUploadTypes),
+    [fileUploadTypes]
+  );
+  const allowedMimeTypes = useMemo(
+    () => buildAllowedMimeTypeSet(resolvedFileUploadTypes),
+    [resolvedFileUploadTypes]
+  );
+  const accept = useMemo(
+    () => resolvedFileUploadTypes.map((ext) => `.${ext}`).join(","),
+    [resolvedFileUploadTypes]
+  );
+  const acceptedTypesLabel = useMemo(
+    () => formatAcceptedTypes(resolvedFileUploadTypes),
+    [resolvedFileUploadTypes]
+  );
+  const acceptedTypeTags = useMemo(
+    () => resolvedFileUploadTypes.map((ext) => formatAcceptedTypeTag(ext)),
+    [resolvedFileUploadTypes]
+  );
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [result, setResult] = useState<{ url: string; name: string } | null>(
     null
@@ -63,10 +124,10 @@ const FileUploadDialog = ({
 
   const processFile = useCallback(
     async (file: File) => {
-      if (!isAllowedFile(file)) {
+      if (!isAllowedFile(file, resolvedFileUploadTypes, allowedMimeTypes)) {
         setSelectedFile(null);
         setResult(null);
-        setError("Please select a Word (.docx) or PDF (.pdf) file");
+        setError(`Please select a supported file type: ${acceptedTypesLabel}`);
         return;
       }
       if (file.size > fileMaxSizeBytes) {
@@ -91,7 +152,7 @@ const FileUploadDialog = ({
         setIsUploading(false);
       }
     },
-    [onPreUpload, fileMaxSizeBytes]
+    [acceptedTypesLabel, allowedMimeTypes, onPreUpload, fileMaxSizeBytes, resolvedFileUploadTypes]
   );
 
   const handleFileChange = useCallback(
@@ -183,7 +244,7 @@ const FileUploadDialog = ({
             <input
               ref={fileInputRef}
               type="file"
-              accept={ACCEPT}
+              accept={accept}
               onChange={handleFileChange}
               className="file-upload-input-hidden"
               id="fileUploadInput"
@@ -225,8 +286,15 @@ const FileUploadDialog = ({
                     Click to select or drag files here
                   </div>
                   <div className="file-upload-file-hint">
-                    Supports Word (.docx), PDF (.pdf), max{" "}
-                    {formatFileSize(fileMaxSizeBytes)}
+                    <span>Supports</span>
+                    <span className="file-upload-file-types">
+                      {acceptedTypeTags.map((tag) => (
+                        <span key={tag} className="file-upload-file-type-tag">
+                          .{tag}
+                        </span>
+                      ))}
+                    </span>
+                    <span>, max {formatFileSize(fileMaxSizeBytes)}</span>
                   </div>
                 </>
               )}
