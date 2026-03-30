@@ -18,6 +18,7 @@ export default defineConfig({
       name: "ReactjsTiptap",
       formats: ["es", "umd"],
       fileName: (format) => `zt-reactjs-tiptap.${format === "es" ? "js" : "umd.cjs"}`,
+      cssFileName: "style",
     },
     rollupOptions: {
       // 确保外部化处理那些你不想打包进库的依赖
@@ -33,5 +34,6 @@ export default defineConfig({
       },
     },
     cssCodeSplit: false,
+    copyPublicDir: false,
   },
 });

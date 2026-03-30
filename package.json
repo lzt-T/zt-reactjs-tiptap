@@ -37,7 +37,7 @@
       "import": "./dist/zt-reactjs-tiptap.js",
       "require": "./dist/zt-reactjs-tiptap.umd.cjs"
     },
-    "./style.css": "./dist/zt-reactjs-tiptap.css"
+    "./style.css": "./dist/style.css"
   },
   "files": [
     "dist",
