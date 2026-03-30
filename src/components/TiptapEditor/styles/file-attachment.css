@@ -1,0 +1,79 @@
+/* 附件块（Word/PDF 等） */
+.editor-wrapper .ProseMirror .file-attachment-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  max-width: 100%;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-wrapper.file-attachment-selected,
+.editor-wrapper .ProseMirror .file-attachment-wrapper.ProseMirror-selectednode {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-icon {
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-external {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-delete {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-wrapper:hover .file-attachment-delete {
+  opacity: 1;
+}
+
+.editor-wrapper .ProseMirror .file-attachment-delete:hover {
+  background: #f1f5f9;
+  color: #475569;
+}

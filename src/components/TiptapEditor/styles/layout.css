@@ -1,0 +1,58 @@
+.editor-container {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 配置了 maxHeight 时：高度随内容增长，到 maxHeight 后内部滚动 */
+.editor-container.editor-container-has-max-height {
+  height: auto;
+  max-height: var(--editor-max-height);
+}
+
+.editor-container.editor-container-has-max-height .editor-wrapper {
+  min-height: 0; /* 允许在容器被 max-height 限制时收缩并出现滚动 */
+}
+
+.editor-container.no-border {
+  border: none;
+}
+
+.editor-wrapper {
+  position: relative;
+  padding: 12px 14px;
+  text-align: left;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 美化滚动条 */
+.editor-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.editor-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.editor-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.editor-wrapper .ProseMirror {
+  outline: none;
+  min-height: 100%;
+  /* 允许浏览器合成斜体：中文等无 italic 变体的字体也能显示倾斜 */
+  font-synthesis: style;
+}

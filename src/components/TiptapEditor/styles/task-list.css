@@ -1,0 +1,60 @@
+/* 任务列表的 li 不显示列表符号，由复选框代替 */
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li {
+  list-style: none;
+  display: flex;
+}
+
+/* Task list styles */
+.editor-wrapper .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li {
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* label 约束在首行行高内，使复选框与第一行文字垂直居中 */
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 1.5em; /* 与行高一致，checkbox 由 align-items: center 居中 */
+}
+
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 隐藏 label 内可能用于样式的 span，只显示我们样式的 input */
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label span:first-of-type {
+  display: none;
+}
+
+/* 任务列表复选框：未勾选为空心方框，勾选为带勾的方框（不依赖 li[data-type="taskItem"]，兼容 NodeView） */
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  border: 1.5px solid var(--border, #94a3b8);
+  border-radius: 0.25rem;
+  background: var(--background, #fff);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"]:checked {
+  background: var(--primary, #3b82f6);
+  border-color: var(--primary, #3b82f6);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: 0.875rem;
+  background-position: center;
+  background-repeat: no-repeat;
+}

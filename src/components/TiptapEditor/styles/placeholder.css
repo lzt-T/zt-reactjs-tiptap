@@ -1,0 +1,19 @@
+/* Notion-like: placeholder on every empty paragraph */
+.editor-wrapper.notion-editor .ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #94a3b8;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Headless: placeholder only when the whole editor is empty */
+/* is-editor-empty may be on the root node (p) or on .ProseMirror depending on extension version */
+.editor-wrapper.headless-editor .ProseMirror p.is-empty.is-editor-empty::before,
+.editor-wrapper.headless-editor .ProseMirror.is-editor-empty p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #94a3b8;
+  pointer-events: none;
+  height: 0;
+}
