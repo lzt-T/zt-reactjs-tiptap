@@ -113,6 +113,8 @@ const FileUploadDialog = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // 上传进行中时锁定可能再次触发上传的交互入口（保留 Cancel 可用）
+  const isInteractionLocked = isUploading;
 
   const resetStates = useCallback(() => {
     setSelectedFile(null);
@@ -167,9 +169,11 @@ const FileUploadDialog = ({
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    // 上传中不进入拖拽高亮态，避免误导用户当前可重新上传
+    if (isInteractionLocked) return;
     e.dataTransfer.dropEffect = "copy";
-    if (!isUploading) setIsDragOver(true);
-  }, [isUploading]);
+    setIsDragOver(true);
+  }, [isInteractionLocked]);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -184,11 +188,12 @@ const FileUploadDialog = ({
       e.preventDefault();
       e.stopPropagation();
       setIsDragOver(false);
-      if (isUploading) return;
+      // 上传中直接忽略 drop，避免并发上传造成状态错乱
+      if (isInteractionLocked) return;
       const file = e.dataTransfer.files?.[0];
       if (file) processFile(file);
     },
-    [isUploading, processFile]
+    [isInteractionLocked, processFile]
   );
 
   const handleConfirm = useCallback(() => {
@@ -248,10 +253,12 @@ const FileUploadDialog = ({
               onChange={handleFileChange}
               className="file-upload-input-hidden"
               id="fileUploadInput"
+              disabled={isInteractionLocked}
             />
             <label
               htmlFor="fileUploadInput"
-              className={`file-upload-file-label ${isDragOver ? "is-drag-over" : ""} ${result ? "has-result" : ""}`}
+              className={`file-upload-file-label ${isDragOver ? "is-drag-over" : ""} ${result ? "has-result" : ""} ${isInteractionLocked ? "is-disabled" : ""}`}
+              aria-disabled={isInteractionLocked}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
@@ -302,7 +309,7 @@ const FileUploadDialog = ({
           </div>
 
           {error && (
-            <div className="file-upload-error" role="alert">
+            <div className="file-upload-error" role="alert" aria-live="polite">
               <AlertCircle size={16} className="file-upload-error-icon" />
               {error}
             </div>

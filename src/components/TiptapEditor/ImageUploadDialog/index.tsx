@@ -40,6 +40,12 @@ const ImageUploadDialog = ({
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
+  // 上传进行中时锁定可能触发二次上传的交互入口（保留 Cancel 可用）
+  const isInteractionLocked = isUploading
+  // 仅在上传中或已有图片结果时保留重选提示区域，避免初始空态出现多余留白
+  const shouldReserveReselectHint = uploadType === 'file' && (isUploading || Boolean(imageUrl))
+  // 仅在可重选阶段展示提示文案；容器常驻用于稳定布局高度
+  const shouldShowReselectHint = uploadType === 'file' && Boolean(imageUrl) && !isUploading
 
   const resetStates = useCallback(() => {
     setUploadType('file')
@@ -106,9 +112,11 @@ const ImageUploadDialog = ({
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    // 上传中禁止进入拖拽高亮态，避免误导用户仍可重新上传
+    if (isInteractionLocked) return
     e.dataTransfer.dropEffect = 'copy'
-    if (!isUploading) setIsDragOver(true)
-  }, [isUploading])
+    setIsDragOver(true)
+  }, [isInteractionLocked])
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -122,10 +130,11 @@ const ImageUploadDialog = ({
     e.preventDefault()
     e.stopPropagation()
     setIsDragOver(false)
-    if (isUploading) return
+    // 上传中直接忽略 drop，防止并发触发新的上传流程
+    if (isInteractionLocked) return
     const file = e.dataTransfer.files?.[0]
     if (file) processFile(file)
-  }, [isUploading, processFile])
+  }, [isInteractionLocked, processFile])
 
   const handleUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value
@@ -199,6 +208,7 @@ const ImageUploadDialog = ({
           <button
             type="button"
             className={`image-upload-tab ${uploadType === 'file' ? 'active' : ''}`}
+            disabled={isInteractionLocked}
             onClick={() => setUploadType('file')}
           >
             Upload file
@@ -206,6 +216,7 @@ const ImageUploadDialog = ({
           <button
             type="button"
             className={`image-upload-tab ${uploadType === 'url' ? 'active' : ''}`}
+            disabled={isInteractionLocked}
             onClick={() => setUploadType('url')}
           >
             Image URL
@@ -222,10 +233,12 @@ const ImageUploadDialog = ({
                 onChange={handleFileChange}
                 className="image-upload-input-hidden"
                 id="imageFileInput"
+                disabled={isInteractionLocked}
               />
               <label
                 htmlFor="imageFileInput"
-                className={`image-upload-file-label ${isDragOver ? 'is-drag-over' : ''} ${imageUrl ? 'has-preview' : ''}`}
+                className={`image-upload-file-label ${isDragOver ? 'is-drag-over' : ''} ${imageUrl ? 'has-preview' : ''} ${isInteractionLocked ? 'is-disabled' : ''}`}
+                aria-disabled={isInteractionLocked}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -267,8 +280,10 @@ const ImageUploadDialog = ({
                   </>
                 )}
               </label>
-              {uploadType === 'file' && imageUrl && (
-                <div className="image-upload-file-hint image-upload-file-reselect-hint">
+              {shouldReserveReselectHint && (
+                <div
+                  className={`image-upload-file-hint image-upload-file-reselect-hint ${shouldShowReselectHint ? '' : 'is-placeholder'}`}
+                >
                   Click or drag to reselect
                 </div>
               )}
@@ -284,12 +299,13 @@ const ImageUploadDialog = ({
                 value={imageUrl}
                 onChange={handleUrlChange}
                 className="image-upload-input"
+                disabled={isInteractionLocked}
               />
             </div>
           )}
 
           {error && (
-            <div className="image-upload-error" role="alert">
+            <div className="image-upload-error" role="alert" aria-live="polite">
               <AlertCircle size={16} className="image-upload-error-icon" />
               {error}
             </div>
