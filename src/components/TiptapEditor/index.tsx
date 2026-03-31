@@ -21,7 +21,7 @@ import MathDialog from "./MathDialog";
 import ImageUploadDialog from "./ImageUploadDialog";
 import FileUploadDialog from "./FileUploadDialog";
 import "./TiptapEditor.css";
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import type { TiptapEditorProps } from "./types";
 import {
   useBlockMathDeleteButton,
@@ -90,7 +90,7 @@ const TiptapEditor = ({
   // 当前语言解析后的文案集合
   const locale = resolveEditorLocale(language);
   // 斜杠菜单项根据当前语言创建，避免菜单文案硬编码
-  const slashCommands = createDefaultCommands(locale);
+  const slashCommands = useMemo(() => createDefaultCommands(locale), [locale]);
 
   // --- Refs & 状态 ---
   const editorRef = useRef<ReturnType<typeof useEditor>>(null);
@@ -138,6 +138,11 @@ const TiptapEditor = ({
       : editorMode === EditorMode.NotionLike
         ? locale.placeholders.notionLike
         : locale.placeholders.headless;
+  // 当模式或附件上传能力切换时，必须重建 editor 实例，确保 SlashCommands 读取到最新回调
+  const editorRecreateDeps = useMemo(
+    () => [editorMode, Boolean(onFilePreUpload)],
+    [editorMode, onFilePreUpload]
+  );
 
   const { editor, runAfterOnChange } = useTiptapEditor({
     value,
@@ -165,6 +170,7 @@ const TiptapEditor = ({
     onFileAttachmentClick,
     onInlineMathClick: mathDialog.handleInlineMathClick,
     onBlockMathClick: mathDialog.handleBlockMathClick,
+    recreateDeps: editorRecreateDeps,
   });
 
   const handleImageUploadAfterChange = useCallback(

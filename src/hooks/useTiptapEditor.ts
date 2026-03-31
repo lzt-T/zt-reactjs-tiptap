@@ -55,6 +55,8 @@ interface UseTiptapEditorOptions {
   onFileAttachmentClick?: (params: { url: string; name: string }) => void;
   onInlineMathClick: MathClickHandler;
   onBlockMathClick: MathClickHandler;
+  /** 控制 editor 何时重建的依赖集合（例如模式切换时重建以刷新扩展回调） */
+  recreateDeps?: ReadonlyArray<unknown>;
 }
 
 export function useTiptapEditor({
@@ -78,6 +80,7 @@ export function useTiptapEditor({
   onFileAttachmentClick,
   onInlineMathClick,
   onBlockMathClick,
+  recreateDeps = [],
 }: UseTiptapEditorOptions) {
   /* 是否是外部更新 */
   const isExternalUpdateRef = useRef(false);
@@ -135,69 +138,73 @@ export function useTiptapEditor({
     [onChange, onChangeDebounceMs, postChangeQueue]
   );
 
-  const editor = useEditor({
-    editable: !disabled,
-    extensions: [
-      StarterKit,
-      ImageWithDelete,
-      FileAttachment,
-      DeletionCallbacks,
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableCell,
-      TableHeader,
-      Subscript,
-      Superscript,
-      TextStyle,
-      Color,
-      Highlight.configure({
-        multicolor: true,
-      }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      TaskList,
-      TaskItem.configure({
-        nested: true,
-      }),
-      Placeholder.configure({
-        placeholder,
-      }),
-      Mathematics.configure({
-        inlineOptions: {
-          onClick: onInlineMathClick,
-        },
-        blockOptions: {
-          onClick: onBlockMathClick,
-        },
-        katexOptions: {
-          throwOnError: false,
-        },
-      }),
-      TableBackspaceHandler,
-      SlashCommands.configure({
-        onStart,
-        onUpdate,
-        onIndexChange,
-        onClientRect,
-        onExit,
-        onMathDialog,
-        onImageUpload,
-        onFileUpload,
-        commands,
-      }),
-    ],
-    content: value || "<p></p>",
-    onUpdate: ({ editor: ed }) => {
-      if (isFirstUpdateRef.current) {
-        isFirstUpdateRef.current = false;
-        return;
-      }
-      if (!isExternalUpdateRef.current) {
-        const html = ed.getHTML();
-        lastEmittedHtmlRef.current = html;
-        debouncedOnChange(html);
-      }
+  const editor = useEditor(
+    {
+      editable: !disabled,
+      extensions: [
+        StarterKit,
+        ImageWithDelete,
+        FileAttachment,
+        DeletionCallbacks,
+        Table.configure({ resizable: true }),
+        TableRow,
+        TableCell,
+        TableHeader,
+        Subscript,
+        Superscript,
+        TextStyle,
+        Color,
+        Highlight.configure({
+          multicolor: true,
+        }),
+        TextAlign.configure({ types: ["heading", "paragraph"] }),
+        TaskList,
+        TaskItem.configure({
+          nested: true,
+        }),
+        Placeholder.configure({
+          placeholder,
+        }),
+        Mathematics.configure({
+          inlineOptions: {
+            onClick: onInlineMathClick,
+          },
+          blockOptions: {
+            onClick: onBlockMathClick,
+          },
+          katexOptions: {
+            throwOnError: false,
+          },
+        }),
+        TableBackspaceHandler,
+        SlashCommands.configure({
+          onStart,
+          onUpdate,
+          onIndexChange,
+          onClientRect,
+          onExit,
+          onMathDialog,
+          onImageUpload,
+          onFileUpload,
+          commands,
+        }),
+      ],
+      content: value || "<p></p>",
+      onUpdate: ({ editor: ed }) => {
+        if (isFirstUpdateRef.current) {
+          isFirstUpdateRef.current = false;
+          return;
+        }
+        if (!isExternalUpdateRef.current) {
+          const html = ed.getHTML();
+          lastEmittedHtmlRef.current = html;
+          debouncedOnChange(html);
+        }
+      },
     },
-  });
+    // 当关键依赖变更时重建 editor，避免扩展内部继续持有旧回调
+    recreateDeps
+  );
 
   useEffect(() => {
     editorRef.current = editor;

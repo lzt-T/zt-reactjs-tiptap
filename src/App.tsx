@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
 import { htmlToPlainText } from "@/lib/htmlToPlainText";
+import { EditorMode } from "@/components/TiptapEditor/types";
+
 import "./App.css";
 
 function App() {
@@ -122,23 +124,23 @@ function App() {
         <TiptapEditor
           // border={false}
           disabled={disabled}
-          // editorMode={EditorMode.Headless}
+          editorMode={EditorMode.Headless}
           // headlessToolbarMode={HeadlessToolbarMode.OnFocus}
           value={content}
           onChange={(str) => {
             console.log("str", str);
             handleEditorChange(str);
           }}
-          // language="zh-CN"
+          language="en-US"
           fileUploadTypes={["pdf"]}
           onImagePreUpload={handleImagePreUpload}
           onImageUpload={onImageUpload}
           onImageDelete={onImageDelete}
           maxHeight="500px"
-          // onFilePreUpload={onFilePreUpload}
-          // onFileUpload={onFileUpload}
-          // onFileDelete={onFileDelete}
-          // onFileAttachmentClick={onFileAttachmentClick}
+          onFilePreUpload={onFilePreUpload}
+          onFileUpload={onFileUpload}
+          onFileDelete={onFileDelete}
+          onFileAttachmentClick={onFileAttachmentClick}
         />
       </div>
       {/* </div> */}
