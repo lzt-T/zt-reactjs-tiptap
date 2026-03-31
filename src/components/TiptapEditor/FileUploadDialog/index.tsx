@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, FileUp, AlertCircle } from "lucide-react";
 import { config } from "@/config";
 import { formatFileSize } from "@/lib/utils";
+import type { EditorLocale } from "@/locales";
 import "./FileUploadDialog.css";
 
 const EXTENSION_MIME_MAP: Record<string, string[]> = {
@@ -73,6 +74,7 @@ export interface FileUploadDialogProps {
   onUpload?: (payload: { file: File; url: string; name: string }) => void | Promise<void>;
   fileMaxSizeBytes?: number;
   fileUploadTypes?: string[];
+  locale: EditorLocale;
 }
 
 const FileUploadDialog = ({
@@ -83,6 +85,7 @@ const FileUploadDialog = ({
   onUpload,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
   fileUploadTypes,
+  locale,
 }: FileUploadDialogProps) => {
   const resolvedFileUploadTypes = useMemo(
     () => normalizeFileUploadTypes(fileUploadTypes),
@@ -129,13 +132,15 @@ const FileUploadDialog = ({
       if (!isAllowedFile(file, resolvedFileUploadTypes, allowedMimeTypes)) {
         setSelectedFile(null);
         setResult(null);
-        setError(`Please select a supported file type: ${acceptedTypesLabel}`);
+        setError(locale.fileDialog.invalidFileType(acceptedTypesLabel));
         return;
       }
       if (file.size > fileMaxSizeBytes) {
         setSelectedFile(null);
         setResult(null);
-        setError(`File size must not exceed ${formatFileSize(fileMaxSizeBytes)}`);
+        setError(
+          locale.fileDialog.fileSizeExceeded(formatFileSize(fileMaxSizeBytes))
+        );
         return;
       }
 
@@ -148,13 +153,20 @@ const FileUploadDialog = ({
       } catch (err) {
         setResult(null);
         setError(
-          err instanceof Error ? err.message : "Upload failed, please try again"
+          err instanceof Error ? err.message : locale.fileDialog.uploadFailed
         );
       } finally {
         setIsUploading(false);
       }
     },
-    [acceptedTypesLabel, allowedMimeTypes, onPreUpload, fileMaxSizeBytes, resolvedFileUploadTypes]
+    [
+      acceptedTypesLabel,
+      allowedMimeTypes,
+      onPreUpload,
+      fileMaxSizeBytes,
+      locale,
+      resolvedFileUploadTypes,
+    ]
   );
 
   const handleFileChange = useCallback(
@@ -198,11 +210,11 @@ const FileUploadDialog = ({
 
   const handleConfirm = useCallback(() => {
     if (!selectedFile || !result) {
-      setError("Please select and upload a file first");
+      setError(locale.fileDialog.selectAndUploadFirst);
       return;
     }
     if (isUploading) {
-      setError("Uploading, please wait");
+      setError(locale.fileDialog.uploadingWait);
 
       return;
     }
@@ -213,7 +225,7 @@ const FileUploadDialog = ({
       );
     }
     resetStates();
-  }, [selectedFile, result, isUploading, onConfirm, onUpload, resetStates]);
+  }, [selectedFile, result, isUploading, locale, onConfirm, onUpload, resetStates]);
 
   const handleCancel = useCallback(() => {
     onCancel();
@@ -241,7 +253,7 @@ const FileUploadDialog = ({
         onKeyDown={handleKeyDown}
       >
         <DialogHeader>
-          <DialogTitle>Upload Attachment</DialogTitle>
+          <DialogTitle>{locale.fileDialog.title}</DialogTitle>
         </DialogHeader>
 
         <div className="file-upload-content">
@@ -271,17 +283,21 @@ const FileUploadDialog = ({
                       className="file-upload-file-icon-spin"
                     />
                   </div>
-                  <div className="file-upload-file-text">Uploading…</div>
+                  <div className="file-upload-file-text">
+                    {locale.fileDialog.uploading}
+                  </div>
                 </>
               ) : result ? (
                 <>
                   <div className="file-upload-file-icon">
                     <FileUp size={40} />
                   </div>
-                  <div className="file-upload-file-text">File selected</div>
+                  <div className="file-upload-file-text">
+                    {locale.fileDialog.fileSelected}
+                  </div>
                   <div className="file-upload-file-name">{result.name}</div>
                   <div className="file-upload-file-hint">
-                    Click or drag to choose another file
+                    {locale.fileDialog.chooseAnotherFile}
                   </div>
                 </>
               ) : (
@@ -290,10 +306,10 @@ const FileUploadDialog = ({
                     <FileUp size={40} />
                   </div>
                   <div className="file-upload-file-text">
-                    Click to select or drag files here
+                    {locale.fileDialog.clickOrDrag}
                   </div>
                   <div className="file-upload-file-hint">
-                    <span>Supports</span>
+                    <span>{locale.fileDialog.supports}</span>
                     <span className="file-upload-file-types">
                       {acceptedTypeTags.map((tag) => (
                         <span key={tag} className="file-upload-file-type-tag">
@@ -301,7 +317,9 @@ const FileUploadDialog = ({
                         </span>
                       ))}
                     </span>
-                    <span>, max {formatFileSize(fileMaxSizeBytes)}</span>
+                    <span>
+                      {locale.fileDialog.maxSize(formatFileSize(fileMaxSizeBytes))}
+                    </span>
                   </div>
                 </>
               )}
@@ -318,13 +336,13 @@ const FileUploadDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            {locale.fileDialog.cancel}
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!result || !!error || isUploading}
           >
-            {isUploading ? "Uploading…" : "Insert Link"}
+            {isUploading ? locale.fileDialog.uploading : locale.fileDialog.insertLink}
           </Button>
         </DialogFooter>
       </DialogContent>

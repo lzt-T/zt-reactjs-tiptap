@@ -21,13 +21,15 @@ import {
 } from "lucide-react";
 import { useEditorCommands } from "@/hooks";
 import ColorPicker from "../ColorPicker";
+import type { EditorLocale } from "@/locales";
 import "./BubbleMenu.css";
 
 interface BubbleMenuProps {
   editor: Editor;
+  locale: EditorLocale;
 }
 
-const BubbleMenu = ({ editor }: BubbleMenuProps) => {
+const BubbleMenu = ({ editor, locale }: BubbleMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<
     "text" | "highlight" | null
   >(null);
@@ -125,35 +127,35 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
         <button
           onClick={() => format.toggleBold()}
           className={editor.isActive("bold") ? "is-active" : ""}
-          title="粗体 (Ctrl+B)"
+          title={locale.bubbleMenu.bold}
         >
           <Bold size={16} />
         </button>
         <button
           onClick={() => format.toggleItalic()}
           className={editor.isActive("italic") ? "is-active" : ""}
-          title="斜体 (Ctrl+I)"
+          title={locale.bubbleMenu.italic}
         >
           <Italic size={16} />
         </button>
         <button
           onClick={() => format.toggleUnderline()}
           className={editor.isActive("underline") ? "is-active" : ""}
-          title="下划线 (Ctrl+U)"
+          title={locale.bubbleMenu.underline}
         >
           <Underline size={16} />
         </button>
         <button
           onClick={() => format.toggleStrike()}
           className={editor.isActive("strike") ? "is-active" : ""}
-          title="删除线"
+          title={locale.bubbleMenu.strikethrough}
         >
           <Strikethrough size={16} />
         </button>
         <button
           onClick={() => format.toggleCode()}
           className={editor.isActive("code") ? "is-active" : ""}
-          title="行内代码"
+          title={locale.bubbleMenu.inlineCode}
         >
           <Code size={16} />
         </button>
@@ -171,7 +173,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
             )
           }
           className={editor.isActive("highlight") ? "is-active" : ""}
-          title="高亮颜色"
+          title={locale.bubbleMenu.highlight}
         >
           <Highlighter size={16} />
         </button>
@@ -185,8 +187,8 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           onClick={() =>
             setShowColorPicker(showColorPicker === "text" ? null : "text")
           }
-          className={!!editor.getAttributes("textStyle").color ? "is-active" : ""}
-          title="文字颜色"
+          className={editor.getAttributes("textStyle").color ? "is-active" : ""}
+          title={locale.bubbleMenu.textColor}
         >
           <Palette size={16} />
         </button>
@@ -199,7 +201,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
           }}
           onClick={() => setShowMoreMenu(!showMoreMenu)}
           className={showMoreMenu ? "is-active" : ""}
-          title="更多"
+          title={locale.bubbleMenu.more}
         >
           <MoreHorizontal size={16} />
         </button>
@@ -233,6 +235,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                   ? onTextColorSelect
                   : onHighlightColorSelect
               }
+              locale={locale}
             />
           </div>
         </>
@@ -260,7 +263,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 setShowMoreMenu(false);
               }}
               className={editor.isActive("superscript") ? "is-active" : ""}
-              title="上标"
+              title={locale.bubbleMenu.superscript}
             >
               <Superscript size={16} />
             </button>
@@ -270,7 +273,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
                 setShowMoreMenu(false);
               }}
               className={editor.isActive("subscript") ? "is-active" : ""}
-              title="下标"
+              title={locale.bubbleMenu.subscript}
             >
               <Subscript size={16} />
             </button>
@@ -283,7 +286,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "left" }) ? "is-active" : ""
               }
-              title="左对齐"
+              title={locale.bubbleMenu.alignLeft}
             >
               <AlignLeft size={16} />
             </button>
@@ -295,7 +298,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "center" }) ? "is-active" : ""
               }
-              title="居中对齐"
+              title={locale.bubbleMenu.alignCenter}
             >
               <AlignCenter size={16} />
             </button>
@@ -307,7 +310,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "right" }) ? "is-active" : ""
               }
-              title="右对齐"
+              title={locale.bubbleMenu.alignRight}
             >
               <AlignRight size={16} />
             </button>
@@ -319,7 +322,7 @@ const BubbleMenu = ({ editor }: BubbleMenuProps) => {
               className={
                 editor.isActive({ textAlign: "justify" }) ? "is-active" : ""
               }
-              title="两端对齐"
+              title={locale.bubbleMenu.justify}
             >
               <AlignJustify size={16} />
             </button>

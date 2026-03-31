@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FormulaPicker } from "./FormulaPicker";
 import type { FormulaPickerCategory } from "@/config/formulaCategories";
+import type { EditorLocale } from "@/locales";
 import "./MathDialog.css";
 
 interface MathDialogProps {
@@ -19,6 +20,7 @@ interface MathDialogProps {
   onConfirm: (latex: string) => void;
   onCancel: () => void;
   formulaCategories?: FormulaPickerCategory[];
+  locale: EditorLocale;
 }
 
 const MathDialog = ({
@@ -28,6 +30,7 @@ const MathDialog = ({
   onConfirm,
   onCancel,
   formulaCategories,
+  locale,
 }: MathDialogProps) => {
   const [latex, setLatex] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -109,7 +112,9 @@ const MathDialog = ({
       >
         <DialogHeader className="shrink-0">
           <DialogTitle>
-            {type === "inline" ? "插入行内公式" : "插入块级公式"}
+            {type === "inline"
+              ? locale.mathDialog.insertInlineMath
+              : locale.mathDialog.insertBlockMath}
           </DialogTitle>
         </DialogHeader>
 
@@ -123,7 +128,7 @@ const MathDialog = ({
 
           <div className="space-y-2">
             <label htmlFor="latex-input" className="text-sm font-medium">
-              Formula:
+              {locale.mathDialog.formulaLabel}
             </label>
             <textarea
               ref={inputRef}
@@ -142,7 +147,7 @@ const MathDialog = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Preview:</label>
+            <label className="text-sm font-medium">{locale.mathDialog.previewLabel}</label>
             <div className="math-dialog-preview">
               <div
                 className="math-dialog-preview-content"
@@ -150,12 +155,12 @@ const MathDialog = ({
               />
               {!latex && (
                 <div className="math-dialog-preview-placeholder">
-                  After entering the formula, the preview will be displayed...
+                  {locale.mathDialog.previewPlaceholder}
                 </div>
               )}
               {previewResult.error && (
                 <div className="math-dialog-preview-error">
-                  Preview error: {previewResult.error}
+                  {locale.mathDialog.previewErrorPrefix} {previewResult.error}
                 </div>
               )}
             </div>
@@ -164,9 +169,9 @@ const MathDialog = ({
 
         <DialogFooter className="shrink-0">
           <Button variant="outline" onClick={handleCancel}>
-            取消
+            {locale.mathDialog.cancel}
           </Button>
-          <Button onClick={handleConfirm}>确定</Button>
+          <Button onClick={handleConfirm}>{locale.mathDialog.confirm}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

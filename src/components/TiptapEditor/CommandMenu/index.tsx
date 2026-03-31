@@ -1,5 +1,8 @@
 import type { Editor } from "@tiptap/react";
-import type { CommandItem as SlashCommandItem } from "@/extensions/SlashCommands";
+import {
+  SlashCommandKey,
+  type CommandItem as SlashCommandItem,
+} from "@/extensions/SlashCommands";
 import { useEffect, useRef } from "react";
 import { Command, CommandList, CommandItem } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
@@ -60,7 +63,7 @@ const CommandMenu = ({
           {items.map((item, index) => {
             const Icon = item.icon;
             const isTableDisabled =
-              item.title === "Table" && editor?.isActive?.("table");
+              item.key === SlashCommandKey.Table && editor?.isActive?.("table");
             const disabled = isTableDisabled;
             return (
               <CommandItem

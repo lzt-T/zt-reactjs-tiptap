@@ -22,6 +22,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Mathematics from "@tiptap/extension-mathematics";
 import { SlashCommands } from "@/extensions/SlashCommands";
+import type { CommandItem } from "@/extensions/SlashCommands";
 import { TableBackspaceHandler } from "@/extensions/TableBackspaceHandler";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import type { Node } from "@tiptap/pm/model";
@@ -50,6 +51,7 @@ interface UseTiptapEditorOptions {
   ) => void;
   onImageUpload: (callback: (src: string, alt?: string) => void) => void;
   onFileUpload?: (callback: (url: string, name: string) => void) => void;
+  commands: CommandItem[];
   onFileAttachmentClick?: (params: { url: string; name: string }) => void;
   onInlineMathClick: MathClickHandler;
   onBlockMathClick: MathClickHandler;
@@ -72,6 +74,7 @@ export function useTiptapEditor({
   onMathDialog,
   onImageUpload,
   onFileUpload,
+  commands,
   onFileAttachmentClick,
   onInlineMathClick,
   onBlockMathClick,
@@ -179,6 +182,7 @@ export function useTiptapEditor({
         onMathDialog,
         onImageUpload,
         onFileUpload,
+        commands,
       }),
     ],
     content: value || "<p></p>",

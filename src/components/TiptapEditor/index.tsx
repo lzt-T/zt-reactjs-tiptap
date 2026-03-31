@@ -8,7 +8,10 @@
  * 功能：数学公式（行内/块级）、图片上传、表格、任务列表等。
  */
 import { useEditor, EditorContent } from "@tiptap/react";
-import { defaultCommands } from "@/extensions/SlashCommands";
+import {
+  createDefaultCommands,
+  type CommandItem,
+} from "@/extensions/SlashCommands";
 import CommandMenu from "./CommandMenu";
 import Toolbar from "./Toolbar";
 import TableRowActions from "./TableRowActions";
@@ -32,6 +35,7 @@ import {
 import { config } from "@/config";
 import { cn } from "@/lib/utils";
 import { EditorMode, HeadlessToolbarMode } from "./types";
+import { resolveEditorLocale } from "@/locales";
 
 /** Headless 模式下斜杠相关回调用空函数，避免传入 SlashCommands */
 const noop = () => {};
@@ -72,6 +76,7 @@ const TiptapEditor = ({
   onFileAttachmentClick,
   commandMenuMaxHeight = config.COMMAND_MENU_DEFAULT_MAX_HEIGHT,
   commandMenuMinHeight = config.COMMAND_MENU_DEFAULT_MIN_HEIGHT,
+  language,
   placeholder,
   disabled = false,
   onChangeDebounceMs = config.DEFAULT_ON_CHANGE_DEBOUNCE_MS,
@@ -82,6 +87,11 @@ const TiptapEditor = ({
   formulaCategories,
   maxHeight,
 }: TiptapEditorProps) => {
+  // 当前语言解析后的文案集合
+  const locale = resolveEditorLocale(language);
+  // 斜杠菜单项根据当前语言创建，避免菜单文案硬编码
+  const slashCommands = createDefaultCommands(locale);
+
   // --- Refs & 状态 ---
   const editorRef = useRef<ReturnType<typeof useEditor>>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
@@ -110,6 +120,7 @@ const TiptapEditor = ({
   const commandMenu = useCommandMenu({
     editorWrapperRef,
     commandMenuMaxHeight,
+    commands: slashCommands,
   });
 
   const mathDialog = useMathDialog({
@@ -125,8 +136,8 @@ const TiptapEditor = ({
     placeholder !== undefined
       ? placeholder
       : editorMode === EditorMode.NotionLike
-        ? config.DEFAULT_PLACEHOLDER
-        : config.PLACEHOLDER_HEADLESS;
+        ? locale.placeholders.notionLike
+        : locale.placeholders.headless;
 
   const { editor, runAfterOnChange } = useTiptapEditor({
     value,
@@ -150,6 +161,7 @@ const TiptapEditor = ({
       isNotionLike && onFilePreUpload
         ? fileUploadDialog.openFileUploadDialog
         : undefined,
+    commands: slashCommands,
     onFileAttachmentClick,
     onInlineMathClick: mathDialog.handleInlineMathClick,
     onBlockMathClick: mathDialog.handleBlockMathClick,
@@ -270,7 +282,7 @@ const TiptapEditor = ({
 
   /** 斜杠命令选中后执行：先删除 "/" 及后续输入，再执行对应命令 */
   const handleCommand = useCallback(
-    (item: (typeof defaultCommands)[0]) => {
+    (item: CommandItem) => {
       if (!editor) return;
       const { from } = editor.state.selection;
       const textBefore = editor.state.doc.textBetween(
@@ -318,6 +330,7 @@ const TiptapEditor = ({
           editor={editor}
           onOpenMathDialog={mathDialog.handleMathDialogFromSlash}
           onOpenImageDialog={imageDialog.openImageDialog}
+          locale={locale}
           onOpenFileUploadDialog={
             onFilePreUpload ? fileUploadDialog.openFileUploadDialog : undefined
           }
@@ -338,12 +351,22 @@ const TiptapEditor = ({
       >
         {editor && !disabled && (
           <>
-            <TableRowActions editor={editor} editorWrapperRef={editorWrapperRef} />
-            <TableColumnActions editor={editor} editorWrapperRef={editorWrapperRef} />
+            <TableRowActions
+              editor={editor}
+              editorWrapperRef={editorWrapperRef}
+              locale={locale}
+            />
+            <TableColumnActions
+              editor={editor}
+              editorWrapperRef={editorWrapperRef}
+              locale={locale}
+            />
           </>
         )}
         <EditorContent editor={editor} />
-        {editor && !disabled && isNotionLike && <BubbleMenu editor={editor} />}
+        {editor && !disabled && isNotionLike && (
+          <BubbleMenu editor={editor} locale={locale} />
+        )}
         {isNotionLike &&
           commandMenu.showCommandMenu &&
           editor &&
@@ -368,6 +391,7 @@ const TiptapEditor = ({
         onConfirm={mathDialog.handleMathConfirm}
         onCancel={mathDialog.handleMathCancel}
         formulaCategories={formulaCategories}
+        locale={locale}
       />
       <ImageUploadDialog
         isOpen={imageDialog.showImageDialog}
@@ -376,6 +400,7 @@ const TiptapEditor = ({
         onPreUpload={onImagePreUpload}
         onUpload={handleImageUploadAfterChange}
         imageMaxSizeBytes={imageMaxSizeBytes}
+        locale={locale}
       />
       {onFilePreUpload && (
         <FileUploadDialog
@@ -386,6 +411,7 @@ const TiptapEditor = ({
           onUpload={handleFileUploadAfterChange}
           fileMaxSizeBytes={fileMaxSizeBytes}
           fileUploadTypes={resolvedFileUploadTypes}
+          locale={locale}
         />
       )}
     </div>

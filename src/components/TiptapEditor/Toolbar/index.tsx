@@ -29,10 +29,12 @@ import { cn } from "@/lib/utils";
 import { useEditorCommands } from "@/hooks";
 import ColorPicker from "../ColorPicker";
 import TableSizePicker from "../TableSizePicker";
+import type { EditorLocale } from "@/locales";
 import "./Toolbar.css";
 
 interface ToolbarProps {
   editor: Editor;
+  locale: EditorLocale;
   /** 打开数学公式弹窗（headless 时由 TiptapEditor 传入） */
   onOpenMathDialog?: (
     type: "inline" | "block",
@@ -49,6 +51,7 @@ interface ToolbarProps {
 
 const Toolbar = ({
   editor,
+  locale,
   onOpenMathDialog,
   onOpenImageDialog,
   onOpenFileUploadDialog,
@@ -232,7 +235,7 @@ const Toolbar = ({
             (showHeadingMenu || currentHeadingLevel !== null) && "is-active",
             isFocusNodeOnly && "is-disabled"
           )}
-          title="Heading"
+          title={locale.toolbar.heading}
         >
           <span className="editor-toolbar-heading-btn">H</span>
           <ChevronDown size={14} className="editor-toolbar-chevron" />
@@ -249,7 +252,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             block.toggleBulletList();
           }}
-          title="Bullet list"
+          title={locale.toolbar.bulletList}
         >
           <List size={16} />
         </button>
@@ -264,7 +267,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             block.toggleOrderedList();
           }}
-          title="Ordered list"
+          title={locale.toolbar.orderedList}
         >
           <ListOrdered size={16} />
         </button>
@@ -279,7 +282,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             block.toggleTaskList();
           }}
-          title="Task list"
+          title={locale.toolbar.taskList}
         >
           <ListTodo size={16} />
         </button>
@@ -298,7 +301,7 @@ const Toolbar = ({
             if (editor.isActive("table") || isFocusNodeOnly) return;
             setShowTableSizePicker(true);
           }}
-          title="Insert table"
+          title={locale.toolbar.insertTable}
         >
           <Table size={16} />
         </button>
@@ -312,7 +315,7 @@ const Toolbar = ({
             if (!onOpenMathDialog || isFocusNodeOnly) return;
             dialogs.openInlineMath();
           }}
-          title="Inline math"
+          title={locale.toolbar.inlineMath}
         >
           <Sigma size={16} />
         </button>
@@ -326,7 +329,7 @@ const Toolbar = ({
             if (!onOpenMathDialog || isFocusNodeOnly) return;
             dialogs.openBlockMath();
           }}
-          title="Block math"
+          title={locale.toolbar.blockMath}
         >
           <SquareFunction size={16} />
         </button>
@@ -340,7 +343,7 @@ const Toolbar = ({
             if (!onOpenImageDialog || isFocusNodeOnly) return;
             dialogs.openImage();
           }}
-          title="Image"
+          title={locale.toolbar.image}
         >
           <Image size={16} />
         </button>
@@ -355,7 +358,7 @@ const Toolbar = ({
               if (isFocusNodeOnly) return;
               dialogs.openFileUpload();
             }}
-            title="Upload attachment"
+            title={locale.toolbar.uploadAttachment}
           >
             <FileUp size={16} />
           </button>
@@ -372,7 +375,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleBold();
           }}
-          title="Bold (Ctrl+B)"
+          title={locale.toolbar.bold}
         >
           <Bold size={16} />
         </button>
@@ -387,7 +390,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleItalic();
           }}
-          title="Italic (Ctrl+I)"
+          title={locale.toolbar.italic}
         >
           <Italic size={16} />
         </button>
@@ -402,7 +405,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleUnderline();
           }}
-          title="Underline (Ctrl+U)"
+          title={locale.toolbar.underline}
         >
           <Underline size={16} />
         </button>
@@ -417,7 +420,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleStrike();
           }}
-          title="Strikethrough"
+          title={locale.toolbar.strikethrough}
         >
           <Strikethrough size={16} />
         </button>
@@ -432,7 +435,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.toggleCode();
           }}
-          title="Inline code"
+          title={locale.toolbar.inlineCode}
         >
           <Code size={16} />
         </button>
@@ -455,7 +458,7 @@ const Toolbar = ({
             editor.isActive("highlight") && "is-active",
             (isFocusNodeOnly || isInsideCode) && "is-disabled"
           )}
-          title="Highlight"
+          title={locale.toolbar.highlight}
         >
           <Highlighter size={16} />
         </button>
@@ -475,7 +478,7 @@ const Toolbar = ({
             !!editor.getAttributes("textStyle").color && "is-active",
             (isFocusNodeOnly || isInsideCode) && "is-disabled"
           )}
-          title="Text color"
+          title={locale.toolbar.textColor}
         >
           <Palette size={16} />
         </button>
@@ -491,7 +494,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleSuperscript();
           }}
-          title="Superscript"
+          title={locale.toolbar.superscript}
         >
           <Superscript size={16} />
         </button>
@@ -506,7 +509,7 @@ const Toolbar = ({
             if (isFocusNodeOnly || isInsideCode) return;
             format.toggleSubscript();
           }}
-          title="Subscript"
+          title={locale.toolbar.subscript}
         >
           <Subscript size={16} />
         </button>
@@ -522,7 +525,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("left");
           }}
-          title="Align left"
+          title={locale.toolbar.alignLeft}
         >
           <AlignLeft size={16} />
         </button>
@@ -537,7 +540,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("center");
           }}
-          title="Align center"
+          title={locale.toolbar.alignCenter}
         >
           <AlignCenter size={16} />
         </button>
@@ -552,7 +555,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("right");
           }}
-          title="Align right"
+          title={locale.toolbar.alignRight}
         >
           <AlignRight size={16} />
         </button>
@@ -567,7 +570,7 @@ const Toolbar = ({
             if (isFocusNodeOnly) return;
             format.setTextAlign("justify");
           }}
-          title="Justify"
+          title={locale.toolbar.justify}
         >
           <AlignJustify size={16} />
         </button>
@@ -601,6 +604,7 @@ const Toolbar = ({
                   ? onTextColorSelect
                   : onHighlightColorSelect
               }
+              locale={locale}
             />
           </div>
         </>
@@ -630,12 +634,12 @@ const Toolbar = ({
                   currentHeadingLevel === level ? "is-active" : ""
                 }`}
                 onClick={() => onHeadingSelect(level)}
-                title={`Heading ${level}`}
+                title={locale.toolbar.headingLevel(level)}
               >
                 <span className="editor-toolbar-heading-num">
                   H{["₁", "₂", "₃"][level - 1]}
                 </span>
-                <span>Heading {level}</span>
+                <span>{locale.toolbar.headingLevel(level)}</span>
               </button>
             ))}
           </div>
@@ -663,6 +667,7 @@ const Toolbar = ({
                 block.insertTable({ rows, cols });
                 setShowTableSizePicker(false);
               }}
+              locale={locale}
             />
           </div>
         </>

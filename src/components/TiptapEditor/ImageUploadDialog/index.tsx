@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, ImagePlus, AlertCircle, ImageOff } from 'lucide-react'
 import { config } from '@/config'
 import { formatFileSize } from '@/lib/utils'
+import type { EditorLocale } from '@/locales'
 import './ImageUploadDialog.css'
 
 interface ImageUploadDialogProps {
@@ -21,6 +22,7 @@ interface ImageUploadDialogProps {
   onUpload?: (payload: { file: File; url: string; alt?: string }) => void | Promise<void>
   /** 图片最大体积（字节），超过则拒绝 */
   imageMaxSizeBytes?: number
+  locale: EditorLocale
 }
 
 const ImageUploadDialog = ({
@@ -30,6 +32,7 @@ const ImageUploadDialog = ({
   onPreUpload,
   onUpload,
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
+  locale,
 }: ImageUploadDialogProps) => {
   const [uploadType, setUploadType] = useState<'file' | 'url'>('file')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -61,7 +64,7 @@ const ImageUploadDialog = ({
     if (!file.type.startsWith('image/')) {
       setSelectedFile(null)
       setImageUrl('')
-      setError('Please select an image file')
+      setError(locale.imageDialog.invalidImageFile)
       return
     }
 
@@ -69,7 +72,7 @@ const ImageUploadDialog = ({
     if (file.size > maxBytes) {
       setSelectedFile(null)
       setImageUrl('')
-      setError(`Image size must not exceed ${formatFileSize(maxBytes)}`)
+      setError(locale.imageDialog.imageSizeExceeded(formatFileSize(maxBytes)))
       return
     }
 
@@ -87,7 +90,9 @@ const ImageUploadDialog = ({
       } catch (err) {
         setIsUploading(false)
         setImageUrl('')
-        setError(err instanceof Error ? err.message : 'Upload failed, please retry')
+        setError(
+          err instanceof Error ? err.message : locale.imageDialog.uploadFailed
+        )
       }
     } else {
       const reader = new FileReader()
@@ -97,11 +102,11 @@ const ImageUploadDialog = ({
         setImageUrl(base64)
       }
       reader.onerror = () => {
-        setError('Failed to read file')
+        setError(locale.imageDialog.fileReadFailed)
       }
       reader.readAsDataURL(file)
     }
-  }, [onPreUpload, imageMaxSizeBytes])
+  }, [onPreUpload, imageMaxSizeBytes, locale])
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -147,21 +152,21 @@ const ImageUploadDialog = ({
         new URL(url)
         setError('')
       } catch {
-        setError('Please enter a valid image URL')
+        setError(locale.imageDialog.invalidImageUrl)
       }
     } else {
       setError('')
     }
-  }, [])
+  }, [locale])
 
   const handleConfirm = useCallback(() => {
     if (!imageUrl) {
-      setError('Please select an image or enter image URL')
+      setError(locale.imageDialog.selectOrEnterImage)
       return
     }
 
     if (isUploading) {
-      setError('Image is uploading, please wait')
+      setError(locale.imageDialog.uploadingWait)
       return
     }
 
@@ -170,7 +175,16 @@ const ImageUploadDialog = ({
       void Promise.resolve(onUpload({ file: selectedFile, url: imageUrl }))
     }
     resetStates()
-  }, [imageUrl, isUploading, onConfirm, onUpload, resetStates, selectedFile, uploadType])
+  }, [
+    imageUrl,
+    isUploading,
+    locale,
+    onConfirm,
+    onUpload,
+    resetStates,
+    selectedFile,
+    uploadType,
+  ])
 
   const handleCancel = useCallback(() => {
     onCancel()
@@ -201,7 +215,7 @@ const ImageUploadDialog = ({
         onKeyDown={handleKeyDown}
       >
         <DialogHeader>
-          <DialogTitle>Image upload</DialogTitle>
+          <DialogTitle>{locale.imageDialog.title}</DialogTitle>
         </DialogHeader>
 
         <div className="image-upload-tabs">
@@ -211,7 +225,7 @@ const ImageUploadDialog = ({
             disabled={isInteractionLocked}
             onClick={() => setUploadType('file')}
           >
-            Upload file
+            {locale.imageDialog.uploadFileTab}
           </button>
           <button
             type="button"
@@ -219,7 +233,7 @@ const ImageUploadDialog = ({
             disabled={isInteractionLocked}
             onClick={() => setUploadType('url')}
           >
-            Image URL
+            {locale.imageDialog.imageUrlTab}
           </button>
         </div>
 
@@ -248,14 +262,16 @@ const ImageUploadDialog = ({
                     <div className="image-upload-file-icon">
                       <Loader2 size={40} className="image-upload-file-icon-spin" />
                     </div>
-                    <div className="image-upload-file-text">Uploading image...</div>
+                    <div className="image-upload-file-text">
+                      {locale.imageDialog.uploadingImage}
+                    </div>
                   </>
                 ) : imageUrl ? (
                   <div className="image-upload-file-preview">
                     {previewLoadError ? (
                       <div className="image-upload-file-preview-error">
                         <ImageOff size={40} />
-                        <span>Image failed to load</span>
+                        <span>{locale.imageDialog.imageLoadFailed}</span>
                       </div>
                     ) : (
                       <img
@@ -272,10 +288,12 @@ const ImageUploadDialog = ({
                       <ImagePlus size={40} />
                     </div>
                     <div className="image-upload-file-text">
-                      Click to select or drag image here
+                      {locale.imageDialog.clickOrDrag}
                     </div>
                     <div className="image-upload-file-hint">
-                      Supports JPG, PNG, GIF, max {formatFileSize(imageMaxSizeBytes)}
+                      {locale.imageDialog.supportsAndMax(
+                        formatFileSize(imageMaxSizeBytes)
+                      )}
                     </div>
                   </>
                 )}
@@ -284,18 +302,20 @@ const ImageUploadDialog = ({
                 <div
                   className={`image-upload-file-hint image-upload-file-reselect-hint ${shouldShowReselectHint ? '' : 'is-placeholder'}`}
                 >
-                  Click or drag to reselect
+                  {locale.imageDialog.reselectHint}
                 </div>
               )}
             </div>
           ) : (
             <div className="image-upload-url space-y-2">
-              <Label htmlFor="imageUrlInput">Image URL</Label>
+              <Label htmlFor="imageUrlInput">
+                {locale.imageDialog.imageUrlLabel}
+              </Label>
               <input
                 ref={urlInputRef}
                 id="imageUrlInput"
                 type="url"
-                placeholder="https://example.com/image.jpg"
+                placeholder={locale.imageDialog.imageUrlPlaceholder}
                 value={imageUrl}
                 onChange={handleUrlChange}
                 className="image-upload-input"
@@ -314,13 +334,15 @@ const ImageUploadDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            {locale.imageDialog.cancel}
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!imageUrl || !!error || isUploading}
           >
-            {isUploading ? 'Uploading...' : 'Confirm'}
+            {isUploading
+              ? locale.imageDialog.uploading
+              : locale.imageDialog.confirm}
           </Button>
         </DialogFooter>
       </DialogContent>

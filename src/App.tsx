@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
-import {
-  EditorMode,
-  HeadlessToolbarMode,
-} from "@/components/TiptapEditor/types";
 import { htmlToPlainText } from "@/lib/htmlToPlainText";
 import "./App.css";
 
@@ -14,9 +10,12 @@ function App() {
   const handleEditorChange = (html: string) => {
     setCount(count + 1);
     setContent(html);
-    console.log("htmlToPlainText", htmlToPlainText(html,{
-      singleLine: true,
-    }));
+    console.log(
+      "htmlToPlainText",
+      htmlToPlainText(html, {
+        singleLine: true,
+      }),
+    );
     console.log("count", count);
     console.log("✏️ onChange 被触发 - 用户编辑:", html);
   };
@@ -25,7 +24,6 @@ function App() {
   const handleImagePreUpload = async (file: File): Promise<string> => {
     console.log("📤 上传图片:", file.name, file.size, "bytes");
     console.log("count", count);
-    
 
     // 模拟上传到服务器（实际使用时替换为真实的上传逻辑）
     return new Promise((resolve, reject) => {
@@ -46,13 +44,19 @@ function App() {
   };
 
   // 仅在点击 Confirm 后触发
-  const onImageUpload = (payload: { file: File; url: string; alt?: string }) => {
+  const onImageUpload = (payload: {
+    file: File;
+    url: string;
+    alt?: string;
+  }) => {
     console.log("count", count);
     console.log("✅ 图片 Confirm 回调:", payload);
   };
 
   // 选择文件时触发：执行预上传，返回文件 URL + 名称
-  const onFilePreUpload = async (file: File): Promise<{ url: string; name: string }> => {
+  const onFilePreUpload = async (
+    file: File,
+  ): Promise<{ url: string; name: string }> => {
     console.log("📤 上传文件:", file.name, file.size, "bytes");
     console.log("count", count);
     return new Promise((resolve) => {
@@ -68,15 +72,23 @@ function App() {
     console.log("✅ 文件 Confirm 回调:", payload);
   };
 
-  const onFileAttachmentClick = ({ url, name }: { url: string; name: string }) => {
-   
-     console.log(count,'count');
-     
-   
+  const onFileAttachmentClick = ({
+    url,
+    name,
+  }: {
+    url: string;
+    name: string;
+  }) => {
+    console.log(count, "count");
+
     console.log("📤 点击文件:", { url, name });
   };
 
-  const onImageDelete = (params: { src: string; alt?: string; title?: string }) => {
+  const onImageDelete = (params: {
+    src: string;
+    alt?: string;
+    title?: string;
+  }) => {
     console.log("count", count);
     console.log("🗑️ 删除图片:", params);
   };
@@ -91,7 +103,7 @@ function App() {
     setTimeout(() => {
       console.log("📥 接口数据返回，设置 content（此操作不应触发 onChange）");
       setContent(
-        '<p>Welcome to Tiptap Editor! asd</p><p></p><div data-latex="\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}" data-type="block-math"></div><p></p>'
+        '<p>Welcome to Tiptap Editor! asd</p><p></p><div data-latex="\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}" data-type="block-math"></div><p></p>',
       );
     }, 2000);
   }, []);
@@ -110,22 +122,23 @@ function App() {
         <TiptapEditor
           // border={false}
           disabled={disabled}
-          editorMode={EditorMode.Headless}
+          // editorMode={EditorMode.Headless}
           // headlessToolbarMode={HeadlessToolbarMode.OnFocus}
           value={content}
-          onChange={(str)=>{
+          onChange={(str) => {
             console.log("str", str);
             handleEditorChange(str);
           }}
+          // language="zh-CN"
           fileUploadTypes={["pdf"]}
           onImagePreUpload={handleImagePreUpload}
           onImageUpload={onImageUpload}
           onImageDelete={onImageDelete}
           maxHeight="500px"
-          onFilePreUpload={onFilePreUpload}
-          onFileUpload={onFileUpload}
-          onFileDelete={onFileDelete}
-          onFileAttachmentClick={onFileAttachmentClick}
+          // onFilePreUpload={onFilePreUpload}
+          // onFileUpload={onFileUpload}
+          // onFileDelete={onFileDelete}
+          // onFileAttachmentClick={onFileAttachmentClick}
         />
       </div>
       {/* </div> */}

@@ -6,6 +6,7 @@ export type {
   TiptapEditorProps,
   EditorMode,
   HeadlessToolbarMode,
+  EditorLanguage,
 } from "./components/TiptapEditor/types";
 
 // 导出公式分类相关，便于扩展 formulaCategories

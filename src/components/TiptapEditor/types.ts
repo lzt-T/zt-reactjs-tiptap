@@ -15,6 +15,14 @@ export const EditorMode = {
 
 export type EditorMode = (typeof EditorMode)[keyof typeof EditorMode]
 
+/** 编辑器语言 */
+export const EditorLanguage = {
+  ZhCN: 'zh-CN',
+  EnUS: 'en-US',
+} as const
+
+export type EditorLanguage = (typeof EditorLanguage)[keyof typeof EditorLanguage]
+
 /** Headless 模式下 Toolbar 的显示模式 */
 export const HeadlessToolbarMode = {
   /** 一直显示 */
@@ -92,8 +100,14 @@ export interface TiptapEditorProps {
   commandMenuMinHeight?: number
 
   /**
-   * Placeholder when editor is empty. When not provided: NotionLike uses "Type '/' for commands...",
-   * Headless uses "Start typing..."; when provided, both modes use this value.
+   * 编辑器语言，控制工具栏、菜单、弹窗、默认 placeholder 等文案
+   * 不传时默认跟随浏览器语言：zh* -> zh-CN，其余 -> en-US
+   */
+  language?: EditorLanguage
+
+  /**
+   * 编辑器为空时显示的占位文本。
+   * 传入时将覆盖不同模式和不同语言下的默认 placeholder。
    */
   placeholder?: string
 
@@ -156,4 +170,3 @@ export interface TiptapEditorProps {
    */
   maxHeight?: number | string
 }
-

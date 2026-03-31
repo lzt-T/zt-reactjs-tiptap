@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { config } from '@/config'
+import type { EditorLocale } from '@/locales'
 import './ColorPicker.css'
 
 interface ColorPickerProps {
@@ -9,6 +10,7 @@ interface ColorPickerProps {
   selectedColor?: string
   style?: React.CSSProperties
   className?: string
+  locale: EditorLocale
 }
 
 /** 规范化色值便于比较（小写，无空格） */
@@ -16,7 +18,13 @@ function normalizeColor(value: string): string {
   return value ? value.trim().toLowerCase() : ''
 }
 
-const ColorPicker = ({ onColorSelect, type, selectedColor, style }: ColorPickerProps) => {
+const ColorPicker = ({
+  onColorSelect,
+  type,
+  selectedColor,
+  style,
+  locale,
+}: ColorPickerProps) => {
   const colors = type === 'text' ? config.TEXT_COLORS : config.HIGHLIGHT_COLORS
   const [showCustomInput, setShowCustomInput] = useState(false)
   const normalizedSelected = normalizeColor(selectedColor ?? '')
@@ -44,7 +52,7 @@ const ColorPicker = ({ onColorSelect, type, selectedColor, style }: ColorPickerP
           className="color-picker-custom-btn"
           onClick={() => setShowCustomInput(true)}
         >
-          + 自定义颜色
+          {locale.colorPicker.customColor}
         </button>
       )}
       {showCustomInput && (

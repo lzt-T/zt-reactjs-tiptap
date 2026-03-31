@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import type { EditorLocale } from "@/locales";
 import "./TableSizePicker.css";
 
 export interface TableSizePickerProps {
@@ -9,6 +10,7 @@ export interface TableSizePickerProps {
   maxRows?: number;
   /** 网格列数上限，默认 10 */
   maxCols?: number;
+  locale: EditorLocale;
 }
 
 const DEFAULT_MAX = 10;
@@ -17,6 +19,7 @@ export function TableSizePicker({
   onSelect,
   maxRows = DEFAULT_MAX,
   maxCols = DEFAULT_MAX,
+  locale,
 }: TableSizePickerProps): React.ReactElement {
   const [hoverCell, setHoverCell] = useState<{ row: number; col: number } | null>(null);
 
@@ -49,7 +52,11 @@ export function TableSizePicker({
       : "";
 
   return (
-    <div className="table-size-picker" role="dialog" aria-label="选择表格尺寸">
+    <div
+      className="table-size-picker"
+      role="dialog"
+      aria-label={locale.tableSizePicker.dialogAriaLabel}
+    >
       <div
         className="table-size-picker-grid"
         style={{ "--rows": rows, "--cols": cols } as React.CSSProperties}
@@ -72,7 +79,7 @@ export function TableSizePicker({
               )}
               onMouseEnter={() => handleCellEnter(row, col)}
               onClick={() => handleCellClick(row, col)}
-              aria-label={`${row} 行 ${col} 列`}
+              aria-label={locale.tableSizePicker.cellAriaLabel(row, col)}
             />
           );
         })}

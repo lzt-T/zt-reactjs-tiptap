@@ -1,15 +1,17 @@
 import { useState, useCallback } from "react";
-import { defaultCommands } from "@/extensions/SlashCommands";
+import type { CommandItem } from "@/extensions/SlashCommands";
 import { MenuPlacement } from "../components/TiptapEditor/types";
 
 interface UseCommandMenuOptions {
   editorWrapperRef: React.RefObject<HTMLDivElement | null>;
   commandMenuMaxHeight: number;
+  commands: CommandItem[];
 }
 
 export function useCommandMenu({
   editorWrapperRef,
   commandMenuMaxHeight,
+  commands,
 }: UseCommandMenuOptions) {
   const [showCommandMenu, setShowCommandMenu] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
@@ -65,7 +67,7 @@ export function useCommandMenu({
     setMenuPosition(null);
   }, []);
 
-  const filteredCommands = defaultCommands.filter((item) =>
+  const filteredCommands = commands.filter((item) =>
     item.title.toLowerCase().includes(commandQuery.toLowerCase())
   );
 

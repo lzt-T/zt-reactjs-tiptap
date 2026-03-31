@@ -25,8 +25,27 @@ import {
   FileUp,
   type LucideIcon,
 } from 'lucide-react'
+import type { EditorLocale } from '@/locales'
+
+export const SlashCommandKey = {
+  Heading1: 'heading1',
+  Heading2: 'heading2',
+  Heading3: 'heading3',
+  BulletList: 'bulletList',
+  NumberedList: 'numberedList',
+  TaskList: 'taskList',
+  InlineCode: 'inlineCode',
+  Table: 'table',
+  InlineMath: 'inlineMath',
+  BlockMath: 'blockMath',
+  Image: 'image',
+  UploadAttachment: 'uploadAttachment',
+} as const
+
+export type SlashCommandKey = (typeof SlashCommandKey)[keyof typeof SlashCommandKey]
 
 export interface CommandItem {
+  key: SlashCommandKey
   title: string
   description?: string
   icon?: LucideIcon
@@ -48,6 +67,7 @@ export interface SlashCommandsOptions {
   onMathDialog?: (type: 'inline' | 'block', initialValue: string, callback: (latex: string) => void) => void
   onImageUpload?: (callback: (src: string, alt?: string) => void) => void
   onFileUpload?: (callback: (url: string, name: string) => void) => void
+  commands: CommandItem[]
 }
 
 function findFirstEnabledIndex(items: CommandItem[]): number {
@@ -55,96 +75,111 @@ function findFirstEnabledIndex(items: CommandItem[]): number {
   return i >= 0 ? i : 0
 }
 
-export const defaultCommands: CommandItem[] = [
-  {
-    title: 'Heading 1',
-    description: 'Large heading',
-    icon: Heading1,
-    command: ({ editor }) => setHeading(editor, 1),
-  },
-  {
-    title: 'Heading 2',
-    description: 'Medium heading',
-    icon: Heading2,
-    command: ({ editor }) => setHeading(editor, 2),
-  },
-  {
-    title: 'Heading 3',
-    description: 'Small heading',
-    icon: Heading3,
-    command: ({ editor }) => setHeading(editor, 3),
-  },
-  {
-    title: 'Bullet List',
-    description: 'Bullet list',
-    icon: List,
-    command: ({ editor }) => toggleBulletList(editor),
-  },
-  {
-    title: 'Numbered List',
-    description: 'Numbered list',
-    icon: ListOrdered,
-    command: ({ editor }) => toggleOrderedList(editor),
-  },
-  {
-    title: 'Task List',
-    description: 'Todo list with checkboxes',
-    icon: ListTodo,
-    command: ({ editor }) => toggleTaskList(editor),
-  },
-  {
-    title: 'Inline Code',
-    description: 'Code span',
-    icon: Code,
-    command: ({ editor }) => toggleCode(editor),
-  },
-  {
-    title: 'Table',
-    description: 'Add table',
-    icon: Table,
-    command: ({ editor }) => insertTable(editor),
-  },
-  {
-    title: 'Inline Math',
-    description: 'Insert inline math',
-    icon: Sigma,
-    mathType: 'inline',
-    command: ({ editor }) => {
-      // This will be handled by the custom dialog
-      editor.chain().focus().run()
+/** 根据当前语言文案创建默认斜杠菜单项。 */
+export function createDefaultCommands(locale: EditorLocale): CommandItem[] {
+  return [
+    {
+      key: SlashCommandKey.Heading1,
+      title: locale.slashCommands.heading1.title,
+      description: locale.slashCommands.heading1.description,
+      icon: Heading1,
+      command: ({ editor }) => setHeading(editor, 1),
     },
-  },
-  {
-    title: 'Block Math',
-    description: 'Insert math block',
-    icon: SquareFunction,
-    mathType: 'block',
-    command: ({ editor }) => {
-      // This will be handled by the custom dialog
-      editor.chain().focus().run()
+    {
+      key: SlashCommandKey.Heading2,
+      title: locale.slashCommands.heading2.title,
+      description: locale.slashCommands.heading2.description,
+      icon: Heading2,
+      command: ({ editor }) => setHeading(editor, 2),
     },
-  },
-  {
-    title: 'Image',
-    description: 'Upload or insert image',
-    icon: Image,
-    imageUpload: true,
-    command: ({ editor }) => {
-      // This will be handled by the image upload dialog
-      editor.chain().focus().run()
+    {
+      key: SlashCommandKey.Heading3,
+      title: locale.slashCommands.heading3.title,
+      description: locale.slashCommands.heading3.description,
+      icon: Heading3,
+      command: ({ editor }) => setHeading(editor, 3),
     },
-  },
-  {
-    title: 'Upload attachment',
-    description: 'Upload attachment as file link',
-    icon: FileUp,
-    fileAttachment: true,
-    command: ({ editor }) => {
-      // This will be handled by the file upload dialog
-      editor.chain().focus().run()
+    {
+      key: SlashCommandKey.BulletList,
+      title: locale.slashCommands.bulletList.title,
+      description: locale.slashCommands.bulletList.description,
+      icon: List,
+      command: ({ editor }) => toggleBulletList(editor),
     },
-  },
-]
+    {
+      key: SlashCommandKey.NumberedList,
+      title: locale.slashCommands.numberedList.title,
+      description: locale.slashCommands.numberedList.description,
+      icon: ListOrdered,
+      command: ({ editor }) => toggleOrderedList(editor),
+    },
+    {
+      key: SlashCommandKey.TaskList,
+      title: locale.slashCommands.taskList.title,
+      description: locale.slashCommands.taskList.description,
+      icon: ListTodo,
+      command: ({ editor }) => toggleTaskList(editor),
+    },
+    {
+      key: SlashCommandKey.InlineCode,
+      title: locale.slashCommands.inlineCode.title,
+      description: locale.slashCommands.inlineCode.description,
+      icon: Code,
+      command: ({ editor }) => toggleCode(editor),
+    },
+    {
+      key: SlashCommandKey.Table,
+      title: locale.slashCommands.table.title,
+      description: locale.slashCommands.table.description,
+      icon: Table,
+      command: ({ editor }) => insertTable(editor),
+    },
+    {
+      key: SlashCommandKey.InlineMath,
+      title: locale.slashCommands.inlineMath.title,
+      description: locale.slashCommands.inlineMath.description,
+      icon: Sigma,
+      mathType: 'inline',
+      command: ({ editor }) => {
+        // This will be handled by the custom dialog
+        editor.chain().focus().run()
+      },
+    },
+    {
+      key: SlashCommandKey.BlockMath,
+      title: locale.slashCommands.blockMath.title,
+      description: locale.slashCommands.blockMath.description,
+      icon: SquareFunction,
+      mathType: 'block',
+      command: ({ editor }) => {
+        // This will be handled by the custom dialog
+        editor.chain().focus().run()
+      },
+    },
+    {
+      key: SlashCommandKey.Image,
+      title: locale.slashCommands.image.title,
+      description: locale.slashCommands.image.description,
+      icon: Image,
+      imageUpload: true,
+      command: ({ editor }) => {
+        // This will be handled by the image upload dialog
+        editor.chain().focus().run()
+      },
+    },
+    {
+      key: SlashCommandKey.UploadAttachment,
+      title: locale.slashCommands.uploadAttachment.title,
+      description: locale.slashCommands.uploadAttachment.description,
+      icon: FileUp,
+      fileAttachment: true,
+      command: ({ editor }) => {
+        // This will be handled by the file upload dialog
+        editor.chain().focus().run()
+      },
+    },
+  ]
+}
 
 export const SlashCommands = Extension.create<SlashCommandsOptions>({
   name: 'slashCommands',
@@ -158,16 +193,23 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
       onMathDialog: undefined,
       onImageUpload: undefined,
       onFileUpload: undefined,
+      // 占位空数组：真正的命令列表必须由调用方显式传入
+      commands: [],
     }
   },
   addProseMirrorPlugins() {
+    const commands = this.options.commands
+    if (!commands || commands.length === 0) {
+      throw new Error('[SlashCommands] commands is required and cannot be empty')
+    }
+
     return [
       Suggestion({
         editor: this.editor,
         char: '/',
         items: ({ query }: { query: string }) => {
           const insideTable = this.editor.isActive('table')
-          return defaultCommands
+          return commands
             .filter((item) => {
               if (!item.title.toLowerCase().includes(query.toLowerCase())) return false
               if (item.fileAttachment && !this.options.onFileUpload) return false
@@ -176,7 +218,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
             .map((item) => ({
               ...item,
               disabled:
-                item.title === 'Table' && insideTable,
+                item.key === SlashCommandKey.Table && insideTable,
             }))
         },
         command: ({ editor, range, props }: { editor: Editor; range: { from: number; to: number }; props: CommandItem }) => {
@@ -185,7 +227,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
         },
         render: () => {
           let currentIndex = 0
-          let items: CommandItem[] = defaultCommands
+          let items: CommandItem[] = commands
           let currentEditor: Editor = this.editor
           let currentRange: { from: number; to: number } = { from: 0, to: 0 }
 
@@ -250,7 +292,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
                 case 'Enter':
                   if (items[currentIndex]) {
                     const item = items[currentIndex]
-                    const isTableDisabled = item.title === 'Table' && currentEditor.isActive('table')
+                    const isTableDisabled = item.key === SlashCommandKey.Table && currentEditor.isActive('table')
                     if (isTableDisabled) {
                       this.options.onExit()
                       return true

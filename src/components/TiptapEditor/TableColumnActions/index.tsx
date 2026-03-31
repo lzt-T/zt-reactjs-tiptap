@@ -14,6 +14,7 @@ import {
 import { IconTableDeleteColumn } from '@/components/Icon'
 import { useTableInsertColumnRunAndClose } from '@/hooks'
 import { config } from '@/config'
+import type { EditorLocale } from '@/locales'
 import './TableColumnActions.css'
 
 export interface ColumnActionItem {
@@ -34,13 +35,18 @@ export interface ColumnActionItem {
 interface TableColumnActionsProps {
   editor: Editor
   editorWrapperRef: React.RefObject<HTMLDivElement | null>
+  locale: EditorLocale
 }
 
 /** 列操作按钮高度（横条），与 config.TABLE_ACTION_BUTTON_SIZE 一致 */
 const COL_BUTTON_HEIGHT = config.TABLE_ACTION_BUTTON_SIZE
 const COL_BUTTON_GAP = 2
 
-const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProps) => {
+const TableColumnActions = ({
+  editor,
+  editorWrapperRef,
+  locale,
+}: TableColumnActionsProps) => {
   /** 当前焦点所在列（只渲染一个按钮，定位到该列） */
   const [currentColumn, setCurrentColumn] = useState<ColumnActionItem | null>(null)
   /** 当前焦点所在表格的列数，用于菜单中「删除列」/「删除表格」 */
@@ -366,7 +372,7 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
       ref={buttonRef}
       type="button"
       className="table-column-action-trigger"
-      aria-label="列操作"
+      aria-label={locale.table.columnActionsAriaLabel}
       style={
         usePortal && portalButtonPosition
           ? {
@@ -407,7 +413,7 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
           <button
             type="button"
             role="menuitem"
-            title="在左侧插入列"
+            title={locale.table.insertColumnLeft}
             onClick={() =>
               runColumnAndClose(() => editor.chain().focus().addColumnBefore().run(), 'before')
             }
@@ -417,7 +423,7 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
           <button
             type="button"
             role="menuitem"
-            title="在右侧插入列"
+            title={locale.table.insertColumnRight}
             onClick={() =>
               runColumnAndCloseAfter(() => editor.chain().focus().addColumnAfter().run(), 'after')
             }
@@ -431,8 +437,10 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
               const numCols = currentColumn
                 ? currentColumn.lastColumnIndex - currentColumn.columnIndex + 1
                 : 1
-              if (focusedTableColCount <= numCols) return '删除整个表格'
-              return numCols > 1 ? `删除选中的 ${numCols} 列` : '删除当前列'
+              if (focusedTableColCount <= numCols) return locale.table.deleteWholeTable
+              return numCols > 1
+                ? locale.table.deleteSelectedColumns(numCols)
+                : locale.table.deleteCurrentColumn
             })()}
             disabled={
               focusedTableColCount <= 1
@@ -462,7 +470,7 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
           <button
             type="button"
             role="menuitem"
-            title="合并单元格（需先选中多个单元格）"
+            title={locale.table.mergeCells}
             disabled={
               !('mergeCells' in editor.commands) || !editor.can().mergeCells?.()
             }
@@ -476,7 +484,7 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
           <button
             type="button"
             role="menuitem"
-            title="拆分单元格"
+            title={locale.table.splitCell}
             disabled={
               !('splitCell' in editor.commands) || !editor.can().splitCell?.()
             }
@@ -491,7 +499,7 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
           <button
             type="button"
             role="menuitem"
-            title="切换表头行"
+            title={locale.table.toggleHeaderRow}
             onClick={() => {
               editor.chain().focus().toggleHeaderRow().run()
               closeMenu()
@@ -502,7 +510,7 @@ const TableColumnActions = ({ editor, editorWrapperRef }: TableColumnActionsProp
           <button
             type="button"
             role="menuitem"
-            title="删除整个表格"
+            title={locale.table.deleteWholeTable}
             onClick={() => {
               editor.chain().focus().deleteTable().run()
               closeMenu()
