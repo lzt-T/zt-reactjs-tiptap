@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
 import { htmlToPlainText } from "@/lib/htmlToPlainText";
 import { EditorMode } from "@/components/TiptapEditor/types";
+import {
+  BuiltinToolbarItemKey,
+  BuiltinSlashCommandKey,
+} from "@/components/TiptapEditor/customization";
 
 import "./App.css";
 
@@ -124,13 +128,47 @@ function App() {
         <TiptapEditor
           // border={false}
           disabled={disabled}
-          editorMode={EditorMode.Headless}
+          // editorMode={EditorMode.Headless}
           // headlessToolbarMode={HeadlessToolbarMode.OnFocus}
           value={content}
           onChange={(str) => {
             console.log("str", str);
             handleEditorChange(str);
           }}
+          hideDefaultSlashCommands={true}
+          // hideDefaultToolbarItems={true}
+          toolbarItems={[
+            {
+              type: "builtin",
+              key: BuiltinToolbarItemKey.Heading,
+              group: "block",
+            },
+            {
+              type: "builtin",
+              key: BuiltinToolbarItemKey.Bold,
+              group: "format",
+            },
+            {
+              type: "custom",
+              key: "asdasd",
+              title: "sadasd",
+              onClick: (ctx) => {
+                //插入-------
+                ctx.editor.chain().focus().insertContent("asdsad").run();
+              },
+            },
+          ]}
+          slashCommands={[
+            {
+              type: "custom",
+              key: "asdasd",
+              title: "sadasd",
+              command: (ctx) => {
+                //插入-------
+                ctx.editor.chain().focus().insertContent("asdsad").run();
+              },
+            },
+          ]}
           language="en-US"
           fileUploadTypes={["pdf"]}
           onImagePreUpload={handleImagePreUpload}

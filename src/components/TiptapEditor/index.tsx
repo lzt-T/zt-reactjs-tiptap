@@ -31,11 +31,21 @@ import {
   useFileUploadDialog,
   useTiptapEditor,
   useEditorCommands,
+  useStableArray,
 } from "@/hooks";
 import { config } from "@/config";
 import { cn } from "@/lib/utils";
 import { EditorMode, HeadlessToolbarMode } from "./types";
 import { resolveEditorLocale } from "@/locales";
+import {
+  createDefaultToolbarItems,
+  createDefaultSlashCommands,
+  isBuiltinToolbarItemKey,
+  isBuiltinSlashCommandKey,
+  mergeConfigItems,
+  type ToolbarItemConfig,
+  type SlashCommandConfig,
+} from "./customization";
 
 /** Headless 模式下斜杠相关回调用空函数，避免传入 SlashCommands */
 const noop = () => {};
@@ -50,6 +60,7 @@ const noopMathDialog = noop as (
 const noopImageUpload = noop as (
   cb: (src: string, alt?: string) => void
 ) => void;
+const EMPTY_EXTENSIONS: NonNullable<TiptapEditorProps["extensions"]> = [];
 
 function normalizeFileUploadTypes(fileUploadTypes?: string[]): string[] {
   const normalized = Array.from(
@@ -86,11 +97,108 @@ const TiptapEditor = ({
   fileUploadTypes,
   formulaCategories,
   maxHeight,
+  toolbarItems,
+  slashCommands,
+  hideDefaultToolbarItems = false,
+  hideDefaultSlashCommands = false,
+  extensions = EMPTY_EXTENSIONS,
+  editorConfigVersion,
 }: TiptapEditorProps) => {
+  // 对外部数组配置做浅稳定，避免仅引用变化触发后续链式重建。
+  const stableExtensions = useStableArray(extensions) ?? EMPTY_EXTENSIONS;
+  const stableToolbarItems = useStableArray(toolbarItems);
+  const stableSlashConfigs = useStableArray(slashCommands);
+
   // 当前语言解析后的文案集合
   const locale = resolveEditorLocale(language);
-  // 斜杠菜单项根据当前语言创建，避免菜单文案硬编码
-  const slashCommands = useMemo(() => createDefaultCommands(locale), [locale]);
+  // 工具栏默认配置：用于在不传配置时保持现有行为。
+  const defaultToolbarItems = useMemo(
+    () => createDefaultToolbarItems(locale),
+    [locale]
+  );
+  // 斜杠默认配置：用于在不传配置时保持现有行为。
+  const defaultSlashConfigs = useMemo(
+    () => createDefaultSlashCommands(locale),
+    [locale]
+  );
+
+  // 合并后的工具栏配置：默认 + 用户，后者同 key 覆盖并重排。
+  const resolvedToolbarItems = useMemo<ToolbarItemConfig[]>(
+    () =>
+      mergeConfigItems(
+        defaultToolbarItems,
+        stableToolbarItems as ToolbarItemConfig[] | undefined,
+        hideDefaultToolbarItems,
+        isBuiltinToolbarItemKey,
+        "[TiptapEditor.toolbarItems]"
+      ),
+    [
+      defaultToolbarItems,
+      stableToolbarItems,
+      hideDefaultToolbarItems,
+    ]
+  );
+
+  // 合并后的斜杠配置：默认 + 用户，后者同 key 覆盖并重排。
+  const resolvedSlashConfigs = useMemo<SlashCommandConfig[]>(
+    () =>
+      mergeConfigItems(
+        defaultSlashConfigs,
+        stableSlashConfigs as SlashCommandConfig[] | undefined,
+        hideDefaultSlashCommands,
+        isBuiltinSlashCommandKey,
+        "[TiptapEditor.slashCommands]"
+      ),
+    [
+      defaultSlashConfigs,
+      stableSlashConfigs,
+      hideDefaultSlashCommands,
+    ]
+  );
+
+  // 内置斜杠命令：用于把 builtin 配置映射回可执行命令。
+  const builtinSlashCommands = useMemo(() => createDefaultCommands(locale), [locale]);
+
+  // 最终斜杠命令：builtin 走默认映射，custom 直接注入。
+  const resolvedSlashCommands = useMemo<CommandItem[]>(() => {
+    const builtinMap = new Map(builtinSlashCommands.map((item) => [item.key, item]));
+    const result: CommandItem[] = [];
+
+    for (const item of resolvedSlashConfigs) {
+      if (item.type === "builtin") {
+        const matched = builtinMap.get(item.key);
+        if (!matched) {
+          console.warn(
+            `[TiptapEditor.slashCommands] Unknown builtin key "${item.key}", skipped.`
+          );
+          continue;
+        }
+        result.push(matched);
+        continue;
+      }
+
+      result.push({
+        key: item.key,
+        title: item.title,
+        description: item.description,
+        icon: item.icon,
+        command: item.command,
+        disabled: item.disabled,
+      });
+    }
+
+    return result;
+  }, [builtinSlashCommands, resolvedSlashConfigs]);
+  /** 运行期命令源：给 SlashCommands 扩展动态读取，避免闭包固化。 */
+  const resolvedSlashCommandsRef = useRef<CommandItem[]>(resolvedSlashCommands);
+  useEffect(() => {
+    resolvedSlashCommandsRef.current = resolvedSlashCommands;
+  }, [resolvedSlashCommands]);
+  /** 获取当前最新斜杠命令列表。 */
+  const getResolvedSlashCommands = useCallback(
+    () => resolvedSlashCommandsRef.current,
+    []
+  );
 
   // --- Refs & 状态 ---
   const editorRef = useRef<ReturnType<typeof useEditor>>(null);
@@ -120,7 +228,7 @@ const TiptapEditor = ({
   const commandMenu = useCommandMenu({
     editorWrapperRef,
     commandMenuMaxHeight,
-    commands: slashCommands,
+    commands: resolvedSlashCommands,
   });
 
   const mathDialog = useMathDialog({
@@ -140,8 +248,13 @@ const TiptapEditor = ({
         : locale.placeholders.headless;
   // 当模式或附件上传能力切换时，必须重建 editor 实例，确保 SlashCommands 读取到最新回调
   const editorRecreateDeps = useMemo(
-    () => [editorMode, Boolean(onFilePreUpload)],
-    [editorMode, onFilePreUpload]
+    () => [
+      editorMode,
+      Boolean(onFilePreUpload),
+      stableExtensions,
+      editorConfigVersion,
+    ],
+    [editorMode, onFilePreUpload, stableExtensions, editorConfigVersion]
   );
 
   const { editor, runAfterOnChange } = useTiptapEditor({
@@ -166,11 +279,13 @@ const TiptapEditor = ({
       isNotionLike && onFilePreUpload
         ? fileUploadDialog.openFileUploadDialog
         : undefined,
-    commands: slashCommands,
+    getCommands: getResolvedSlashCommands,
+    locale,
     onFileAttachmentClick,
     onInlineMathClick: mathDialog.handleInlineMathClick,
     onBlockMathClick: mathDialog.handleBlockMathClick,
     recreateDeps: editorRecreateDeps,
+    extensions: stableExtensions as typeof extensions,
   });
 
   const handleImageUploadAfterChange = useCallback(
@@ -334,6 +449,7 @@ const TiptapEditor = ({
       {editor && !disabled && showHeadlessToolbar && (
         <Toolbar
           editor={editor}
+          items={resolvedToolbarItems}
           onOpenMathDialog={mathDialog.handleMathDialogFromSlash}
           onOpenImageDialog={imageDialog.openImageDialog}
           locale={locale}

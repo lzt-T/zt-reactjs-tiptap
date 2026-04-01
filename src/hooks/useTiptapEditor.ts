@@ -27,6 +27,8 @@ import { TableBackspaceHandler } from "@/extensions/TableBackspaceHandler";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import type { Node } from "@tiptap/pm/model";
 import debounce from "lodash/debounce";
+import type { AnyExtension } from "@tiptap/core";
+import type { EditorLocale } from "@/locales";
 
 type MathClickHandler = (node: Node, pos: number) => void;
 
@@ -51,12 +53,15 @@ interface UseTiptapEditorOptions {
   ) => void;
   onImageUpload: (callback: (src: string, alt?: string) => void) => void;
   onFileUpload?: (callback: (url: string, name: string) => void) => void;
-  commands: CommandItem[];
+  getCommands?: () => CommandItem[];
   onFileAttachmentClick?: (params: { url: string; name: string }) => void;
+  locale: EditorLocale;
   onInlineMathClick: MathClickHandler;
   onBlockMathClick: MathClickHandler;
   /** 控制 editor 何时重建的依赖集合（例如模式切换时重建以刷新扩展回调） */
   recreateDeps?: ReadonlyArray<unknown>;
+  /** 额外扩展：按顺序追加在内置扩展后。 */
+  extensions?: AnyExtension[];
 }
 
 export function useTiptapEditor({
@@ -76,11 +81,13 @@ export function useTiptapEditor({
   onMathDialog,
   onImageUpload,
   onFileUpload,
-  commands,
+  getCommands,
   onFileAttachmentClick,
+  locale,
   onInlineMathClick,
   onBlockMathClick,
   recreateDeps = [],
+  extensions = [],
 }: UseTiptapEditorOptions) {
   /* 是否是外部更新 */
   const isExternalUpdateRef = useRef(false);
@@ -138,57 +145,86 @@ export function useTiptapEditor({
     [onChange, onChangeDebounceMs, postChangeQueue]
   );
 
+  // 内置扩展集合（与历史行为保持一致）
+  const builtInExtensions = useMemo<AnyExtension[]>(
+    () => [
+      StarterKit,
+      ImageWithDelete,
+      FileAttachment,
+      DeletionCallbacks,
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
+      Subscript,
+      Superscript,
+      TextStyle,
+      Color,
+      Highlight.configure({
+        multicolor: true,
+      }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Placeholder.configure({
+        placeholder,
+      }),
+      Mathematics.configure({
+        inlineOptions: {
+          onClick: onInlineMathClick,
+        },
+        blockOptions: {
+          onClick: onBlockMathClick,
+        },
+        katexOptions: {
+          throwOnError: false,
+        },
+      }),
+      TableBackspaceHandler,
+      SlashCommands.configure({
+        onStart,
+        onUpdate,
+        onIndexChange,
+        onClientRect,
+        onExit,
+        onMathDialog,
+        onImageUpload,
+        onFileUpload,
+        locale,
+        // 本库内部统一走 getCommands 动态读取命令列表。
+        commands: [],
+        getCommands,
+      }),
+    ],
+    [
+      getCommands,
+      onBlockMathClick,
+      onClientRect,
+      onExit,
+      onFileUpload,
+      onImageUpload,
+      onIndexChange,
+      onInlineMathClick,
+      onMathDialog,
+      onStart,
+      onUpdate,
+      locale,
+      placeholder,
+    ]
+  );
+
+  // 最终扩展集合：内置 + 外部传入（后置）。
+  const finalExtensions = useMemo<AnyExtension[]>(
+    () => [...builtInExtensions, ...extensions],
+    [builtInExtensions, extensions]
+  );
+
   const editor = useEditor(
     {
       editable: !disabled,
-      extensions: [
-        StarterKit,
-        ImageWithDelete,
-        FileAttachment,
-        DeletionCallbacks,
-        Table.configure({ resizable: true }),
-        TableRow,
-        TableCell,
-        TableHeader,
-        Subscript,
-        Superscript,
-        TextStyle,
-        Color,
-        Highlight.configure({
-          multicolor: true,
-        }),
-        TextAlign.configure({ types: ["heading", "paragraph"] }),
-        TaskList,
-        TaskItem.configure({
-          nested: true,
-        }),
-        Placeholder.configure({
-          placeholder,
-        }),
-        Mathematics.configure({
-          inlineOptions: {
-            onClick: onInlineMathClick,
-          },
-          blockOptions: {
-            onClick: onBlockMathClick,
-          },
-          katexOptions: {
-            throwOnError: false,
-          },
-        }),
-        TableBackspaceHandler,
-        SlashCommands.configure({
-          onStart,
-          onUpdate,
-          onIndexChange,
-          onClientRect,
-          onExit,
-          onMathDialog,
-          onImageUpload,
-          onFileUpload,
-          commands,
-        }),
-      ],
+      extensions: finalExtensions,
       content: value || "<p></p>",
       onUpdate: ({ editor: ed }) => {
         if (isFirstUpdateRef.current) {

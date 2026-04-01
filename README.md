@@ -209,6 +209,12 @@ function EditorExample() {
 | `fileUploadTypes` | `string[]` | 否 | `['pdf']` | 附件可上传扩展名列表（不区分大小写），如 `['pdf', 'docx']`。会自动去空格、去重、去掉前导 `.`；为空时回落到默认 `['pdf']` |
 | `formulaCategories` | `FormulaPickerCategory[]` | 否 | 内置默认分类 | 公式选择器的分类列表。不传则使用内置分类；传入时可完全自定义或在默认基础上扩展（见下方「扩展公式分类」） |
 | `maxHeight` | `number \| string` | 否 | - | 编辑器容器的最大高度。不配置时容器为 `height: 100%`；配置后高度限制为该值，内容超出时在编辑区内滚动。数字为像素（如 `400`），字符串为任意合法 CSS 长度（如 `"50vh"`、`"20rem"`） |
+| `toolbarItems` | `ToolbarItemConfig[]` | 否 | 内置默认工具栏 | 工具栏配置：支持重排/裁剪内置按钮与追加自定义按钮 |
+| `slashCommands` | `SlashCommandConfig[]` | 否 | 内置默认斜杠命令 | 斜杠配置：支持重排/裁剪内置命令与追加自定义命令 |
+| `hideDefaultToolbarItems` | `boolean` | 否 | `false` | 为 `true` 时不注入默认工具栏项，仅渲染 `toolbarItems` |
+| `hideDefaultSlashCommands` | `boolean` | 否 | `false` | 为 `true` 时不注入默认斜杠命令，仅使用 `slashCommands` |
+| `extensions` | `AnyExtension[]` | 否 | `[]` | 外部 TipTap 扩展，按顺序追加在内置扩展后 |
+| `editorConfigVersion` | `string \| number` | 否 | - | 高级开关：值变化时强制重建 editor（用于创建期配置刷新） |
 
 ### Headless 模式下的工具栏显示
 
@@ -251,6 +257,80 @@ function EditorExample() {
 - 使用 ↑ ↓ 方向键选择
 - 按 Enter 确认插入
 - 按 Escape 关闭菜单
+
+### 工具栏自定义（重排内置项 + 新增自定义按钮）
+
+```tsx
+import { Clock3 } from 'lucide-react'
+import {
+  TiptapEditor,
+  BuiltinToolbarItemKey,
+  type ToolbarItemConfig,
+} from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
+
+const toolbarItems: ToolbarItemConfig[] = [
+  { type: 'builtin', key: BuiltinToolbarItemKey.Heading, group: 'block' },
+  { type: 'builtin', key: BuiltinToolbarItemKey.Bold, group: 'format' },
+  { type: 'builtin', key: BuiltinToolbarItemKey.Italic, group: 'format' },
+  {
+    type: 'custom',
+    key: 'insert-timestamp',
+    title: '插入时间',
+    group: 'custom',
+    icon: <Clock3 size={16} />,
+    onClick: ({ editor }) => {
+      editor.chain().focus().insertContent(`[${new Date().toLocaleString()}]`).run()
+    },
+  },
+]
+
+<TiptapEditor toolbarItems={toolbarItems} hideDefaultToolbarItems />
+```
+
+### Slash 命令自定义（保留默认 + 追加自定义命令）
+
+```tsx
+import { MessageSquareQuote } from 'lucide-react'
+import {
+  TiptapEditor,
+  type SlashCommandConfig,
+} from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
+
+const slashCommands: SlashCommandConfig[] = [
+  {
+    type: 'custom',
+    key: 'callout',
+    title: 'Callout',
+    description: '插入提示块',
+    icon: MessageSquareQuote,
+    command: ({ editor }) => {
+      editor
+        .chain()
+        .focus()
+        .insertContent('<blockquote><p>💡 提示内容</p></blockquote>')
+        .run()
+    },
+    disabled: ({ editor }) => editor.isActive('table'),
+  },
+]
+
+<TiptapEditor slashCommands={slashCommands} />
+```
+
+### 注入外部扩展（追加到内置扩展后）
+
+```tsx
+import Typography from '@tiptap/extension-typography'
+import { TiptapEditor } from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
+
+<TiptapEditor extensions={[Typography]} />
+```
+
+> 扩展顺序为：`内置扩展 -> 你传入的 extensions`。若存在同名行为冲突，请在业务侧自行确认兼容性。
+> 库内部已做浅稳定处理，`toolbarItems` / `slashCommands` / `extensions` 即使每次传新数组引用，也不会因此无意义重建 editor。
 
 ### 气泡菜单
 

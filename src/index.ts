@@ -9,6 +9,20 @@ export type {
   EditorLanguage,
 } from "./components/TiptapEditor/types";
 
+// 导出编辑器可配置项类型与默认配置构建器
+export {
+  BuiltinToolbarItemKey,
+  BuiltinSlashCommandKey,
+  createDefaultToolbarItems,
+  createDefaultSlashCommands,
+} from "./components/TiptapEditor/customization";
+export type {
+  ToolbarItemConfig,
+  SlashCommandConfig,
+  EditorActionContext,
+  EditorExternalExtension,
+} from "./components/TiptapEditor/customization";
+
 // 导出公式分类相关，便于扩展 formulaCategories
 export { FORMULA_CATEGORIES } from "./config/formulaCategories";
 export type { FormulaPickerCategory } from "./config/formulaCategories";

@@ -1,4 +1,9 @@
 import type { FormulaPickerCategory } from '@/config/formulaCategories'
+import type {
+  EditorExternalExtension,
+  SlashCommandConfig,
+  ToolbarItemConfig,
+} from './customization'
 
 export const MenuPlacement = {
   Top: 'top',
@@ -169,4 +174,42 @@ export interface TiptapEditorProps {
    * 数字表示像素（如 400），字符串为任意合法 CSS 长度（如 "50vh"、"20rem"）。
    */
   maxHeight?: number | string
+
+  /**
+   * 工具栏项配置：支持重排/裁剪内置按钮与追加自定义按钮。
+   * 不传时使用默认工具栏配置。
+   */
+  toolbarItems?: ToolbarItemConfig[]
+
+  /**
+   * 斜杠命令配置：支持重排/裁剪内置命令与追加自定义命令。
+   * 不传时使用默认斜杠配置。
+   */
+  slashCommands?: SlashCommandConfig[]
+
+  /**
+   * 是否隐藏默认工具栏项（默认 false）。
+   * - false: 默认项 + toolbarItems 合并（同 key 后者覆盖并按后者顺序移动）
+   * - true: 仅使用 toolbarItems
+   */
+  hideDefaultToolbarItems?: boolean
+
+  /**
+   * 是否隐藏默认斜杠命令（默认 false）。
+   * - false: 默认项 + slashCommands 合并（同 key 后者覆盖并按后者顺序移动）
+   * - true: 仅使用 slashCommands
+   */
+  hideDefaultSlashCommands?: boolean
+
+  /**
+   * 额外 TipTap 扩展，按顺序追加在内置扩展之后。
+   * 可用于新增节点/标记或覆盖同名行为（冲突需业务侧自行保证兼容）。
+   */
+  extensions?: EditorExternalExtension[]
+
+  /**
+   * 强制编辑器配置版本号。值变化时会强制重建 editor 实例。
+   * 用于高级场景下手动触发“创建期配置”刷新。
+   */
+  editorConfigVersion?: string | number
 }

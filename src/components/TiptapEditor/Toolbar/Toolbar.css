@@ -9,6 +9,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
+  row-gap: 4px;
   flex-wrap: wrap;
 }
 
@@ -65,6 +66,7 @@
 
 .editor-toolbar-separator {
   width: 1px;
+  flex: 0 0 1px;
   background: #e5e7eb;
   margin: 4px 4px;
   align-self: stretch;

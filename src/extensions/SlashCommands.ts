@@ -26,26 +26,15 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { EditorLocale } from '@/locales'
+import {
+  BuiltinSlashCommandKey as BuiltinSlashKey,
+} from '@/components/TiptapEditor/customization'
 
-export const SlashCommandKey = {
-  Heading1: 'heading1',
-  Heading2: 'heading2',
-  Heading3: 'heading3',
-  BulletList: 'bulletList',
-  NumberedList: 'numberedList',
-  TaskList: 'taskList',
-  InlineCode: 'inlineCode',
-  Table: 'table',
-  InlineMath: 'inlineMath',
-  BlockMath: 'blockMath',
-  Image: 'image',
-  UploadAttachment: 'uploadAttachment',
-} as const
-
+export const SlashCommandKey = BuiltinSlashKey
 export type SlashCommandKey = (typeof SlashCommandKey)[keyof typeof SlashCommandKey]
 
 export interface CommandItem {
-  key: SlashCommandKey
+  key: string
   title: string
   description?: string
   icon?: LucideIcon
@@ -55,7 +44,7 @@ export interface CommandItem {
   /** Upload attachment and insert file block link */
   fileAttachment?: boolean
   /** 为 true 时在斜杠菜单中灰显，且方向键会跳过该项 */
-  disabled?: boolean
+  disabled?: boolean | ((ctx: { editor: Editor }) => boolean)
 }
 
 export interface SlashCommandsOptions {
@@ -67,6 +56,8 @@ export interface SlashCommandsOptions {
   onMathDialog?: (type: 'inline' | 'block', initialValue: string, callback: (latex: string) => void) => void
   onImageUpload?: (callback: (src: string, alt?: string) => void) => void
   onFileUpload?: (callback: (url: string, name: string) => void) => void
+  locale: EditorLocale
+  getCommands?: () => CommandItem[]
   commands: CommandItem[]
 }
 
@@ -193,13 +184,16 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
       onMathDialog: undefined,
       onImageUpload: undefined,
       onFileUpload: undefined,
+      locale: {} as EditorLocale,
+      getCommands: undefined,
       // 占位空数组：真正的命令列表必须由调用方显式传入
       commands: [],
     }
   },
   addProseMirrorPlugins() {
-    const commands = this.options.commands
-    if (!commands || commands.length === 0) {
+    const resolveCommands = () => this.options.getCommands?.() ?? this.options.commands
+    const initialCommands = resolveCommands()
+    if (!initialCommands || initialCommands.length === 0) {
       throw new Error('[SlashCommands] commands is required and cannot be empty')
     }
 
@@ -209,6 +203,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
         char: '/',
         items: ({ query }: { query: string }) => {
           const insideTable = this.editor.isActive('table')
+          const commands = resolveCommands()
           return commands
             .filter((item) => {
               if (!item.title.toLowerCase().includes(query.toLowerCase())) return false
@@ -217,8 +212,12 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
             })
             .map((item) => ({
               ...item,
+              // 先应用业务自定义禁用，再叠加内置上下文禁用。
               disabled:
-                item.key === SlashCommandKey.Table && insideTable,
+                (typeof item.disabled === "function"
+                  ? item.disabled({ editor: this.editor })
+                  : item.disabled ?? false) ||
+                (item.key === SlashCommandKey.Table && insideTable),
             }))
         },
         command: ({ editor, range, props }: { editor: Editor; range: { from: number; to: number }; props: CommandItem }) => {
@@ -227,7 +226,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
         },
         render: () => {
           let currentIndex = 0
-          let items: CommandItem[] = commands
+          let items: CommandItem[] = initialCommands
           let currentEditor: Editor = this.editor
           let currentRange: { from: number; to: number } = { from: 0, to: 0 }
 

@@ -5,6 +5,7 @@ export { useImageUploadDialog } from "./useImageUploadDialog";
 export { useFileUploadDialog } from "./useFileUploadDialog";
 export { useTiptapEditor } from "./useTiptapEditor";
 export { useEditorCommands } from "./useEditorCommands";
+export { useStableArray } from "./useStableArray";
 export { useTableInsertRowRunAndClose } from "./useTableInsertRowRunAndClose";
 export { useTableInsertColumnRunAndClose } from "./useTableInsertColumnRunAndClose";
 export type { TableRowMenuTarget } from "./useTableInsertRowRunAndClose";

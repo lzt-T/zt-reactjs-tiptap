@@ -64,7 +64,13 @@ const CommandMenu = ({
             const Icon = item.icon;
             const isTableDisabled =
               item.key === SlashCommandKey.Table && editor?.isActive?.("table");
-            const disabled = isTableDisabled;
+            const customDisabled =
+              typeof item.disabled === "function"
+                ? editor
+                  ? item.disabled({ editor })
+                  : false
+                : !!item.disabled;
+            const disabled = isTableDisabled || customDisabled;
             return (
               <CommandItem
                 key={item.title}
