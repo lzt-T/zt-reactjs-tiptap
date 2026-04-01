@@ -21,6 +21,7 @@
 - 🔄 撤销/重做支持
 - 📐 文本对齐（左对齐、居中、右对齐、两端对齐）
 - ⬆️⬇️ 上标/下标支持
+- 🌐 国际化（i18n）：支持 `zh-CN` / `en-US`，工具栏、斜杠命令、弹窗与默认占位文案可本地化
 - 📄 HTML/DOM 转纯文本工具（与编辑器 `getText()` 一致）
 
 ## 安装
@@ -110,6 +111,28 @@ function App() {
 }
 ```
 
+### 国际化使用示例
+
+```tsx
+import { TiptapEditor } from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
+
+function App() {
+  return (
+    <>
+      {/* 强制中文 */}
+      <TiptapEditor language="zh-CN" />
+
+      {/* 强制英文 */}
+      <TiptapEditor language="en-US" />
+
+      {/* 不传 language：自动跟随浏览器语言（zh* -> zh-CN，其余 -> en-US） */}
+      <TiptapEditor />
+    </>
+  )
+}
+```
+
 ### 受控组件完整示例
 
 ```tsx
@@ -176,6 +199,7 @@ function EditorExample() {
 | `headlessToolbarMode` | `'always' \| 'on-focus'` | 否 | `'always'` | **仅在 `editorMode='headless'` 时生效**。`always`：工具栏始终显示；`on-focus`：编辑器聚焦或点击工具栏时显示，失焦到编辑器区域外时隐藏 |
 | `commandMenuMaxHeight` | `number` | 否 | `240` | 斜杠命令菜单最大高度（px） |
 | `commandMenuMinHeight` | `number` | 否 | `160` | 斜杠命令菜单最小高度（px） |
+| `language` | `'zh-CN' \| 'en-US'` | 否 | 自动解析浏览器语言（`zh* -> zh-CN`，其余 `-> en-US`） | 控制工具栏、斜杠命令、弹窗与默认 placeholder 文案 |
 | `placeholder` | `string` | 否 | NotionLike: "Type '/' for commands..."；Headless: "Start typing..." | 编辑器为空时的占位文本。不传时按模式使用上述默认值；传入后两种模式均使用该值 |
 | `disabled` | `boolean` | 否 | `false` | 是否禁用编辑器（只读） |
 | `onChangeDebounceMs` | `number` | 否 | `300` | `onChange` 防抖延迟（毫秒） |
@@ -200,6 +224,14 @@ function EditorExample() {
 ```
 
 ## 功能说明
+
+### 国际化（i18n）
+
+- 当前支持语言：`zh-CN`、`en-US`
+- 可通过 `language` 属性显式指定语言，例如：`language="zh-CN"` 或 `language="en-US"`
+- 不传 `language` 时，默认跟随浏览器语言：`zh* -> zh-CN`，其余 `-> en-US`
+- `placeholder` 优先级高于语言默认文案：传入 `placeholder` 后，会覆盖不同语言下的默认占位文本
+- 如需新增语言，可扩展 `src/locales` 下的语言文件，并在 `src/locales/index.ts` 的 `localeMap` 中注册映射
 
 ### 斜杠命令
 
