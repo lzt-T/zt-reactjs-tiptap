@@ -97,13 +97,17 @@ const TableColumnActions = ({
     }
   }, [menuOpen, floatingRefs])
 
+  const clearTableColumnStates = useCallback(() => {
+    setCurrentColumn(null)
+    setFocusedTableColCount(0)
+    setPortalTarget(null)
+    setPortalButtonPosition(null)
+  }, [])
+
   const updatePositions = useCallback(() => {
     const wrapper = editorWrapperRef.current
     if (!editor.isActive('table') || !wrapper) {
-      setCurrentColumn(null)
-      setFocusedTableColCount(0)
-      setPortalTarget(null)
-      setPortalButtonPosition(null)
+      clearTableColumnStates()
       return
     }
 
@@ -274,7 +278,7 @@ const TableColumnActions = ({
       setPortalTarget(null)
       setPortalButtonPosition(null)
     }
-  }, [editor, editorWrapperRef])
+  }, [clearTableColumnStates, editor, editorWrapperRef])
 
   useEffect(() => {
     const id = setTimeout(updatePositions, 0)

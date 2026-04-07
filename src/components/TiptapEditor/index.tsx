@@ -55,10 +55,10 @@ const noopUpdate = noop as (query: string) => void;
 const noopMathDialog = noop as (
   type: "inline" | "block",
   initial: string,
-  cb: (latex: string) => void
+  cb: (latex: string) => void,
 ) => void;
 const noopImageUpload = noop as (
-  cb: (src: string, alt?: string) => void
+  cb: (src: string, alt?: string) => void,
 ) => void;
 const EMPTY_EXTENSIONS: NonNullable<TiptapEditorProps["extensions"]> = [];
 
@@ -67,8 +67,8 @@ function normalizeFileUploadTypes(fileUploadTypes?: string[]): string[] {
     new Set(
       (fileUploadTypes ?? [])
         .map((item) => item.trim().toLowerCase().replace(/^\.+/, ""))
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
   return normalized.length > 0 ? normalized : config.DEFAULT_FILE_UPLOAD_TYPES;
 }
@@ -114,12 +114,12 @@ const TiptapEditor = ({
   // 工具栏默认配置：用于在不传配置时保持现有行为。
   const defaultToolbarItems = useMemo(
     () => createDefaultToolbarItems(locale),
-    [locale]
+    [locale],
   );
   // 斜杠默认配置：用于在不传配置时保持现有行为。
   const defaultSlashConfigs = useMemo(
     () => createDefaultSlashCommands(locale),
-    [locale]
+    [locale],
   );
 
   // 合并后的工具栏配置：默认 + 用户，后者同 key 覆盖并重排。
@@ -130,13 +130,9 @@ const TiptapEditor = ({
         stableToolbarItems as ToolbarItemConfig[] | undefined,
         hideDefaultToolbarItems,
         isBuiltinToolbarItemKey,
-        "[TiptapEditor.toolbarItems]"
+        "[TiptapEditor.toolbarItems]",
       ),
-    [
-      defaultToolbarItems,
-      stableToolbarItems,
-      hideDefaultToolbarItems,
-    ]
+    [defaultToolbarItems, stableToolbarItems, hideDefaultToolbarItems],
   );
 
   // 合并后的斜杠配置：默认 + 用户，后者同 key 覆盖并重排。
@@ -147,21 +143,22 @@ const TiptapEditor = ({
         stableSlashConfigs as SlashCommandConfig[] | undefined,
         hideDefaultSlashCommands,
         isBuiltinSlashCommandKey,
-        "[TiptapEditor.slashCommands]"
+        "[TiptapEditor.slashCommands]",
       ),
-    [
-      defaultSlashConfigs,
-      stableSlashConfigs,
-      hideDefaultSlashCommands,
-    ]
+    [defaultSlashConfigs, stableSlashConfigs, hideDefaultSlashCommands],
   );
 
   // 内置斜杠命令：用于把 builtin 配置映射回可执行命令。
-  const builtinSlashCommands = useMemo(() => createDefaultCommands(locale), [locale]);
+  const builtinSlashCommands = useMemo(
+    () => createDefaultCommands(locale),
+    [locale],
+  );
 
   // 最终斜杠命令：builtin 走默认映射，custom 直接注入。
   const resolvedSlashCommands = useMemo<CommandItem[]>(() => {
-    const builtinMap = new Map(builtinSlashCommands.map((item) => [item.key, item]));
+    const builtinMap = new Map(
+      builtinSlashCommands.map((item) => [item.key, item]),
+    );
     const result: CommandItem[] = [];
 
     for (const item of resolvedSlashConfigs) {
@@ -169,7 +166,7 @@ const TiptapEditor = ({
         const matched = builtinMap.get(item.key);
         if (!matched) {
           console.warn(
-            `[TiptapEditor.slashCommands] Unknown builtin key "${item.key}", skipped.`
+            `[TiptapEditor.slashCommands] Unknown builtin key "${item.key}", skipped.`,
           );
           continue;
         }
@@ -197,7 +194,7 @@ const TiptapEditor = ({
   /** 获取当前最新斜杠命令列表。 */
   const getResolvedSlashCommands = useCallback(
     () => resolvedSlashCommandsRef.current,
-    []
+    [],
   );
 
   // --- Refs & 状态 ---
@@ -222,6 +219,7 @@ const TiptapEditor = ({
 
   useEffect(() => {
     isEditorFocusedRef.current = isEditorFocused;
+    console.log("isEditorFocused", isEditorFocused);
   }, [isEditorFocused]);
 
   // --- Hooks：斜杠命令、公式弹窗、图片上传、编辑器实例、块级公式删除 ---
@@ -236,8 +234,8 @@ const TiptapEditor = ({
     disabledRef,
   });
 
-  const imageDialog = useImageUploadDialog();
-  const fileUploadDialog = useFileUploadDialog();
+  const imageDialog = useImageUploadDialog({ editorRef });
+  const fileUploadDialog = useFileUploadDialog({ editorRef });
   const resolvedFileUploadTypes = normalizeFileUploadTypes(fileUploadTypes);
 
   const resolvedPlaceholder =
@@ -254,7 +252,7 @@ const TiptapEditor = ({
       stableExtensions,
       editorConfigVersion,
     ],
-    [editorMode, onFilePreUpload, stableExtensions, editorConfigVersion]
+    [editorMode, onFilePreUpload, stableExtensions, editorConfigVersion],
   );
 
   const { editor, runAfterOnChange } = useTiptapEditor({
@@ -296,7 +294,7 @@ const TiptapEditor = ({
         }
       });
     },
-    [onImageUpload, runAfterOnChange]
+    [onImageUpload, runAfterOnChange],
   );
 
   const handleFileUploadAfterChange = useCallback(
@@ -307,7 +305,7 @@ const TiptapEditor = ({
         }
       });
     },
-    [onFileUpload, runAfterOnChange]
+    [onFileUpload, runAfterOnChange],
   );
 
   const { runCommandItem } = useEditorCommands(editor, {
@@ -341,7 +339,7 @@ const TiptapEditor = ({
         // 导致 Mathematics 扩展的 onClick 不触发，需在 onFocus 里补触发
         if (!isEditorFocusedRef.current) {
           const mathEl = (e.target as Element).closest(
-            ".tiptap-mathematics-render"
+            ".tiptap-mathematics-render",
           );
           if (mathEl) {
             pendingMathClickRef.current = {
@@ -409,7 +407,7 @@ const TiptapEditor = ({
       const textBefore = editor.state.doc.textBetween(
         Math.max(0, from - 50),
         from,
-        "\n"
+        "\n",
       );
       const slashIndex = textBefore.lastIndexOf("/");
       if (slashIndex !== -1) {
@@ -423,7 +421,7 @@ const TiptapEditor = ({
       runCommandItem(item);
       commandMenu.setShowCommandMenu(false);
     },
-    [editor, runCommandItem, commandMenu]
+    [editor, runCommandItem, commandMenu],
   );
 
   // --- 渲染 ---
@@ -435,14 +433,14 @@ const TiptapEditor = ({
         disabled && "is-disabled",
         !border && "no-border",
         !isNotionLike && "editor-container-headless",
-        maxHeight != null && "editor-container-has-max-height"
+        maxHeight != null && "editor-container-has-max-height",
       )}
       style={
         maxHeight != null
-          ? {
+          ? ({
               "--editor-max-height":
                 typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight,
-            } as React.CSSProperties
+            } as React.CSSProperties)
           : undefined
       }
     >
@@ -462,16 +460,16 @@ const TiptapEditor = ({
       <div
         className={cn(
           "editor-wrapper",
-          isNotionLike ? "notion-editor" : "headless-editor"
+          isNotionLike ? "notion-editor" : "headless-editor",
         )}
         ref={editorWrapperRef}
         style={
           {
-            '--table-action-padding': `${config.TABLE_ACTION_BUTTON_PADDING}px`,
+            "--table-action-padding": `${config.TABLE_ACTION_BUTTON_PADDING}px`,
           } as React.CSSProperties
         }
       >
-        {editor && !disabled && (
+        {editor && !disabled && isEditorFocused && (
           <>
             <TableRowActions
               editor={editor}

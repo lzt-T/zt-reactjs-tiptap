@@ -1,6 +1,14 @@
 import { useState, useCallback } from "react";
+import type { RefObject } from "react";
+import type { Editor } from "@tiptap/react";
 
-export function useFileUploadDialog() {
+interface UseFileUploadDialogOptions {
+  editorRef: RefObject<Editor | null>;
+}
+
+export function useFileUploadDialog({
+  editorRef,
+}: UseFileUploadDialogOptions) {
   const [showFileUploadDialog, setShowFileUploadDialog] = useState(false);
   const [fileUploadCallback, setFileUploadCallback] = useState<
     ((url: string, name: string) => void) | null
@@ -28,7 +36,9 @@ export function useFileUploadDialog() {
   const handleFileUploadCancel = useCallback(() => {
     setShowFileUploadDialog(false);
     setFileUploadCallback(null);
-  }, []);
+    // 关闭附件弹窗后恢复编辑器焦点，保证可以直接继续输入。
+    editorRef.current?.commands.focus();
+  }, [editorRef]);
 
   return {
     showFileUploadDialog,

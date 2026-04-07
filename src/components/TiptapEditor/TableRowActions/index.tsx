@@ -103,15 +103,19 @@ const TableRowActions = ({
     }
   }, [menuOpen, floatingRefs])
 
+  const clearTableRowStates = useCallback(() => {
+    setCurrentRow(null)
+    setFocusedTableRowCount(0)
+    setPortalTarget(null)
+    setPortalButtonPosition(null)
+    setTableSize(null)
+    setFocusedTableIndexForPlus(null)
+  }, [])
+
   const updatePositions = useCallback(() => {
     const wrapper = editorWrapperRef.current
     if (!editor.isActive('table') || !wrapper) {
-      setCurrentRow(null)
-      setFocusedTableRowCount(0)
-      setPortalTarget(null)
-      setPortalButtonPosition(null)
-      setTableSize(null)
-      setFocusedTableIndexForPlus(null)
+      clearTableRowStates()
       return
     }
 
@@ -301,7 +305,7 @@ const TableRowActions = ({
       setTableSize(null)
       setFocusedTableIndexForPlus(null)
     }
-  }, [editor, editorWrapperRef])
+  }, [clearTableRowStates, editor, editorWrapperRef])
 
   useEffect(() => {
     const id = setTimeout(updatePositions, 0)
