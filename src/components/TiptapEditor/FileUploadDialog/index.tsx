@@ -75,6 +75,8 @@ export interface FileUploadDialogProps {
   fileMaxSizeBytes?: number;
   fileUploadTypes?: string[];
   locale: EditorLocale;
+  /** 弹窗挂载容器，用于继承编辑器作用域主题变量 */
+  portalContainer?: HTMLElement | null;
 }
 
 const FileUploadDialog = ({
@@ -86,6 +88,7 @@ const FileUploadDialog = ({
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
   fileUploadTypes,
   locale,
+  portalContainer,
 }: FileUploadDialogProps) => {
   const resolvedFileUploadTypes = useMemo(
     () => normalizeFileUploadTypes(fileUploadTypes),
@@ -251,6 +254,7 @@ const FileUploadDialog = ({
         className="file-upload-dialog-content max-w-lg overflow-hidden flex flex-col"
         showCloseButton={false}
         onKeyDown={handleKeyDown}
+        portalContainer={portalContainer}
       >
         <DialogHeader>
           <DialogTitle>{locale.fileDialog.title}</DialogTitle>

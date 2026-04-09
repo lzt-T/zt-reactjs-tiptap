@@ -476,7 +476,7 @@ import 'zt-reactjs-tiptap/style.css'
 
 样式文件包含：
 - ✅ Tailwind CSS v4 基础样式
-- ✅ shadcn/ui 主题变量
+- ✅ 作用域化的 shadcn/ui 主题变量（仅作用于编辑器容器）
 - ✅ 编辑器组件样式
 - ✅ KaTeX 数学公式样式
 
@@ -486,11 +486,20 @@ import 'zt-reactjs-tiptap/style.css'
 
 1. **务必导入样式**：在使用编辑器的组件或入口文件顶部导入 `import 'zt-reactjs-tiptap/style.css'`
 
-2. **导入顺序**：若希望用自己项目的主题覆盖编辑器主题，请先导入 `zt-reactjs-tiptap/style.css`，再导入你的全局样式
+2. **导入顺序**：若希望用你项目的样式覆盖编辑器默认样式，建议先导入 `zt-reactjs-tiptap/style.css`，再导入你的全局样式
 
-3. **CSS 变量覆盖**：在你的全局样式中定义或覆盖 CSS 变量（如 `--primary`、`--background`、`--border` 等）
+3. **作用域主题变量**：本库的 shadcn 变量只在 `.zt-tiptap-theme` 作用域内生效，不会覆盖宿主项目的全局 `:root` 变量
 
-4. **弹层/对话框**：插入图片、公式等弹层通过 Portal 渲染到 `document.body`，库的样式为全局样式。若仍被覆盖，检查是否有全局 reset 或更高优先级的选择器影响弹层
+4. **局部主题定制**：可在宿主项目中按编辑器容器局部覆盖变量，例如：
+
+```css
+.zt-tiptap-theme {
+  --primary: oklch(0.58 0.19 260);
+  --background: oklch(0.99 0 0);
+}
+```
+
+5. **弹层/对话框**：图片、公式、附件弹层通过 Portal 挂载到编辑器容器内，继承同一套作用域变量；若样式仍异常，优先检查宿主全局 reset 或高优先级选择器
 
 ## 开发
 

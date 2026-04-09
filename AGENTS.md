@@ -97,6 +97,14 @@ pnpm preview
 - Use CSS custom properties for theming
 - Follow BEM naming for complex selectors
 
+## Modal/Portal Theme Isolation
+- Use `.zt-tiptap-theme` as the only theme scope class for editor styles.
+- Do not place editor theme variables on global `:root` in library output.
+- Editor root must include `.zt-tiptap-theme` and `text-foreground`.
+- Portal-based dialogs/modals must mount inside the editor container (via `portalContainer`), not `document.body`.
+- Keep dark mode synced by mirroring `html.dark` state onto the editor container when needed.
+- Any isolation change must also update README "样式系统" docs.
+
 ## Type Definitions
 - Define interfaces for component props
 - Use strict typing for event handlers

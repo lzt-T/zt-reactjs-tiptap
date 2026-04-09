@@ -201,8 +201,25 @@ const TiptapEditor = ({
   const editorRef = useRef<ReturnType<typeof useEditor>>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Dialog Portal 挂载点：放在编辑器容器内以继承作用域主题变量。
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
+  /** 回调 ref：在挂载/卸载时同步 Portal 容器节点到状态。 */
+  const handlePortalContainerRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setPortalContainer(node);
+    },
+    [],
+  );
   const disabledRef = useRef(disabled);
   const isNotionLike = editorMode === EditorMode.NotionLike;
+  // 记录当前全局暗色状态，用于给编辑器容器补充 dark 类。
+  const [isDocumentDark, setIsDocumentDark] = useState(
+    () =>
+      typeof document !== "undefined" &&
+      document.documentElement.classList.contains("dark"),
+  );
   const [isEditorFocused, setIsEditorFocused] = useState(false);
   /** 标记 mousedown 是否发生在容器内，用于 blur 时决定是否保留焦点状态 */
   const mouseDownInsideRef = useRef(false);
@@ -221,6 +238,27 @@ const TiptapEditor = ({
     isEditorFocusedRef.current = isEditorFocused;
     console.log("isEditorFocused", isEditorFocused);
   }, [isEditorFocused]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    // 同步 html.dark 变化，确保运行时切换主题时编辑器容器类名保持一致。
+    const syncDarkState = () => {
+      setIsDocumentDark(root.classList.contains("dark"));
+    };
+
+    syncDarkState();
+
+    const observer = new MutationObserver(syncDarkState);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   // --- Hooks：斜杠命令、公式弹窗、图片上传、编辑器实例、块级公式删除 ---
   const commandMenu = useCommandMenu({
@@ -430,6 +468,9 @@ const TiptapEditor = ({
       ref={containerRef}
       className={cn(
         "editor-container",
+        "zt-tiptap-theme",
+        "text-foreground",
+        isDocumentDark && "dark",
         disabled && "is-disabled",
         !border && "no-border",
         !isNotionLike && "editor-container-headless",
@@ -512,6 +553,7 @@ const TiptapEditor = ({
         onCancel={mathDialog.handleMathCancel}
         formulaCategories={formulaCategories}
         locale={locale}
+        portalContainer={portalContainer}
       />
       <ImageUploadDialog
         isOpen={imageDialog.showImageDialog}
@@ -521,6 +563,7 @@ const TiptapEditor = ({
         onUpload={handleImageUploadAfterChange}
         imageMaxSizeBytes={imageMaxSizeBytes}
         locale={locale}
+        portalContainer={portalContainer}
       />
       {onFilePreUpload && (
         <FileUploadDialog
@@ -532,8 +575,10 @@ const TiptapEditor = ({
           fileMaxSizeBytes={fileMaxSizeBytes}
           fileUploadTypes={resolvedFileUploadTypes}
           locale={locale}
+          portalContainer={portalContainer}
         />
       )}
+      <div ref={handlePortalContainerRef} className="zt-tiptap-portal" />
     </div>
   );
 };

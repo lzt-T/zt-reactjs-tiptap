@@ -21,6 +21,8 @@ interface MathDialogProps {
   onCancel: () => void;
   formulaCategories?: FormulaPickerCategory[];
   locale: EditorLocale;
+  /** 弹窗挂载容器，用于继承编辑器作用域主题变量 */
+  portalContainer?: HTMLElement | null;
 }
 
 const MathDialog = ({
@@ -31,6 +33,7 @@ const MathDialog = ({
   onCancel,
   formulaCategories,
   locale,
+  portalContainer,
 }: MathDialogProps) => {
   const [latex, setLatex] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -109,6 +112,7 @@ const MathDialog = ({
         className="max-w-[calc(100%-2rem)] sm:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
         showCloseButton={false}
         onOpenAutoFocus={handleOpenAutoFocus}
+        portalContainer={portalContainer}
       >
         <DialogHeader className="shrink-0">
           <DialogTitle>

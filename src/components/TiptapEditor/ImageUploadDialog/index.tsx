@@ -23,6 +23,8 @@ interface ImageUploadDialogProps {
   /** 图片最大体积（字节），超过则拒绝 */
   imageMaxSizeBytes?: number
   locale: EditorLocale
+  /** 弹窗挂载容器，用于继承编辑器作用域主题变量 */
+  portalContainer?: HTMLElement | null
 }
 
 const ImageUploadDialog = ({
@@ -33,6 +35,7 @@ const ImageUploadDialog = ({
   onUpload,
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
   locale,
+  portalContainer,
 }: ImageUploadDialogProps) => {
   const [uploadType, setUploadType] = useState<'file' | 'url'>('file')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -213,6 +216,7 @@ const ImageUploadDialog = ({
         className="image-upload-dialog-content max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
         showCloseButton={false}
         onKeyDown={handleKeyDown}
+        portalContainer={portalContainer}
       >
         <DialogHeader>
           <DialogTitle>{locale.imageDialog.title}</DialogTitle>
