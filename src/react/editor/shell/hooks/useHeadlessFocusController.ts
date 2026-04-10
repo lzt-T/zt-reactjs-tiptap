@@ -126,7 +126,6 @@ export function useHeadlessFocusController({
 
     /** 失焦后按点击位置决定是否保留聚焦态。 */
     const onBlur = () => {
-      setIsEditorFocusStable(false);
       if (focusStableRafIdRef.current != null) {
         cancelAnimationFrame(focusStableRafIdRef.current);
         focusStableRafIdRef.current = null;
@@ -138,6 +137,7 @@ export function useHeadlessFocusController({
           !isInsideLanguageMenu(document.activeElement)
         ) {
           setIsEditorFocused(false);
+          setIsEditorFocusStable(false);
         }
       });
     };
