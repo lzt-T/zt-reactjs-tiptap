@@ -22,6 +22,7 @@ export interface UseEditorOverlayPositionOptions {
   editorWrapperRef: React.RefObject<HTMLDivElement | null>;
   defaultPlacement?: MenuPlacement;
   placementThreshold?: number;
+  lockPlacement?: boolean;
   horizontalAlign?: EditorOverlayHorizontalAlign;
   verticalMode?: EditorOverlayVerticalMode;
   horizontalOffset?: number;
@@ -34,6 +35,7 @@ export interface UseEditorOverlayPositionOptions {
 export interface UpdateEditorOverlayPositionOptions {
   defaultPlacement?: MenuPlacement;
   placementThreshold?: number;
+  lockPlacement?: boolean;
   horizontalAlign?: EditorOverlayHorizontalAlign;
   verticalMode?: EditorOverlayVerticalMode;
   horizontalOffset?: number;
@@ -87,6 +89,7 @@ export function useEditorOverlayPosition({
   editorWrapperRef,
   defaultPlacement = DEFAULT_PLACEMENT,
   placementThreshold = DEFAULT_PLACEMENT_THRESHOLD,
+  lockPlacement = false,
   horizontalAlign = "start",
   verticalMode = "outside",
   horizontalOffset = DEFAULT_HORIZONTAL_OFFSET,
@@ -133,6 +136,9 @@ export function useEditorOverlayPosition({
       // 决定何时从默认方向切换到反方向展开。
       const resolvedThreshold =
         overrideOptions?.placementThreshold ?? placementThreshold;
+      // 控制是否锁定浮层方向，避免因可用空间变化而翻转。
+      const resolvedLockPlacement =
+        overrideOptions?.lockPlacement ?? lockPlacement;
       // 决定浮层与锚点在水平方向上的对齐方式。
       const resolvedHorizontalAlign =
         overrideOptions?.horizontalAlign ?? horizontalAlign;
@@ -182,12 +188,14 @@ export function useEditorOverlayPosition({
       // 锚点下方在可视区域中的可用空间。
       const spaceBelow = wrapperRect.bottom - rect.bottom;
       // 根据上下可用空间决定最终展开方向。
-      const placement = resolvePlacement(
-        resolvedPlacement,
-        spaceAbove,
-        spaceBelow,
-        resolvedThreshold,
-      );
+      const placement = resolvedLockPlacement
+        ? resolvedPlacement
+        : resolvePlacement(
+            resolvedPlacement,
+            spaceAbove,
+            spaceBelow,
+            resolvedThreshold,
+          );
 
       // 计算未裁切前的纵向位置。
       const nextTop =
@@ -227,6 +235,7 @@ export function useEditorOverlayPosition({
       editorWrapperRef,
       horizontalAlign,
       horizontalOffset,
+      lockPlacement,
       placementThreshold,
       trackScrollLeft,
       verticalMode,

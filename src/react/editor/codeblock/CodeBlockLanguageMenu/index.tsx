@@ -76,10 +76,13 @@ export default function CodeBlockLanguageMenu({
   const { position, overlayRef, updatePosition, clearPosition } =
     useEditorOverlayPosition({
       editorWrapperRef,
-      placementThreshold: 260,
+      // 触发器位置固定在代码块下方，不因下拉面板可用空间而翻转。
+      lockPlacement: true,
       horizontalAlign: "end",
-      verticalMode: "inside-bottom",
-      horizontalOffset: CODE_BLOCK_LANGUAGE_MENU_INSET,
+      // 语言选择器放在代码块底边外侧，而不是内容区内部。
+      verticalMode: "outside",
+      // 右边缘与代码块右边缘贴齐，不再额外向左缩进。
+      horizontalOffset: 0,
       verticalOffset: CODE_BLOCK_LANGUAGE_MENU_INSET,
       boundaryInset: CODE_BLOCK_LANGUAGE_MENU_INSET,
     });
@@ -189,7 +192,6 @@ export default function CodeBlockLanguageMenu({
         <SelectContent
           container={portalContainer}
           position="popper"
-          side={position.placement}
           align="end"
           sideOffset={6}
           className="code-block-language-select-content"
