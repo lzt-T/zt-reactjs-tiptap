@@ -1,5 +1,32 @@
+.zt-tiptap-theme {
+  --code-block-bg: #f8fafc;
+  --code-block-fg: color-mix(in oklab, var(--foreground) 88%, var(--muted-foreground) 12%);
+  --code-block-border: color-mix(in oklab, var(--border) 90%, var(--foreground) 10%);
+  --code-token-comment: color-mix(in oklab, var(--muted-foreground) 86%, var(--foreground) 14%);
+  --code-token-keyword: oklch(0.58 0.16 10);
+  --code-token-string: oklch(0.56 0.14 150);
+  --code-token-number: oklch(0.58 0.13 255);
+}
+
+.dark .zt-tiptap-theme,
+.zt-tiptap-theme.dark {
+  --code-block-bg: color-mix(in oklab, var(--muted) 72%, var(--card) 28%);
+  --code-block-fg: color-mix(in oklab, var(--foreground) 94%, var(--muted-foreground) 6%);
+  --code-block-border: color-mix(in oklab, var(--border) 80%, var(--foreground) 20%);
+  --code-token-comment: color-mix(in oklab, var(--muted-foreground) 94%, var(--foreground) 6%);
+  --code-token-keyword: oklch(0.73 0.13 8);
+  --code-token-string: oklch(0.78 0.1 150);
+  --code-token-number: oklch(0.75 0.11 255);
+}
+
 .editor-wrapper .ProseMirror pre {
   position: relative;
+  background: var(--code-block-bg);
+  color: var(--code-block-fg);
+  padding: 1em;
+  border-radius: 8px;
+  border: 1px solid var(--code-block-border);
+  overflow-x: auto;
 }
 
 .editor-wrapper .ProseMirror pre code {
@@ -8,7 +35,7 @@
 
 .editor-wrapper .ProseMirror .hljs-comment,
 .editor-wrapper .ProseMirror .hljs-quote {
-  color: #94a3b8;
+  color: var(--code-token-comment);
 }
 
 .editor-wrapper .ProseMirror .hljs-keyword,
@@ -16,7 +43,7 @@
 .editor-wrapper .ProseMirror .hljs-literal,
 .editor-wrapper .ProseMirror .hljs-section,
 .editor-wrapper .ProseMirror .hljs-link {
-  color: #fda4af;
+  color: var(--code-token-keyword);
 }
 
 .editor-wrapper .ProseMirror .hljs-string,
@@ -30,7 +57,7 @@
 .editor-wrapper .ProseMirror .hljs-variable,
 .editor-wrapper .ProseMirror .hljs-template-tag,
 .editor-wrapper .ProseMirror .hljs-template-variable {
-  color: #86efac;
+  color: var(--code-token-string);
 }
 
 .editor-wrapper .ProseMirror .hljs-number,
@@ -44,7 +71,7 @@
 .editor-wrapper .ProseMirror .hljs-selector-class,
 .editor-wrapper .ProseMirror .hljs-selector-attr,
 .editor-wrapper .ProseMirror .hljs-selector-pseudo {
-  color: #93c5fd;
+  color: var(--code-token-number);
 }
 
 .editor-wrapper .ProseMirror .hljs-emphasis {

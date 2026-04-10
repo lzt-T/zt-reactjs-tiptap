@@ -3,4 +3,12 @@
 /* 导入共享主题（包含 Tailwind、shadcn、KaTeX 和所有 CSS 变量） */
 @import "./theme.css";
 
+/* 库输出仅在编辑器主题作用域内应用基础边框/描边颜色映射，避免污染宿主全局样式。 */
+@layer base {
+  .zt-tiptap-theme,
+  .zt-tiptap-theme * {
+    @apply border-border outline-ring/50;
+  }
+}
+
 

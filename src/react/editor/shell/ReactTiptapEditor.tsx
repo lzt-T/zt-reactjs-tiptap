@@ -85,7 +85,7 @@ function normalizeFileUploadTypes(fileUploadTypes?: string[]): string[] {
 
 function normalizeCodeBlockLanguages(
   languages: CodeBlockLanguageOption[] | undefined,
-  localePlainTextLabel: string
+  localePlainTextLabel: string,
 ): CodeBlockLanguageOption[] {
   const source =
     languages && languages.length > 0
@@ -93,14 +93,15 @@ function normalizeCodeBlockLanguages(
       : DEFAULT_CODE_BLOCK_LANGUAGES.map((item) =>
           item.value === "plaintext"
             ? { ...item, label: localePlainTextLabel }
-            : item
+            : item,
         );
   const deduped = new Map<string, CodeBlockLanguageOption>();
   for (const item of source) {
     const raw = item.value?.trim();
     if (!raw) continue;
     const resolved = resolveCodeBlockLanguage(raw, DEFAULT_CODE_BLOCK_LANGUAGE);
-    if (!isRegisteredCodeBlockLanguage(resolved) || deduped.has(resolved)) continue;
+    if (!isRegisteredCodeBlockLanguage(resolved) || deduped.has(resolved))
+      continue;
     deduped.set(resolved, {
       value: resolved,
       label: (item.label ?? "").trim() || resolved,
@@ -157,11 +158,15 @@ const ReactTiptapEditor = ({
   const locale = resolveEditorLocale(language);
   const resolvedDefaultCodeBlockLanguage = resolveCodeBlockLanguage(
     defaultCodeBlockLanguage,
-    DEFAULT_CODE_BLOCK_LANGUAGE
+    DEFAULT_CODE_BLOCK_LANGUAGE,
   );
   const resolvedCodeBlockLanguages = useMemo(
-    () => normalizeCodeBlockLanguages(codeBlockLanguages, locale.codeBlock.plainText),
-    [codeBlockLanguages, locale.codeBlock.plainText]
+    () =>
+      normalizeCodeBlockLanguages(
+        codeBlockLanguages,
+        locale.codeBlock.plainText,
+      ),
+    [codeBlockLanguages, locale.codeBlock.plainText],
   );
   // 工具栏默认配置：用于在不传配置时保持现有行为。
   const defaultToolbarItems = useMemo(
@@ -289,11 +294,14 @@ const ReactTiptapEditor = ({
     [],
   );
 
-  const isInsideCodeBlockLanguageSelect = useCallback((target: EventTarget | null) => {
-    if (!(target instanceof Element)) return false;
-    if (codeBlockLanguageMenuRootRef.current?.contains(target)) return true;
-    return !!target.closest(".code-block-language-select-content");
-  }, []);
+  const isInsideCodeBlockLanguageSelect = useCallback(
+    (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false;
+      if (codeBlockLanguageMenuRootRef.current?.contains(target)) return true;
+      return !!target.closest(".code-block-language-select-content");
+    },
+    [],
+  );
 
   useEffect(() => {
     disabledRef.current = disabled;
@@ -301,7 +309,6 @@ const ReactTiptapEditor = ({
 
   useEffect(() => {
     isEditorFocusedRef.current = isEditorFocused;
-    console.log("isEditorFocused", isEditorFocused);
   }, [isEditorFocused]);
 
   useEffect(() => {
@@ -508,11 +515,8 @@ const ReactTiptapEditor = ({
     !isNotionLike &&
     (headlessToolbarMode === HeadlessToolbarMode.Always ||
       (headlessToolbarMode === HeadlessToolbarMode.OnFocus && isEditorFocused));
-  /** 代码语言菜单显示门控：Headless + on-focus 时跟随 isEditorFocused，其它场景保持显示。 */
-  const showCodeBlockLanguageMenu =
-    isNotionLike ||
-    headlessToolbarMode !== HeadlessToolbarMode.OnFocus ||
-    isEditorFocused;
+  /** 代码语言菜单显示门控：统一跟随编辑器焦点状态。 */
+  const showCodeBlockLanguageMenu = isEditorFocused;
 
   /** 斜杠命令选中后执行：先删除 "/" 及后续输入，再执行对应命令 */
   const handleCommand = useCallback(
@@ -566,6 +570,7 @@ const ReactTiptapEditor = ({
         <Toolbar
           editor={editor}
           items={resolvedToolbarItems}
+          isEditorFocused={isEditorFocused}
           onOpenMathDialog={mathDialog.handleMathDialogFromSlash}
           onOpenImageDialog={imageDialog.openImageDialog}
           locale={locale}

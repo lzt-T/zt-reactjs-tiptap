@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   ReactTiptapEditor,
+  EditorMode,
   htmlToPlainText,
 } from "../../../src/index";
 import "./App.css";
@@ -113,7 +114,7 @@ function App() {
       >
         <ReactTiptapEditor
           disabled={disabled}
-          // editorMode={EditorMode.Headless}
+          editorMode={EditorMode.Headless}
           value={content}
           onChange={(str: string) => {
             console.log("str", str);
