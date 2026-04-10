@@ -7,22 +7,11 @@
  *
  * 功能：数学公式（行内/块级）、图片上传、表格、任务列表等。
  */
-import { useEditor, EditorContent } from "@tiptap/react";
-import {
-  createDefaultCommands,
-  type CommandItem,
-} from "@/core/extensions/SlashCommands";
-import CommandMenu from "@/react/editor/menus/CommandMenu";
-import Toolbar from "@/react/editor/toolbar/Toolbar";
-import CodeBlockLanguageMenu from "@/react/editor/codeblock/CodeBlockLanguageMenu";
-import TableRowActions from "@/react/editor/table/TableRowActions";
-import TableColumnActions from "@/react/editor/table/TableColumnActions";
-import BubbleMenu from "@/react/editor/menus/BubbleMenu";
-import MathDialog from "@/react/editor/dialogs/MathDialog";
-import ImageUploadDialog from "@/react/editor/dialogs/ImageUploadDialog";
-import FileUploadDialog from "@/react/editor/dialogs/FileUploadDialog";
+import type { Editor } from "@tiptap/react";
+import type { CommandItem } from "@/core/extensions/SlashCommands";
 import "@/react/editor/styles/TiptapEditor.css";
-import { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import { useRef, useEffect, useCallback } from "react";
+import type { CSSProperties } from "react";
 import type { TiptapEditorProps } from "@/react/editor/types";
 import {
   useBlockMathDeleteButton,
@@ -32,89 +21,41 @@ import {
   useFileUploadDialog,
   useTiptapEditor,
   useEditorCommands,
-  useStableArray,
 } from "@/react/hooks";
-import { config } from "@/shared/config";
 import {
   DEFAULT_CODE_BLOCK_LANGUAGE,
-  DEFAULT_CODE_BLOCK_LANGUAGES,
-  type CodeBlockLanguageOption,
+  config,
 } from "@/shared/config";
 import { cn } from "@/shared/utils/utils";
-import { EditorMode, HeadlessToolbarMode } from "@/react/editor/types";
+import {
+  EditorMode,
+  HeadlessToolbarMode,
+} from "@/react/editor/types";
 import { resolveEditorLocale } from "@/shared/locales";
-import {
-  createDefaultToolbarItems,
-  createDefaultSlashCommands,
-  isBuiltinToolbarItemKey,
-  isBuiltinSlashCommandKey,
-  mergeConfigItems,
-  type ToolbarItemConfig,
-  type SlashCommandConfig,
-} from "@/react/editor/customization";
-import {
-  resolveCodeBlockLanguage,
-  isRegisteredCodeBlockLanguage,
-} from "@/core/extensions/codeBlockLowlight";
+import { useEditorResolvedConfig } from "@/react/editor/shell/hooks/useEditorResolvedConfig";
+import { useEditorThemePortalState } from "@/react/editor/shell/hooks/useEditorThemePortalState";
+import { useHeadlessFocusController } from "@/react/editor/shell/hooks/useHeadlessFocusController";
+import EditorSurface from "@/react/editor/shell/components/EditorSurface";
+import EditorDialogs from "@/react/editor/shell/components/EditorDialogs";
 
 /** Headless 模式下斜杠相关回调用空函数，避免传入 SlashCommands */
 const noop = () => {};
+// 空矩形回调。
 const noopRect = noop as (rect: DOMRect | null) => void;
+// 空索引回调。
 const noopIndex = noop as (index: number) => void;
+// 空查询回调。
 const noopUpdate = noop as (query: string) => void;
+// 空数学弹窗回调。
 const noopMathDialog = noop as (
   type: "inline" | "block",
   initial: string,
   cb: (latex: string) => void,
 ) => void;
+// 空图片上传回调。
 const noopImageUpload = noop as (
   cb: (src: string, alt?: string) => void,
 ) => void;
-const EMPTY_EXTENSIONS: NonNullable<TiptapEditorProps["extensions"]> = [];
-
-function normalizeFileUploadTypes(fileUploadTypes?: string[]): string[] {
-  const normalized = Array.from(
-    new Set(
-      (fileUploadTypes ?? [])
-        .map((item) => item.trim().toLowerCase().replace(/^\.+/, ""))
-        .filter(Boolean),
-    ),
-  );
-  return normalized.length > 0 ? normalized : config.DEFAULT_FILE_UPLOAD_TYPES;
-}
-
-function normalizeCodeBlockLanguages(
-  languages: CodeBlockLanguageOption[] | undefined,
-  localePlainTextLabel: string,
-): CodeBlockLanguageOption[] {
-  const source =
-    languages && languages.length > 0
-      ? languages
-      : DEFAULT_CODE_BLOCK_LANGUAGES.map((item) =>
-          item.value === "plaintext"
-            ? { ...item, label: localePlainTextLabel }
-            : item,
-        );
-  const deduped = new Map<string, CodeBlockLanguageOption>();
-  for (const item of source) {
-    const raw = item.value?.trim();
-    if (!raw) continue;
-    const resolved = resolveCodeBlockLanguage(raw, DEFAULT_CODE_BLOCK_LANGUAGE);
-    if (!isRegisteredCodeBlockLanguage(resolved) || deduped.has(resolved))
-      continue;
-    deduped.set(resolved, {
-      value: resolved,
-      label: (item.label ?? "").trim() || resolved,
-    });
-  }
-  if (!deduped.has(DEFAULT_CODE_BLOCK_LANGUAGE)) {
-    deduped.set(DEFAULT_CODE_BLOCK_LANGUAGE, {
-      value: DEFAULT_CODE_BLOCK_LANGUAGE,
-      label: localePlainTextLabel,
-    });
-  }
-  return Array.from(deduped.values());
-}
 
 const ReactTiptapEditor = ({
   editorMode = EditorMode.NotionLike,
@@ -146,279 +87,117 @@ const ReactTiptapEditor = ({
   slashCommands,
   hideDefaultToolbarItems = false,
   hideDefaultSlashCommands = false,
-  extensions = EMPTY_EXTENSIONS,
+  extensions,
   editorConfigVersion,
 }: TiptapEditorProps) => {
-  // 对外部数组配置做浅稳定，避免仅引用变化触发后续链式重建。
-  const stableExtensions = useStableArray(extensions) ?? EMPTY_EXTENSIONS;
-  const stableToolbarItems = useStableArray(toolbarItems);
-  const stableSlashConfigs = useStableArray(slashCommands);
-
-  // 当前语言解析后的文案集合
+  // 当前语言解析后的文案集合。
   const locale = resolveEditorLocale(language);
-  const resolvedDefaultCodeBlockLanguage = resolveCodeBlockLanguage(
+  // 配置解析结果：工具栏、斜杠命令、placeholder、上传类型、扩展重建依赖等。
+  const resolvedConfig = useEditorResolvedConfig({
+    editorMode,
+    placeholder,
+    fileUploadTypes,
+    codeBlockLanguages,
     defaultCodeBlockLanguage,
-    DEFAULT_CODE_BLOCK_LANGUAGE,
-  );
-  const resolvedCodeBlockLanguages = useMemo(
-    () =>
-      normalizeCodeBlockLanguages(
-        codeBlockLanguages,
-        locale.codeBlock.plainText,
-      ),
-    [codeBlockLanguages, locale.codeBlock.plainText],
-  );
-  // 工具栏默认配置：用于在不传配置时保持现有行为。
-  const defaultToolbarItems = useMemo(
-    () => createDefaultToolbarItems(locale),
-    [locale],
-  );
-  // 斜杠默认配置：用于在不传配置时保持现有行为。
-  const defaultSlashConfigs = useMemo(
-    () => createDefaultSlashCommands(locale),
-    [locale],
-  );
+    toolbarItems,
+    slashCommands,
+    hideDefaultToolbarItems,
+    hideDefaultSlashCommands,
+    extensions,
+    onFilePreUpload,
+    editorConfigVersion,
+    locale,
+  });
 
-  // 合并后的工具栏配置：默认 + 用户，后者同 key 覆盖并重排。
-  const resolvedToolbarItems = useMemo<ToolbarItemConfig[]>(
-    () =>
-      mergeConfigItems(
-        defaultToolbarItems,
-        stableToolbarItems as ToolbarItemConfig[] | undefined,
-        hideDefaultToolbarItems,
-        isBuiltinToolbarItemKey,
-        "[ReactTiptapEditor.toolbarItems]",
-      ),
-    [defaultToolbarItems, stableToolbarItems, hideDefaultToolbarItems],
-  );
-
-  // 合并后的斜杠配置：默认 + 用户，后者同 key 覆盖并重排。
-  const resolvedSlashConfigs = useMemo<SlashCommandConfig[]>(
-    () =>
-      mergeConfigItems(
-        defaultSlashConfigs,
-        stableSlashConfigs as SlashCommandConfig[] | undefined,
-        hideDefaultSlashCommands,
-        isBuiltinSlashCommandKey,
-        "[ReactTiptapEditor.slashCommands]",
-      ),
-    [defaultSlashConfigs, stableSlashConfigs, hideDefaultSlashCommands],
-  );
-
-  // 内置斜杠命令：用于把 builtin 配置映射回可执行命令。
-  const builtinSlashCommands = useMemo(
-    () => createDefaultCommands(locale, resolvedDefaultCodeBlockLanguage),
-    [locale, resolvedDefaultCodeBlockLanguage],
-  );
-
-  // 最终斜杠命令：builtin 走默认映射，custom 直接注入。
-  const resolvedSlashCommands = useMemo<CommandItem[]>(() => {
-    const builtinMap = new Map(
-      builtinSlashCommands.map((item) => [item.key, item]),
-    );
-    const result: CommandItem[] = [];
-
-    for (const item of resolvedSlashConfigs) {
-      if (item.type === "builtin") {
-        const matched = builtinMap.get(item.key);
-        if (!matched) {
-          console.warn(
-            `[ReactTiptapEditor.slashCommands] Unknown builtin key "${item.key}", skipped.`,
-          );
-          continue;
-        }
-        result.push(matched);
-        continue;
-      }
-
-      result.push({
-        key: item.key,
-        title: item.title,
-        description: item.description,
-        icon: item.icon,
-        command: item.command,
-        disabled: item.disabled,
-      });
-    }
-
-    return result;
-  }, [builtinSlashCommands, resolvedSlashConfigs]);
-  /** 运行期命令源：给 SlashCommands 扩展动态读取，避免闭包固化。 */
-  const resolvedSlashCommandsRef = useRef<CommandItem[]>(resolvedSlashCommands);
-  useEffect(() => {
-    resolvedSlashCommandsRef.current = resolvedSlashCommands;
-  }, [resolvedSlashCommands]);
-  /** 获取当前最新斜杠命令列表。 */
-  const getResolvedSlashCommands = useCallback(
-    () => resolvedSlashCommandsRef.current,
-    [],
-  );
-
-  // --- Refs & 状态 ---
-  const editorRef = useRef<ReturnType<typeof useEditor>>(null);
+  // 编辑器实例引用。
+  const editorRef = useRef<Editor | null>(null);
+  // 编辑器内容包裹层引用。
   const editorWrapperRef = useRef<HTMLDivElement>(null);
+  // 编辑器根容器引用。
   const containerRef = useRef<HTMLDivElement>(null);
-  // Dialog Portal 挂载点：放在编辑器容器内以继承作用域主题变量。
-  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(
-    null,
-  );
-  /** 回调 ref：在挂载/卸载时同步 Portal 容器节点到状态。 */
-  const handlePortalContainerRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      setPortalContainer(node);
-    },
-    [],
-  );
+  // disabled 状态引用，供事件回调读取最新值。
   const disabledRef = useRef(disabled);
-  const codeBlockLanguageMenuRootRef = useRef<HTMLDivElement | null>(null);
-  const isNotionLike = editorMode === EditorMode.NotionLike;
-  // 记录当前全局暗色状态，用于给编辑器容器补充 dark 类。
-  const [isDocumentDark, setIsDocumentDark] = useState(
-    () =>
-      typeof document !== "undefined" &&
-      document.documentElement.classList.contains("dark"),
-  );
-  const [isEditorFocused, setIsEditorFocused] = useState(false);
-  /** 标记 mousedown 是否发生在容器内，用于 blur 时决定是否保留焦点状态 */
-  const mouseDownInsideRef = useRef(false);
-  /** 编辑器未聚焦时点击公式，记录该元素，在 onFocus 里补触发公式弹窗 */
-  const pendingMathClickRef = useRef<{
-    el: Element;
-    isBlock: boolean;
-  } | null>(null);
-  const isEditorFocusedRef = useRef(false);
-  const setCodeBlockLanguageMenuRoot = useCallback(
-    (node: HTMLDivElement | null) => {
-      codeBlockLanguageMenuRootRef.current = node;
-    },
-    [],
-  );
 
-  const isInsideCodeBlockLanguageSelect = useCallback(
-    (target: EventTarget | null) => {
-      if (!(target instanceof Element)) return false;
-      if (codeBlockLanguageMenuRootRef.current?.contains(target)) return true;
-      return !!target.closest(".code-block-language-select-content");
-    },
-    [],
-  );
+  // 主题与 portal 状态。
+  const themePortalState = useEditorThemePortalState();
 
   useEffect(() => {
     disabledRef.current = disabled;
   }, [disabled]);
 
-  useEffect(() => {
-    isEditorFocusedRef.current = isEditorFocused;
-  }, [isEditorFocused]);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    // 同步 html.dark 变化，确保运行时切换主题时编辑器容器类名保持一致。
-    const syncDarkState = () => {
-      setIsDocumentDark(root.classList.contains("dark"));
-    };
-
-    syncDarkState();
-
-    const observer = new MutationObserver(syncDarkState);
-    observer.observe(root, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => {
-      observer.disconnect();
-    };
+  /** 判断事件目标是否位于代码块语言菜单浮层。 */
+  const isInsideCodeBlockLanguageSelect = useCallback((target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    return !!target.closest(".code-block-language-select-content");
   }, []);
 
-  // --- Hooks：斜杠命令、公式弹窗、图片上传、编辑器实例、块级公式删除 ---
+  // 斜杠命令菜单状态。
   const commandMenu = useCommandMenu({
     editorWrapperRef,
     commandMenuMaxHeight,
-    commands: resolvedSlashCommands,
+    commands: resolvedConfig.resolvedSlashCommands,
   });
 
+  // 数学公式弹窗状态。
   const mathDialog = useMathDialog({
     editorRef,
     disabledRef,
   });
 
+  // 图片弹窗状态。
   const imageDialog = useImageUploadDialog({ editorRef });
+  // 附件弹窗状态。
   const fileUploadDialog = useFileUploadDialog({ editorRef });
-  const resolvedFileUploadTypes = normalizeFileUploadTypes(fileUploadTypes);
 
-  const resolvedPlaceholder =
-    placeholder !== undefined
-      ? placeholder
-      : editorMode === EditorMode.NotionLike
-        ? locale.placeholders.notionLike
-        : locale.placeholders.headless;
-  // 当模式或附件上传能力切换时，必须重建 editor 实例，确保 SlashCommands 读取到最新回调
-  const editorRecreateDeps = useMemo(
-    () => [
-      editorMode,
-      Boolean(onFilePreUpload),
-      stableExtensions,
-      editorConfigVersion,
-    ],
-    [editorMode, onFilePreUpload, stableExtensions, editorConfigVersion],
-  );
-
+  // TipTap 编辑器实例。
   const { editor, runAfterOnChange } = useTiptapEditor({
     value,
-    placeholder: resolvedPlaceholder,
+    placeholder: resolvedConfig.resolvedPlaceholder,
     disabled,
     editorRef,
     onChangeDebounceMs,
     onChange,
     onImageDelete,
     onFileDelete,
-    onStart: isNotionLike ? commandMenu.handleStart : noop,
-    onUpdate: isNotionLike ? commandMenu.handleUpdate : noopUpdate,
-    onIndexChange: isNotionLike ? commandMenu.handleIndexChange : noopIndex,
-    onClientRect: isNotionLike ? commandMenu.handleClientRect : noopRect,
-    onExit: isNotionLike ? commandMenu.handleExit : noop,
-    onMathDialog: isNotionLike
+    onStart: resolvedConfig.isNotionLike ? commandMenu.handleStart : noop,
+    onUpdate: resolvedConfig.isNotionLike ? commandMenu.handleUpdate : noopUpdate,
+    onIndexChange: resolvedConfig.isNotionLike
+      ? commandMenu.handleIndexChange
+      : noopIndex,
+    onClientRect: resolvedConfig.isNotionLike ? commandMenu.handleClientRect : noopRect,
+    onExit: resolvedConfig.isNotionLike ? commandMenu.handleExit : noop,
+    onMathDialog: resolvedConfig.isNotionLike
       ? mathDialog.handleMathDialogFromSlash
       : noopMathDialog,
-    onImageUpload: isNotionLike ? imageDialog.openImageDialog : noopImageUpload,
+    onImageUpload: resolvedConfig.isNotionLike
+      ? imageDialog.openImageDialog
+      : noopImageUpload,
     onFileUpload:
-      isNotionLike && onFilePreUpload
+      resolvedConfig.isNotionLike && onFilePreUpload
         ? fileUploadDialog.openFileUploadDialog
         : undefined,
-    getCommands: getResolvedSlashCommands,
+    getCommands: resolvedConfig.getResolvedSlashCommands,
     locale,
-    defaultCodeBlockLanguage: resolvedDefaultCodeBlockLanguage,
+    defaultCodeBlockLanguage: resolvedConfig.resolvedDefaultCodeBlockLanguage,
     onFileAttachmentClick,
     onInlineMathClick: mathDialog.handleInlineMathClick,
     onBlockMathClick: mathDialog.handleBlockMathClick,
-    recreateDeps: editorRecreateDeps,
-    extensions: stableExtensions as typeof extensions,
+    recreateDeps: resolvedConfig.editorRecreateDeps,
+    extensions: resolvedConfig.stableExtensions as typeof extensions,
   });
 
-  const handleImageUploadAfterChange = useCallback(
-    (payload: { file: File; url: string; alt?: string }) => {
-      runAfterOnChange(() => {
-        if (onImageUpload) {
-          void Promise.resolve(onImageUpload(payload));
-        }
-      });
-    },
-    [onImageUpload, runAfterOnChange],
-  );
+  // Headless 模式焦点控制。
+  const focusController = useHeadlessFocusController({
+    editor,
+    isNotionLike: resolvedConfig.isNotionLike,
+    containerRef,
+    headlessToolbarMode,
+    isInsideCodeBlockLanguageSelect,
+    onInlineMathClick: mathDialog.handleInlineMathClick,
+    onBlockMathClick: mathDialog.handleBlockMathClick,
+  });
 
-  const handleFileUploadAfterChange = useCallback(
-    (payload: { file: File; url: string; name: string }) => {
-      runAfterOnChange(() => {
-        if (onFileUpload) {
-          void Promise.resolve(onFileUpload(payload));
-        }
-      });
-    },
-    [onFileUpload, runAfterOnChange],
-  );
-
+  // 编辑器命令执行器。
   const { runCommandItem } = useEditorCommands(editor, {
     onOpenMathDialog: mathDialog.handleMathDialogFromSlash,
     onOpenImageDialog: imageDialog.openImageDialog,
@@ -433,92 +212,31 @@ const ReactTiptapEditor = ({
     disabled,
   });
 
-  /** Headless 模式：监听 focus/blur 与容器内 mousedown，用于工具栏显示与未聚焦时点击公式的补触发 */
-  useEffect(() => {
-    if (!editor || isNotionLike) return;
-
-    const handleMouseDown = (e: MouseEvent) => {
-      // 只要点击发生在容器内，就标记为内部点击，阻止 onBlur 清除焦点状态
-      if (
-        containerRef.current?.contains(e.target as Node) ||
-        isInsideCodeBlockLanguageSelect(e.target)
-      ) {
-        mouseDownInsideRef.current = true;
-        // 延迟重置，确保 blur 处理链路全部完成后再允许下次触发
-        setTimeout(() => {
-          mouseDownInsideRef.current = false;
-        }, 300);
-
-        // 编辑器未聚焦时点击公式：ProseMirror 会把 mousedown 当作"聚焦点击"
-        // 导致 Mathematics 扩展的 onClick 不触发，需在 onFocus 里补触发
-        if (!isEditorFocusedRef.current) {
-          const mathEl = (e.target as Element).closest(
-            ".tiptap-mathematics-render",
-          );
-          if (mathEl) {
-            pendingMathClickRef.current = {
-              el: mathEl,
-              isBlock: mathEl.getAttribute("data-type") === "block-math",
-            };
-          }
-        }
-      }
-    };
-
-    const onFocus = () => {
-      setIsEditorFocused(true);
-      const pending = pendingMathClickRef.current;
-      if (!pending) return;
-      pendingMathClickRef.current = null;
-      // 等 ProseMirror 完成焦点处理后再触发弹窗
-      requestAnimationFrame(() => {
-        try {
-          const pos = editor.view.posAtDOM(pending.el, 0);
-          const node = editor.state.doc.nodeAt(pos);
-          if (!node) return;
-          if (pending.isBlock) {
-            mathDialog.handleBlockMathClick(node, pos);
-          } else {
-            mathDialog.handleInlineMathClick(node, pos);
-          }
-        } catch {
-          // 元素可能已不在文档中，忽略
+  /** 在 onChange 之后再回调外部图片上传事件，避免时序竞争。 */
+  const handleImageUploadAfterChange = useCallback(
+    (payload: { file: File; url: string; alt?: string }) => {
+      runAfterOnChange(() => {
+        if (onImageUpload) {
+          void Promise.resolve(onImageUpload(payload));
         }
       });
-    };
-    const onBlur = () => {
-      // mousedown 总先于 blur 触发，若点击在容器内（如公式），直接跳过
-      if (mouseDownInsideRef.current) return;
-      // 否则延迟一帧：焦点若移到容器内的可聚焦元素（如工具栏按钮），不隐藏工具栏
-      requestAnimationFrame(() => {
-        if (
-          !containerRef.current?.contains(document.activeElement) &&
-          !isInsideCodeBlockLanguageSelect(document.activeElement)
-        ) {
-          setIsEditorFocused(false);
+    },
+    [onImageUpload, runAfterOnChange],
+  );
+
+  /** 在 onChange 之后再回调外部附件上传事件，避免时序竞争。 */
+  const handleFileUploadAfterChange = useCallback(
+    (payload: { file: File; url: string; name: string }) => {
+      runAfterOnChange(() => {
+        if (onFileUpload) {
+          void Promise.resolve(onFileUpload(payload));
         }
       });
-    };
+    },
+    [onFileUpload, runAfterOnChange],
+  );
 
-    document.addEventListener("mousedown", handleMouseDown);
-    editor.on("focus", onFocus);
-    editor.on("blur", onBlur);
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-      editor.off("focus", onFocus);
-      editor.off("blur", onBlur);
-    };
-  }, [editor, isNotionLike, mathDialog, isInsideCodeBlockLanguageSelect]);
-
-  /** Headless 模式下是否显示顶部工具栏 */
-  const showHeadlessToolbar =
-    !isNotionLike &&
-    (headlessToolbarMode === HeadlessToolbarMode.Always ||
-      (headlessToolbarMode === HeadlessToolbarMode.OnFocus && isEditorFocused));
-  /** 代码语言菜单显示门控：统一跟随编辑器焦点状态。 */
-  const showCodeBlockLanguageMenu = isEditorFocused;
-
-  /** 斜杠命令选中后执行：先删除 "/" 及后续输入，再执行对应命令 */
+  /** 斜杠命令选中后执行：先删除 "/" 及后续输入，再执行对应命令。 */
   const handleCommand = useCallback(
     (item: CommandItem) => {
       if (!editor) return;
@@ -540,141 +258,75 @@ const ReactTiptapEditor = ({
       runCommandItem(item);
       commandMenu.setShowCommandMenu(false);
     },
-    [editor, runCommandItem, commandMenu],
+    [commandMenu, editor, runCommandItem],
   );
 
-  // --- 渲染 ---
+  // 编辑器根容器样式。
+  const containerClassName = cn(
+    "editor-container",
+    "zt-tiptap-theme",
+    "text-foreground",
+    themePortalState.isDocumentDark && "dark",
+    disabled && "is-disabled",
+    !focusController.isEditorFocused && "is-editor-blurred",
+    !border && "no-border",
+    !resolvedConfig.isNotionLike && "editor-container-headless",
+    maxHeight != null && "editor-container-has-max-height",
+  );
+
+  // 编辑器最大高度变量样式。
+  const containerStyle =
+    maxHeight != null
+      ? ({
+          "--editor-max-height":
+            typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight,
+        } as CSSProperties)
+      : undefined;
+
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "editor-container",
-        "zt-tiptap-theme",
-        "text-foreground",
-        isDocumentDark && "dark",
-        disabled && "is-disabled",
-        !isEditorFocused && "is-editor-blurred",
-        !border && "no-border",
-        !isNotionLike && "editor-container-headless",
-        maxHeight != null && "editor-container-has-max-height",
-      )}
-      style={
-        maxHeight != null
-          ? ({
-              "--editor-max-height":
-                typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight,
-            } as React.CSSProperties)
-          : undefined
-      }
-    >
-      {editor && !disabled && showHeadlessToolbar && (
-        <Toolbar
-          editor={editor}
-          items={resolvedToolbarItems}
-          isEditorFocused={isEditorFocused}
-          onOpenMathDialog={mathDialog.handleMathDialogFromSlash}
-          onOpenImageDialog={imageDialog.openImageDialog}
-          locale={locale}
-          onOpenFileUploadDialog={
-            onFilePreUpload ? fileUploadDialog.openFileUploadDialog : undefined
-          }
-        />
-      )}
-      {/* 编辑区：表格行操作、ProseMirror 内容、Bubble 菜单、斜杠命令菜单 */}
-      <div
-        className={cn(
-          "editor-wrapper",
-          isNotionLike ? "notion-editor" : "headless-editor",
-        )}
-        ref={editorWrapperRef}
-        style={
-          {
-            "--table-action-padding": `${config.TABLE_ACTION_BUTTON_PADDING}px`,
-          } as React.CSSProperties
+    <div ref={containerRef} className={containerClassName} style={containerStyle}>
+      <EditorSurface
+        editor={editor}
+        disabled={disabled}
+        isNotionLike={resolvedConfig.isNotionLike}
+        isEditorFocused={focusController.isEditorFocused}
+        showHeadlessToolbar={focusController.showHeadlessToolbar}
+        showCodeBlockLanguageMenu={focusController.showCodeBlockLanguageMenu}
+        locale={locale}
+        editorWrapperRef={editorWrapperRef}
+        portalContainer={themePortalState.portalContainer}
+        resolvedToolbarItems={resolvedConfig.resolvedToolbarItems}
+        resolvedCodeBlockLanguages={resolvedConfig.resolvedCodeBlockLanguages}
+        resolvedDefaultCodeBlockLanguage={
+          resolvedConfig.resolvedDefaultCodeBlockLanguage
         }
-      >
-        {editor && !disabled && isEditorFocused && (
-          <>
-            <TableRowActions
-              editor={editor}
-              editorWrapperRef={editorWrapperRef}
-              locale={locale}
-            />
-            <TableColumnActions
-              editor={editor}
-              editorWrapperRef={editorWrapperRef}
-              locale={locale}
-            />
-          </>
-        )}
-        <EditorContent editor={editor} />
-        {editor && !disabled && (
-          <CodeBlockLanguageMenu
-            editor={editor}
-            locale={locale}
-            portalContainer={portalContainer}
-            editorWrapperRef={editorWrapperRef}
-            languages={resolvedCodeBlockLanguages}
-            defaultLanguage={resolvedDefaultCodeBlockLanguage}
-            enabled={showCodeBlockLanguageMenu}
-            onMenuRootChange={setCodeBlockLanguageMenuRoot}
-          />
-        )}
-        {editor && !disabled && isNotionLike && (
-          <BubbleMenu editor={editor} locale={locale} />
-        )}
-        {isNotionLike &&
-          commandMenu.showCommandMenu &&
-          editor &&
-          !disabled &&
-          commandMenu.menuPosition && (
-            <CommandMenu
-              items={commandMenu.filteredCommands}
-              command={handleCommand}
-              selectedIndex={commandMenu.selectedIndex}
-              position={commandMenu.menuPosition}
-              maxHeight={commandMenuMaxHeight}
-              minHeight={commandMenuMinHeight}
-              overlayRef={commandMenu.menuOverlayRef}
-              editor={editor}
-            />
-          )}
-      </div>
-      {/* 公式编辑弹窗、图片上传弹窗 */}
-      <MathDialog
-        isOpen={mathDialog.showMathDialog}
-        type={mathDialog.mathDialogType}
-        initialValue={mathDialog.mathDialogInitialValue}
-        onConfirm={mathDialog.handleMathConfirm}
-        onCancel={mathDialog.handleMathCancel}
+        commandMenu={commandMenu}
+        commandMenuMaxHeight={commandMenuMaxHeight}
+        commandMenuMinHeight={commandMenuMinHeight}
+        onHandleCommand={handleCommand}
+        onOpenMathDialog={mathDialog.handleMathDialogFromSlash}
+        onOpenImageDialog={imageDialog.openImageDialog}
+        onOpenFileUploadDialog={
+          onFilePreUpload ? fileUploadDialog.openFileUploadDialog : undefined
+        }
+        onMenuRootChange={focusController.setCodeBlockLanguageMenuRoot}
+      />
+      <EditorDialogs
+        portalContainer={themePortalState.portalContainer}
         formulaCategories={formulaCategories}
         locale={locale}
-        portalContainer={portalContainer}
-      />
-      <ImageUploadDialog
-        isOpen={imageDialog.showImageDialog}
-        onConfirm={imageDialog.handleImageConfirm}
-        onCancel={imageDialog.handleImageCancel}
-        onPreUpload={onImagePreUpload}
-        onUpload={handleImageUploadAfterChange}
         imageMaxSizeBytes={imageMaxSizeBytes}
-        locale={locale}
-        portalContainer={portalContainer}
+        fileMaxSizeBytes={fileMaxSizeBytes}
+        fileUploadTypes={resolvedConfig.resolvedFileUploadTypes}
+        onImagePreUpload={onImagePreUpload}
+        onFilePreUpload={onFilePreUpload}
+        onImageUploadAfterChange={handleImageUploadAfterChange}
+        onFileUploadAfterChange={handleFileUploadAfterChange}
+        mathDialog={mathDialog}
+        imageDialog={imageDialog}
+        fileUploadDialog={fileUploadDialog}
+        onPortalContainerRef={themePortalState.handlePortalContainerRef}
       />
-      {onFilePreUpload && (
-        <FileUploadDialog
-          isOpen={fileUploadDialog.showFileUploadDialog}
-          onConfirm={fileUploadDialog.handleFileUploadConfirm}
-          onCancel={fileUploadDialog.handleFileUploadCancel}
-          onPreUpload={onFilePreUpload}
-          onUpload={handleFileUploadAfterChange}
-          fileMaxSizeBytes={fileMaxSizeBytes}
-          fileUploadTypes={resolvedFileUploadTypes}
-          locale={locale}
-          portalContainer={portalContainer}
-        />
-      )}
-      <div ref={handlePortalContainerRef} className="zt-tiptap-portal" />
     </div>
   );
 };
