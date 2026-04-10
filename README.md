@@ -7,6 +7,27 @@
 
 **GitHub:** [https://github.com/lzt-T/md-tiptap](https://github.com/lzt-T/md-tiptap)
 
+## v1.0 破坏性升级说明
+
+`1.0.0` 开始，仓库已重构为 **core + react + shared** 三层结构：
+
+- `src/core/`：编辑器核心命令与扩展
+- `src/react/editor/`：React 编辑器主域（shell/menus/dialogs/table/toolbar/styles/types/customization）
+- `src/react/hooks/`：React 层复用 hooks
+- `src/shared/`：配置、国际化、工具函数、样式
+- `examples/react-demo/`：示例与调试入口
+
+### 导出策略
+
+- 主入口 `zt-reactjs-tiptap`：继续导出 `ReactTiptapEditor`、常用类型、工具函数。
+- 子路径入口 `zt-reactjs-tiptap/core`：导出核心扩展与命令（高级定制场景）。
+- 样式入口 `zt-reactjs-tiptap/style.css`：保持不变。
+
+### 迁移建议
+
+- 推荐继续使用主入口 + `style.css`，无需改动现有消费端样式引入方式。
+- 如需直接复用底层扩展，请改用 `zt-reactjs-tiptap/core`。
+
 ## 特性
 
 - ✨ 丰富的文本格式化选项（粗体、斜体、下划线、删除线、行内代码）
@@ -39,14 +60,14 @@ yarn add zt-reactjs-tiptap
 ### 基础使用
 
 ```tsx
-import { TiptapEditor } from 'zt-reactjs-tiptap'
+import { ReactTiptapEditor } from 'zt-reactjs-tiptap'
 import 'zt-reactjs-tiptap/style.css'  // 必须导入样式
 
 function App() {
   const [content, setContent] = useState('<p>Hello World!</p>')
 
   return (
-    <TiptapEditor
+    <ReactTiptapEditor
       value={content}
       onChange={setContent}
     />
@@ -57,7 +78,7 @@ function App() {
 ### 带图片与附件预上传（Confirm 后回调）
 
 ```tsx
-import { TiptapEditor } from 'zt-reactjs-tiptap'
+import { ReactTiptapEditor } from 'zt-reactjs-tiptap'
 import 'zt-reactjs-tiptap/style.css'
 
 function App() {
@@ -98,7 +119,7 @@ function App() {
   }
 
   return (
-    <TiptapEditor
+    <ReactTiptapEditor
       value={content}
       onChange={setContent}
       onImagePreUpload={handleImagePreUpload}
@@ -114,20 +135,20 @@ function App() {
 ### 国际化使用示例
 
 ```tsx
-import { TiptapEditor } from 'zt-reactjs-tiptap'
+import { ReactTiptapEditor } from 'zt-reactjs-tiptap'
 import 'zt-reactjs-tiptap/style.css'
 
 function App() {
   return (
     <>
       {/* 强制中文 */}
-      <TiptapEditor language="zh-CN" />
+      <ReactTiptapEditor language="zh-CN" />
 
       {/* 强制英文 */}
-      <TiptapEditor language="en-US" />
+      <ReactTiptapEditor language="en-US" />
 
       {/* 不传 language：自动跟随浏览器语言（zh* -> zh-CN，其余 -> en-US） */}
-      <TiptapEditor />
+      <ReactTiptapEditor />
     </>
   )
 }
@@ -137,7 +158,7 @@ function App() {
 
 ```tsx
 import { useState } from 'react'
-import { TiptapEditor } from 'zt-reactjs-tiptap'
+import { ReactTiptapEditor } from 'zt-reactjs-tiptap'
 import 'zt-reactjs-tiptap/style.css'
 
 function EditorExample() {
@@ -165,7 +186,7 @@ function EditorExample() {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <h1>我的编辑器</h1>
-      <TiptapEditor
+      <ReactTiptapEditor
         value={content}
         onChange={(html) => {
           setContent(html)
@@ -226,7 +247,7 @@ function EditorExample() {
 示例：
 
 ```tsx
-<TiptapEditor editorMode="headless" headlessToolbarMode="on-focus" />
+<ReactTiptapEditor editorMode="headless" headlessToolbarMode="on-focus" />
 ```
 
 ## 功能说明
@@ -263,7 +284,7 @@ function EditorExample() {
 ```tsx
 import { Clock3 } from 'lucide-react'
 import {
-  TiptapEditor,
+  ReactTiptapEditor,
   BuiltinToolbarItemKey,
   type ToolbarItemConfig,
 } from 'zt-reactjs-tiptap'
@@ -285,7 +306,7 @@ const toolbarItems: ToolbarItemConfig[] = [
   },
 ]
 
-<TiptapEditor toolbarItems={toolbarItems} hideDefaultToolbarItems />
+<ReactTiptapEditor toolbarItems={toolbarItems} hideDefaultToolbarItems />
 ```
 
 ### Slash 命令自定义（保留默认 + 追加自定义命令）
@@ -293,7 +314,7 @@ const toolbarItems: ToolbarItemConfig[] = [
 ```tsx
 import { MessageSquareQuote } from 'lucide-react'
 import {
-  TiptapEditor,
+  ReactTiptapEditor,
   type SlashCommandConfig,
 } from 'zt-reactjs-tiptap'
 import 'zt-reactjs-tiptap/style.css'
@@ -316,17 +337,17 @@ const slashCommands: SlashCommandConfig[] = [
   },
 ]
 
-<TiptapEditor slashCommands={slashCommands} />
+<ReactTiptapEditor slashCommands={slashCommands} />
 ```
 
 ### 注入外部扩展（追加到内置扩展后）
 
 ```tsx
 import Typography from '@tiptap/extension-typography'
-import { TiptapEditor } from 'zt-reactjs-tiptap'
+import { ReactTiptapEditor } from 'zt-reactjs-tiptap'
 import 'zt-reactjs-tiptap/style.css'
 
-<TiptapEditor extensions={[Typography]} />
+<ReactTiptapEditor extensions={[Typography]} />
 ```
 
 > 扩展顺序为：`内置扩展 -> 你传入的 extensions`。若存在同名行为冲突，请在业务侧自行确认兼容性。
@@ -371,7 +392,7 @@ import 'zt-reactjs-tiptap/style.css'
 
 ```tsx
 import {
-  TiptapEditor,
+  ReactTiptapEditor,
   FORMULA_CATEGORIES,
   type FormulaPickerCategory,
   type FormulaSnippetItem,
@@ -386,7 +407,7 @@ const customCategory: FormulaPickerCategory = {
   ] as FormulaSnippetItem[],
 }
 
-<TiptapEditor
+<ReactTiptapEditor
   formulaCategories={[...FORMULA_CATEGORIES, customCategory]}
 />
 ```

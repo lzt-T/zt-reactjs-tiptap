@@ -1,37 +1,31 @@
-// 导出主组件
-export { default as TiptapEditor } from "./components/TiptapEditor";
-
-// 导出组件类型
-export type {
-  TiptapEditorProps,
+// 导出 React 适配层主组件与运行时常量。
+export {
+  ReactTiptapEditor,
   EditorMode,
   HeadlessToolbarMode,
   EditorLanguage,
-} from "./components/TiptapEditor/types";
-
-// 导出编辑器可配置项类型与默认配置构建器
-export {
   BuiltinToolbarItemKey,
   BuiltinSlashCommandKey,
   createDefaultToolbarItems,
   createDefaultSlashCommands,
-} from "./components/TiptapEditor/customization";
+} from "./react";
+
+// 导出 React 层类型。
 export type {
+  TiptapEditorProps,
   ToolbarItemConfig,
   SlashCommandConfig,
   EditorActionContext,
   EditorExternalExtension,
-} from "./components/TiptapEditor/customization";
+  FormulaSnippetItem,
+} from "./react";
 
-// 导出公式分类相关，便于扩展 formulaCategories
-export { FORMULA_CATEGORIES } from "./config/formulaCategories";
-export type { FormulaPickerCategory } from "./config/formulaCategories";
-export type { FormulaSnippetItem } from "./components/TiptapEditor/MathDialog/FormulaSnippetButton";
+// 导出 shared 与 core 能力。
+export * from "./core";
+export { FORMULA_CATEGORIES } from "./shared/config/formulaCategories";
+export type { FormulaPickerCategory } from "./shared/config/formulaCategories";
+export { htmlToPlainText, domToPlainText } from "./shared/utils/htmlToPlainText";
+export type { HtmlToPlainTextOptions } from "./shared/utils/htmlToPlainText";
 
-
-// 导出 HTML/DOM 转纯文本工具（与编辑器 getText() 一致）
-export { htmlToPlainText, domToPlainText } from "./lib/htmlToPlainText";
-export type { HtmlToPlainTextOptions } from "./lib/htmlToPlainText";
-
-// 导入样式，这样会被打包到 style.css
-import "./style.css";
+// 导入库默认样式，确保打包产物包含 style.css。
+import "./shared/styles/style.css";

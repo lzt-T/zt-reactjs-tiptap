@@ -1,163 +1,145 @@
-# Agent Guidelines for zt-reactjs-tiptap
+# AGENTS.md（zt-reactjs-tiptap）
 
-## Project Overview
-React + TypeScript + Vite application for markdown editing with TipTap.
+本文档用于约束 AI Agent 在本仓库中的默认协作方式与工程规范。
 
-## Build Commands
+## 1. 项目定位
+
+- 本项目是基于 **React + TypeScript + Vite** 的 TipTap 编辑器库。
+- 当前代码结构为 **2.0 分层架构**：`core + react/editor + shared`。
+- React 对外主组件名称为：`ReactTiptapEditor`。
+- 对外发布入口：
+  - 主入口：`zt-reactjs-tiptap`
+  - 核心子路径：`zt-reactjs-tiptap/core`
+  - 样式入口：`zt-reactjs-tiptap/style.css`
+
+## 2. 常用命令
 
 ```bash
-# Development server
+# 开发调试
 pnpm dev
 
-# Production build
+# 构建
 pnpm build
+pnpm build:lib
 
-# Lint code
+# 代码检查
 pnpm lint
+pnpm exec tsc --project tsconfig.lib.json --noEmit false
 
-# Preview production build
+# 预览
 pnpm preview
 ```
 
-## Tech Stack
-- **Framework**: React 19 + Vite 7
-- **Language**: TypeScript 5.9 (strict mode)
-- **Styling**: Tailwind CSS v4
-- **Editor**: Tiptap 3.x (rich text editor based on ProseMirror)
+## 3. 技术栈与关键依赖
 
-## Tiptap Extensions Used
+- Framework: React 19 + Vite 7
+- Language: TypeScript 5.9（strict mode）
+- Editor: TipTap 3.x（基于 ProseMirror）
+- Styling: Tailwind CSS v4 + 组件级 CSS
+- Package Manager: pnpm
+- Module System: ES Modules
 
-### Core Extensions (via StarterKit)
-- Bold, Italic, Strike, Code
-- Heading (H1, H2, H3)
-- Bullet List, Ordered List
-- Blockquote, Code Block
-- History (Undo/Redo)
+## 4. 目录结构（当前真实结构）
 
-### Additional Extensions
-- **Image**: URL-based image insertion
-- **Table**: Full table operations (insert/delete rows/columns, toggle header)
-- **Underline**: Text underlining
-- **Subscript/Superscript**: Mathematical formatting
-- **Color**: Text color picker
-- **Highlight**: Background highlighting
-- **TextAlign**: Left, center, right, justify alignment
-- **TaskList**: Checkbox task lists
-- **Placeholder**: Empty state placeholder
-
-### Notion-like Features
-- **Slash Commands**: Type `/` to open command menu
-- **Command Menu**: Quick insertion of blocks (headings, lists, tables, etc.)
-- **Block-based Editing**: Each paragraph is a separate block
-- **Empty Placeholder**: Shows hint when editor is empty
-
-- **Package Manager**: pnpm
-- **Module System**: ES Modules
-
-## Code Style Guidelines
-
-### TypeScript Configuration
-- Target: ES2022
-- Strict mode enabled with additional checks:
-  - `noUnusedLocals: true` - Error on unused variables
-  - `noUnusedParameters: true` - Error on unused function parameters
-  - `noFallthroughCasesInSwitch: true` - Prevent switch case fallthrough
-  - `verbatimModuleSyntax: true` - Preserve import/export syntax
-
-### Import Conventions
-- Use ES module imports
-- Import React hooks explicitly: `import { useState } from 'react'`
-- CSS imports: `import './App.css'`
-- No default exports preferred for components
-
-### Naming Conventions
-- Components: PascalCase (e.g., `App.tsx`)
-- Files: PascalCase for components, camelCase for utilities
-- Hooks: camelCase with `use` prefix (e.g., `useCounter`)
-- Types/Interfaces: PascalCase
-
-### Component Structure
-- Use functional components with hooks
-- Prefer destructured props
-- Always define explicit return types for complex components
-
-### Error Handling
-- Use TypeScript's strict null checks
-- Handle async errors with try/catch
-- Validate external data at boundaries
-
-### ESLint Rules
-- Standard TypeScript ESLint recommended rules
-- React Hooks rules (exhaustive-deps enforced)
-- React Refresh rules for HMR
-- `dist/` folder is ignored
-
-### CSS
-- Component-scoped CSS files
-- Use CSS custom properties for theming
-- Follow BEM naming for complex selectors
-
-## Modal/Portal Theme Isolation
-- Use `.zt-tiptap-theme` as the only theme scope class for editor styles.
-- Do not place editor theme variables on global `:root` in library output.
-- Editor root must include `.zt-tiptap-theme` and `text-foreground`.
-- Portal-based dialogs/modals must mount inside the editor container (via `portalContainer`), not `document.body`.
-- Keep dark mode synced by mirroring `html.dark` state onto the editor container when needed.
-- Any isolation change must also update README "样式系统" docs.
-
-## Type Definitions
-- Define interfaces for component props
-- Use strict typing for event handlers
-- Avoid `any` type; use `unknown` when type is uncertain
-
-## Performance Guidelines
-- Use React.memo for expensive renders
-- Lazy load heavy components
-- Optimize images before adding to public/
-
-## Git Workflow
-- This is NOT a git repository (no .git folder found)
-- Initialize git with `git init` if version control is needed
-
-## Common Tasks
-
-### Adding a New Component
-1. Create folder in `src/components/ComponentName/`
-2. Create component file: `src/components/ComponentName/index.tsx`
-3. Add corresponding CSS: `src/components/ComponentName/ComponentName.css`
-4. Export component and import where needed
-
-### Adding Type Definitions
-- Place shared types in `src/types/` directory
-- Keep component-specific types with the component
-
-### Running Linting
-Always run `pnpm lint` before committing to ensure code quality.
-
-## Project Structure
-```
+```txt
 src/
-├── main.tsx          # Application entry point
-├── App.tsx           # Root component
-├── App.css           # App styles
-├── index.css         # Global styles
-├── components/       # React components
-│   └── TiptapEditor/
-│       ├── index.tsx                  # Main editor component
-│       ├── TiptapEditor.css           # Editor styles
-│       ├── CommandMenu/               # Slash command menu
-│       │   ├── index.tsx              # Command menu component
-│       │   └── CommandMenu.css        # Command menu styles
-│       └── extensions/                # Custom Tiptap extensions
-│           └── SlashCommands.ts       # Slash command extension
-└── assets/           # Static assets
-public/               # Public static files
+├── core/                    # 编辑器核心能力（与 React 解耦）
+│   ├── commands/
+│   └── extensions/
+├── react/
+│   ├── editor/              # React 编辑器主域
+│   │   ├── shell/
+│   │   ├── menus/
+│   │   ├── dialogs/
+│   │   ├── table/
+│   │   ├── toolbar/
+│   │   ├── styles/
+│   │   ├── types/
+│   │   └── customization/
+│   ├── hooks/               # React 层复用 Hook
+│   ├── components/ui/       # 通用 UI 组件
+│   └── components/Icon/
+└── shared/                  # 跨层共享能力
+    ├── config/
+    ├── locales/
+    ├── styles/
+    └── utils/
+
+examples/
+└── react-demo/              # 示例与调试入口
 ```
 
-## Notes for AI Agents
-- This project uses pnpm as package manager
-- Vite provides Hot Module Replacement (HMR) in development
-- TypeScript errors will block builds due to `tsc -b` in build script
-- No testing framework is currently configured
-- Always check for TypeScript strict mode violations
-- Follow existing patterns in `src/App.tsx` for component structure
+## 5. 代码规范
+
+### 5.1 TypeScript 约束
+
+- 必须保持 strict mode 思维，不绕过类型系统。
+- 禁止无必要的 `any`；类型不确定时优先 `unknown` + 类型收窄。
+- 保持 `noUnusedLocals`、`noUnusedParameters`、`noFallthroughCasesInSwitch` 通过。
+
+### 5.2 导入与命名
+
+- 使用 ES module 导入导出。
+- Hook 命名必须 `useXxx`。
+- 组件名使用 PascalCase。
+- 类型名使用 PascalCase。
+- 优先使用 `@/` 别名，避免深层相对路径可读性下降。
+
+### 5.3 React 约束
+
+- 使用函数组件 + Hook。
+- 复杂 props/返回值应有明确类型。
+- 以可维护性优先，减少超大组件；按域拆分 UI/逻辑。
+
+### 5.4 CSS 约束
+
+- 保持组件样式就近管理。
+- 主题相关变量使用约定作用域，避免污染全局。
+- 命名保持语义化、可检索。
+
+## 6. Modal/Portal Theme Isolation（强约束）
+
+- 编辑器主题作用域类仅使用 `.zt-tiptap-theme`。
+- 库输出中不要把编辑器主题变量放到全局 `:root`。
+- 编辑器根节点必须包含 `.zt-tiptap-theme` 与 `text-foreground`。
+- Dialog/Modal 的 Portal 必须挂在编辑器容器内（通过 `portalContainer`），不要挂到 `document.body`。
+- 暗色模式需与 `html.dark` 状态保持同步。
+- 若改动隔离策略，必须同步更新 README 的“样式系统”说明。
+
+## 7. TipTap 能力说明（维护视角）
+
+- Core（StarterKit）覆盖常用文本结构与历史能力。
+- 扩展能力包括：图片、表格、上下标、颜色/高亮、对齐、任务列表、占位符、数学公式等。
+- Notion-like 体验包括：Slash Commands、Command Menu、块级编辑交互。
+
+## 8. Agent 工作约定
+
+- 修改前先定位受影响域（`core` / `react/editor` / `shared`）。
+- 变更应最小化且与现有分层一致，不引入反向依赖。
+- 提交前至少执行：`pnpm lint`；涉及导出/类型时执行 `pnpm exec tsc --project tsconfig.lib.json --noEmit false`。
+- 若改动导出接口、目录结构或行为语义，必须同步更新 README 与 CHANGELOG。
+
+## 9. 常见任务指引
+
+### 9.1 新增编辑器能力
+
+1. 优先评估是否应放入 `src/core`（可复用、与 React 无关）。
+2. React 交互层放在 `src/react/editor` 对应域（dialogs/menus/table/toolbar/shell）。
+3. 跨域常量与文案放在 `src/shared/config`、`src/shared/locales`。
+
+### 9.2 新增类型
+
+- React 编辑器相关类型优先放 `src/react/editor/types`。
+- 跨层共享类型按需放在 `shared` 邻近域，避免循环依赖。
+
+### 9.3 文案与国际化
+
+- 所有用户可见文案应走 `src/shared/locales`。
+- 新增字段需同步 `zh-CN` 与 `en-US`。
+
+## 10. 禁止与注意事项
+
+- 不要再引入旧目录语义（如 `src/components/TiptapEditor`）。
+- 不要在未说明影响的情况下变更公共导出名称。
+- 不要把 React 视图层逻辑下沉到 `core`。
+- 不要忽略类型错误或 ESLint 错误再提交。

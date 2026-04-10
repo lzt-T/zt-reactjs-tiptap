@@ -1,7 +1,7 @@
 {
   "name": "zt-reactjs-tiptap",
   "private": false,
-  "version": "0.1.18",
+  "version": "2.0.0",
   "type": "module",
   "description": "A powerful Markdown editor based on TipTap with Notion-like features",
   "author": "",
@@ -34,6 +34,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/zt-reactjs-tiptap.js",
+      "require": "./dist/zt-reactjs-tiptap.umd.cjs"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
       "import": "./dist/zt-reactjs-tiptap.js",
       "require": "./dist/zt-reactjs-tiptap.umd.cjs"
     },
