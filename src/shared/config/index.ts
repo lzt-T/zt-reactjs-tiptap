@@ -4,6 +4,12 @@ export interface ColorOption {
   value: string
 }
 
+export type { CodeBlockLanguageOption } from "./codeBlockLanguages";
+export {
+  DEFAULT_CODE_BLOCK_LANGUAGE,
+  DEFAULT_CODE_BLOCK_LANGUAGES,
+} from "./codeBlockLanguages";
+
 /* 配置项 */
 export const config = {
   /* 斜杠命令菜单的最大高度（px），默认 240 */

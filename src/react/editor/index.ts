@@ -23,3 +23,4 @@ export type {
 
 // 数学片段类型。
 export type { FormulaSnippetItem } from "./dialogs/MathDialog/FormulaSnippetButton";
+export type { CodeBlockLanguageOption } from "@/shared/config";

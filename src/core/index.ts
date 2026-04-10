@@ -5,6 +5,8 @@ export * from "./commands/editorCommands";
 export * from "./extensions/DeletionCallbacks";
 export * from "./extensions/FileAttachment";
 export * from "./extensions/ImageWithDelete";
+export * from "./extensions/CodeBlockKeyboardHandler";
+export * from "./extensions/codeBlockLowlight";
 export * from "./extensions/SlashCommands";
 export * from "./extensions/TableBackspaceHandler";
 export * from "./extensions/editorCallbackRegistry";

@@ -228,6 +228,8 @@ function EditorExample() {
 | `imageMaxSizeBytes` | `number` | 否 | `5242880`（5MB） | 图片上传最大体积（字节），超过则拒绝并提示 |
 | `fileMaxSizeBytes` | `number` | 否 | `10485760`（10MB） | 附件上传最大体积（字节），超过则拒绝并提示 |
 | `fileUploadTypes` | `string[]` | 否 | `['pdf']` | 附件可上传扩展名列表（不区分大小写），如 `['pdf', 'docx']`。会自动去空格、去重、去掉前导 `.`；为空时回落到默认 `['pdf']` |
+| `codeBlockLanguages` | `Array<{ value: string; label: string }>` | 否 | 内置 20 种常用语言 | 代码块语言列表。传入后覆盖内置列表（会自动去重并回落无效语言） |
+| `defaultCodeBlockLanguage` | `string` | 否 | `'plaintext'` | 新增代码块默认语言。传入无效值时自动回落 `plaintext` |
 | `formulaCategories` | `FormulaPickerCategory[]` | 否 | 内置默认分类 | 公式选择器的分类列表。不传则使用内置分类；传入时可完全自定义或在默认基础上扩展（见下方「扩展公式分类」） |
 | `maxHeight` | `number \| string` | 否 | - | 编辑器容器的最大高度。不配置时容器为 `height: 100%`；配置后高度限制为该值，内容超出时在编辑区内滚动。数字为像素（如 `400`），字符串为任意合法 CSS 长度（如 `"50vh"`、`"20rem"`） |
 | `toolbarItems` | `ToolbarItemConfig[]` | 否 | 内置默认工具栏 | 工具栏配置：支持重排/裁剪内置按钮与追加自定义按钮 |
@@ -272,6 +274,33 @@ function EditorExample() {
 - **图片**：打开图片上传对话框
 - **数学公式**：行内公式、块级公式
 - **分割线**：水平分隔线
+
+### 代码块语言选择
+
+- 光标位于代码块中时，右上角会显示“代码语言（Code language）”按钮。
+- 点击后可选择语言，选中项会高亮，代码块会即时按语言高亮渲染。
+- 默认内置常用 20 种语言（含 `plaintext` 兜底）。
+
+```tsx
+import {
+  ReactTiptapEditor,
+  DEFAULT_CODE_BLOCK_LANGUAGES,
+  DEFAULT_CODE_BLOCK_LANGUAGE,
+  type CodeBlockLanguageOption,
+} from 'zt-reactjs-tiptap'
+
+const customLanguages: CodeBlockLanguageOption[] = [
+  { value: 'plaintext', label: '纯文本' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'python', label: 'Python' },
+]
+
+<ReactTiptapEditor
+  defaultCodeBlockLanguage={DEFAULT_CODE_BLOCK_LANGUAGE}
+  codeBlockLanguages={customLanguages}
+/>
+```
 
 **操作方式**：
 - 输入 `/` 打开命令菜单

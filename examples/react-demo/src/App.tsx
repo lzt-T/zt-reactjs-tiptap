@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import {
   ReactTiptapEditor,
-  EditorMode,
   htmlToPlainText,
+  EditorMode,
 } from "../../../src/index";
 import "./App.css";
 

@@ -13,6 +13,7 @@ const enUS: EditorLocale = {
     numberedList: { title: 'Numbered List', description: 'Numbered list' },
     taskList: { title: 'Task List', description: 'Todo list with checkboxes' },
     inlineCode: { title: 'Inline Code', description: 'Code span' },
+    codeBlock: { title: 'Code Block', description: 'Insert code block with language' },
     table: { title: 'Table', description: 'Add table' },
     inlineMath: { title: 'Inline Math', description: 'Insert inline math' },
     blockMath: { title: 'Block Math', description: 'Insert math block' },
@@ -28,6 +29,7 @@ const enUS: EditorLocale = {
     orderedList: 'Ordered list',
     taskList: 'Task list',
     insertTable: 'Insert table',
+    codeBlock: 'Code block',
     inlineMath: 'Inline math',
     blockMath: 'Block math',
     image: 'Image',
@@ -65,6 +67,10 @@ const enUS: EditorLocale = {
   },
   colorPicker: {
     customColor: '+ Custom color',
+  },
+  codeBlock: {
+    languageButton: 'Code language',
+    plainText: 'Plain text',
   },
   mathDialog: {
     insertInlineMath: 'Insert inline math',

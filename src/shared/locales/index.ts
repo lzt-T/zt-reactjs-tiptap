@@ -15,6 +15,7 @@ export interface EditorLocale {
     numberedList: { title: string; description: string };
     taskList: { title: string; description: string };
     inlineCode: { title: string; description: string };
+    codeBlock: { title: string; description: string };
     table: { title: string; description: string };
     inlineMath: { title: string; description: string };
     blockMath: { title: string; description: string };
@@ -27,6 +28,7 @@ export interface EditorLocale {
     orderedList: string;
     taskList: string;
     insertTable: string;
+    codeBlock: string;
     inlineMath: string;
     blockMath: string;
     image: string;
@@ -64,6 +66,10 @@ export interface EditorLocale {
   };
   colorPicker: {
     customColor: string;
+  };
+  codeBlock: {
+    languageButton: string;
+    plainText: string;
   };
   mathDialog: {
     insertInlineMath: string;

@@ -121,6 +121,8 @@ const BubbleMenu = ({ editor, locale }: BubbleMenuProps) => {
           if (selection instanceof NodeSelection) return false;
           // CellSelection（表格多单元格选中）不显示，$anchorCell 是 CellSelection 的专有属性
           if ('$anchorCell' in selection) return false;
+          // 代码块内不显示气泡菜单（NotionLike 模式下避免与代码语言菜单重叠）
+          if (editor.isActive("codeBlock")) return false;
           return !selection.empty;
         }}
       >

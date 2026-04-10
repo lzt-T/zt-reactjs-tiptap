@@ -17,12 +17,20 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Mathematics from "@tiptap/extension-mathematics";
+import {
+  createCodeBlockLowlightExtension,
+  resolveCodeBlockLanguage,
+} from "@/core/extensions/codeBlockLowlight";
+import { DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
 
 /**
  * 与编辑器一致的扩展列表（仅用于解析/序列化，无运行时回调）
  */
 const schemaExtensions: Extensions = [
-  StarterKit,
+  StarterKit.configure({
+    codeBlock: false,
+  }),
+  createCodeBlockLowlightExtension(DEFAULT_CODE_BLOCK_LANGUAGE),
   ImageWithDelete,
   FileAttachment,
   Table.configure({ resizable: true }),
@@ -74,6 +82,16 @@ const defaultTextSerializers: Record<string, TextSerializer> = {
   blockMath: ({ node }) => {
     const latex = node.attrs?.latex;
     return typeof latex === "string" && latex ? `[${latex}]` : "[block math]";
+  },
+  codeBlock: ({ node }) => {
+    const language = resolveCodeBlockLanguage(
+      typeof node.attrs?.language === "string"
+        ? node.attrs.language
+        : undefined,
+      DEFAULT_CODE_BLOCK_LANGUAGE
+    );
+    const content = node.textContent ?? "";
+    return content ? `[code:${language}] ${content}` : `[code:${language}]`;
   },
   table: () => {
     // 表格整体用占位符；默认序列化会递归子节点，这里覆盖后表格会变成一行 "[表格]"

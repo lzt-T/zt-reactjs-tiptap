@@ -8,6 +8,7 @@ import {
   toggleOrderedList,
   toggleTaskList,
   toggleCode,
+  setCodeBlockLanguage,
   insertTable,
 } from '@/core/commands/editorCommands'
 import {
@@ -18,6 +19,7 @@ import {
   ListOrdered,
   ListTodo,
   Code,
+  SquareCode,
   Table,
   Sigma,
   SquareFunction,
@@ -29,6 +31,8 @@ import type { EditorLocale } from '@/shared/locales'
 import {
   BuiltinSlashCommandKey as BuiltinSlashKey,
 } from '@/react/editor/customization'
+import { DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
+import { resolveCodeBlockLanguage } from "./codeBlockLowlight";
 
 export const SlashCommandKey = BuiltinSlashKey
 export type SlashCommandKey = (typeof SlashCommandKey)[keyof typeof SlashCommandKey]
@@ -67,7 +71,10 @@ function findFirstEnabledIndex(items: CommandItem[]): number {
 }
 
 /** 根据当前语言文案创建默认斜杠菜单项。 */
-export function createDefaultCommands(locale: EditorLocale): CommandItem[] {
+export function createDefaultCommands(
+  locale: EditorLocale,
+  defaultCodeBlockLanguage: string = DEFAULT_CODE_BLOCK_LANGUAGE
+): CommandItem[] {
   return [
     {
       key: SlashCommandKey.Heading1,
@@ -117,6 +124,21 @@ export function createDefaultCommands(locale: EditorLocale): CommandItem[] {
       description: locale.slashCommands.inlineCode.description,
       icon: Code,
       command: ({ editor }) => toggleCode(editor),
+    },
+    {
+      key: SlashCommandKey.CodeBlock,
+      title: locale.slashCommands.codeBlock.title,
+      description: locale.slashCommands.codeBlock.description,
+      icon: SquareCode,
+      command: ({ editor }) => {
+        const current = editor.getAttributes("codeBlock")
+          .language as string | undefined;
+        const language = resolveCodeBlockLanguage(
+          current,
+          defaultCodeBlockLanguage
+        );
+        setCodeBlockLanguage(editor, language);
+      },
     },
     {
       key: SlashCommandKey.Table,

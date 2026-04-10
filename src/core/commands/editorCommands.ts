@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/react";
+import { resolveCodeBlockLanguage } from "@/core/extensions/codeBlockLowlight";
 
 export type TextAlignValue = "left" | "center" | "right" | "justify";
 
@@ -20,6 +21,23 @@ export function toggleStrike(editor: Editor): void {
 
 export function toggleCode(editor: Editor): void {
   editor.chain().focus().toggleCode().run();
+}
+
+export function toggleCodeBlock(editor: Editor): void {
+  editor.chain().focus().toggleCodeBlock().run();
+}
+
+export function setCodeBlockLanguage(editor: Editor, language: string): void {
+  const resolvedLanguage = resolveCodeBlockLanguage(language);
+  if (editor.isActive("codeBlock")) {
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("codeBlock", { language: resolvedLanguage })
+      .run();
+    return;
+  }
+  editor.chain().focus().setCodeBlock({ language: resolvedLanguage }).run();
 }
 
 export function toggleSuperscript(editor: Editor): void {

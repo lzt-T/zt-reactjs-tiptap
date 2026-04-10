@@ -1,4 +1,5 @@
 import type { FormulaPickerCategory } from '@/shared/config/formulaCategories'
+import type { CodeBlockLanguageOption } from "@/shared/config";
 import type {
   EditorExternalExtension,
   SlashCommandConfig,
@@ -161,6 +162,18 @@ export interface TiptapEditorProps {
    * 内部会自动去空格、去重、去掉前导 "."；当不传或为空时默认仅允许 ['pdf']。
    */
   fileUploadTypes?: string[]
+
+  /**
+   * 代码块可选语言列表。传入后会覆盖内置语言集合。
+   * 每项结构：{ value: 语言标识, label: 显示名称 }。
+   */
+  codeBlockLanguages?: CodeBlockLanguageOption[]
+
+  /**
+   * 新插入代码块的默认语言（默认 'plaintext'）。
+   * 若传入语言未注册，会自动回落为 plaintext。
+   */
+  defaultCodeBlockLanguage?: string
 
   /**
    * 公式选择器的分类列表。不传则使用默认 FORMULA_CATEGORIES；

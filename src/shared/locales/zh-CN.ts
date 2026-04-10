@@ -13,6 +13,7 @@ const zhCN: EditorLocale = {
     numberedList: { title: '有序列表', description: '创建有序列表' },
     taskList: { title: '任务列表', description: '带勾选框的待办列表' },
     inlineCode: { title: '行内代码', description: '插入行内代码片段' },
+    codeBlock: { title: '代码块', description: '插入可设置语言的代码块' },
     table: { title: '表格', description: '插入表格' },
     inlineMath: { title: '行内公式', description: '插入行内数学公式' },
     blockMath: { title: '块级公式', description: '插入块级数学公式' },
@@ -25,6 +26,7 @@ const zhCN: EditorLocale = {
     orderedList: '有序列表',
     taskList: '任务列表',
     insertTable: '插入表格',
+    codeBlock: '代码块',
     inlineMath: '行内公式',
     blockMath: '块级公式',
     image: '图片',
@@ -62,6 +64,10 @@ const zhCN: EditorLocale = {
   },
   colorPicker: {
     customColor: '+ 自定义颜色',
+  },
+  codeBlock: {
+    languageButton: '代码语言',
+    plainText: '纯文本',
   },
   mathDialog: {
     insertInlineMath: '插入行内公式',

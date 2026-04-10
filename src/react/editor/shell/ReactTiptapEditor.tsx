@@ -14,6 +14,7 @@ import {
 } from "@/core/extensions/SlashCommands";
 import CommandMenu from "@/react/editor/menus/CommandMenu";
 import Toolbar from "@/react/editor/toolbar/Toolbar";
+import CodeBlockLanguageMenu from "@/react/editor/codeblock/CodeBlockLanguageMenu";
 import TableRowActions from "@/react/editor/table/TableRowActions";
 import TableColumnActions from "@/react/editor/table/TableColumnActions";
 import BubbleMenu from "@/react/editor/menus/BubbleMenu";
@@ -34,6 +35,11 @@ import {
   useStableArray,
 } from "@/react/hooks";
 import { config } from "@/shared/config";
+import {
+  DEFAULT_CODE_BLOCK_LANGUAGE,
+  DEFAULT_CODE_BLOCK_LANGUAGES,
+  type CodeBlockLanguageOption,
+} from "@/shared/config";
 import { cn } from "@/shared/utils/utils";
 import { EditorMode, HeadlessToolbarMode } from "@/react/editor/types";
 import { resolveEditorLocale } from "@/shared/locales";
@@ -46,6 +52,10 @@ import {
   type ToolbarItemConfig,
   type SlashCommandConfig,
 } from "@/react/editor/customization";
+import {
+  resolveCodeBlockLanguage,
+  isRegisteredCodeBlockLanguage,
+} from "@/core/extensions/codeBlockLowlight";
 
 /** Headless 模式下斜杠相关回调用空函数，避免传入 SlashCommands */
 const noop = () => {};
@@ -73,6 +83,38 @@ function normalizeFileUploadTypes(fileUploadTypes?: string[]): string[] {
   return normalized.length > 0 ? normalized : config.DEFAULT_FILE_UPLOAD_TYPES;
 }
 
+function normalizeCodeBlockLanguages(
+  languages: CodeBlockLanguageOption[] | undefined,
+  localePlainTextLabel: string
+): CodeBlockLanguageOption[] {
+  const source =
+    languages && languages.length > 0
+      ? languages
+      : DEFAULT_CODE_BLOCK_LANGUAGES.map((item) =>
+          item.value === "plaintext"
+            ? { ...item, label: localePlainTextLabel }
+            : item
+        );
+  const deduped = new Map<string, CodeBlockLanguageOption>();
+  for (const item of source) {
+    const raw = item.value?.trim();
+    if (!raw) continue;
+    const resolved = resolveCodeBlockLanguage(raw, DEFAULT_CODE_BLOCK_LANGUAGE);
+    if (!isRegisteredCodeBlockLanguage(resolved) || deduped.has(resolved)) continue;
+    deduped.set(resolved, {
+      value: resolved,
+      label: (item.label ?? "").trim() || resolved,
+    });
+  }
+  if (!deduped.has(DEFAULT_CODE_BLOCK_LANGUAGE)) {
+    deduped.set(DEFAULT_CODE_BLOCK_LANGUAGE, {
+      value: DEFAULT_CODE_BLOCK_LANGUAGE,
+      label: localePlainTextLabel,
+    });
+  }
+  return Array.from(deduped.values());
+}
+
 const ReactTiptapEditor = ({
   editorMode = EditorMode.NotionLike,
   headlessToolbarMode = HeadlessToolbarMode.Always,
@@ -95,6 +137,8 @@ const ReactTiptapEditor = ({
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
   fileUploadTypes,
+  codeBlockLanguages,
+  defaultCodeBlockLanguage = DEFAULT_CODE_BLOCK_LANGUAGE,
   formulaCategories,
   maxHeight,
   toolbarItems,
@@ -111,6 +155,14 @@ const ReactTiptapEditor = ({
 
   // 当前语言解析后的文案集合
   const locale = resolveEditorLocale(language);
+  const resolvedDefaultCodeBlockLanguage = resolveCodeBlockLanguage(
+    defaultCodeBlockLanguage,
+    DEFAULT_CODE_BLOCK_LANGUAGE
+  );
+  const resolvedCodeBlockLanguages = useMemo(
+    () => normalizeCodeBlockLanguages(codeBlockLanguages, locale.codeBlock.plainText),
+    [codeBlockLanguages, locale.codeBlock.plainText]
+  );
   // 工具栏默认配置：用于在不传配置时保持现有行为。
   const defaultToolbarItems = useMemo(
     () => createDefaultToolbarItems(locale),
@@ -150,8 +202,8 @@ const ReactTiptapEditor = ({
 
   // 内置斜杠命令：用于把 builtin 配置映射回可执行命令。
   const builtinSlashCommands = useMemo(
-    () => createDefaultCommands(locale),
-    [locale],
+    () => createDefaultCommands(locale, resolvedDefaultCodeBlockLanguage),
+    [locale, resolvedDefaultCodeBlockLanguage],
   );
 
   // 最终斜杠命令：builtin 走默认映射，custom 直接注入。
@@ -317,6 +369,7 @@ const ReactTiptapEditor = ({
         : undefined,
     getCommands: getResolvedSlashCommands,
     locale,
+    defaultCodeBlockLanguage: resolvedDefaultCodeBlockLanguage,
     onFileAttachmentClick,
     onInlineMathClick: mathDialog.handleInlineMathClick,
     onBlockMathClick: mathDialog.handleBlockMathClick,
@@ -525,6 +578,16 @@ const ReactTiptapEditor = ({
           </>
         )}
         <EditorContent editor={editor} />
+        {editor && !disabled && (
+          <CodeBlockLanguageMenu
+            editor={editor}
+            locale={locale}
+            portalContainer={portalContainer}
+            editorWrapperRef={editorWrapperRef}
+            languages={resolvedCodeBlockLanguages}
+            defaultLanguage={resolvedDefaultCodeBlockLanguage}
+          />
+        )}
         {editor && !disabled && isNotionLike && (
           <BubbleMenu editor={editor} locale={locale} />
         )}

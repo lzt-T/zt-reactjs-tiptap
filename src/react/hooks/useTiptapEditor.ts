@@ -21,14 +21,17 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Mathematics from "@tiptap/extension-mathematics";
+import { createCodeBlockLowlightExtension } from "@/core/extensions/codeBlockLowlight";
 import { SlashCommands } from "@/core/extensions/SlashCommands";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import { TableBackspaceHandler } from "@/core/extensions/TableBackspaceHandler";
+import { CodeBlockKeyboardHandler } from "@/core/extensions/CodeBlockKeyboardHandler";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import type { Node } from "@tiptap/pm/model";
 import debounce from "lodash/debounce";
 import type { AnyExtension } from "@tiptap/core";
 import type { EditorLocale } from "@/shared/locales";
+import { DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
 
 type MathClickHandler = (node: Node, pos: number) => void;
 
@@ -56,6 +59,7 @@ interface UseTiptapEditorOptions {
   getCommands?: () => CommandItem[];
   onFileAttachmentClick?: (params: { url: string; name: string }) => void;
   locale: EditorLocale;
+  defaultCodeBlockLanguage?: string;
   onInlineMathClick: MathClickHandler;
   onBlockMathClick: MathClickHandler;
   /** 控制 editor 何时重建的依赖集合（例如模式切换时重建以刷新扩展回调） */
@@ -84,6 +88,7 @@ export function useTiptapEditor({
   getCommands,
   onFileAttachmentClick,
   locale,
+  defaultCodeBlockLanguage = DEFAULT_CODE_BLOCK_LANGUAGE,
   onInlineMathClick,
   onBlockMathClick,
   recreateDeps = [],
@@ -148,7 +153,10 @@ export function useTiptapEditor({
   // 内置扩展集合（与历史行为保持一致）
   const builtInExtensions = useMemo<AnyExtension[]>(
     () => [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      createCodeBlockLowlightExtension(defaultCodeBlockLanguage),
       ImageWithDelete,
       FileAttachment,
       DeletionCallbacks,
@@ -182,6 +190,7 @@ export function useTiptapEditor({
           throwOnError: false,
         },
       }),
+      CodeBlockKeyboardHandler,
       TableBackspaceHandler,
       SlashCommands.configure({
         onStart,
@@ -211,6 +220,7 @@ export function useTiptapEditor({
       onStart,
       onUpdate,
       locale,
+      defaultCodeBlockLanguage,
       placeholder,
     ]
   );

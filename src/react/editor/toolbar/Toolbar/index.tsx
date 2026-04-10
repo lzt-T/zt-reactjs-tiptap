@@ -20,6 +20,7 @@ import {
   ListOrdered,
   ListTodo,
   Table,
+  SquareCode,
   Sigma,
   SquareFunction,
   Image,
@@ -69,6 +70,7 @@ const BUILTIN_GROUP_MAP: Record<string, string> = {
   [BuiltinToolbarItemKey.OrderedList]: "block",
   [BuiltinToolbarItemKey.TaskList]: "block",
   [BuiltinToolbarItemKey.InsertTable]: "block",
+  [BuiltinToolbarItemKey.CodeBlock]: "block",
   [BuiltinToolbarItemKey.InlineMath]: "insert",
   [BuiltinToolbarItemKey.BlockMath]: "insert",
   [BuiltinToolbarItemKey.Image]: "insert",
@@ -117,6 +119,12 @@ const Toolbar = ({
       editor.isActive("blockMath") ||
       editor.isActive("image") ||
       editor.isActive("fileAttachment"));
+  /** 光标是否位于代码块。Headless 模式下代码块内统一禁用顶部工具栏按钮。 */
+  const isInsideCodeBlock = !!editor && editor.isActive("codeBlock");
+  /** 统一的工具栏禁用条件：特殊节点或代码块中均禁用。 */
+  const isToolbarLocked = isFocusNodeOnly || isInsideCodeBlock;
+  /** 代码块切换按钮例外：在代码块内仍可用，仅在特殊节点内禁用。 */
+  const isCodeBlockToggleLocked = isFocusNodeOnly;
 
   /**
    * 是否处于行内代码（code mark）内。
@@ -133,7 +141,8 @@ const Toolbar = ({
         editor.isActive("inlineMath") ||
         editor.isActive("blockMath") ||
         editor.isActive("image") ||
-        editor.isActive("code")
+        editor.isActive("code") ||
+        editor.isActive("codeBlock")
       ) {
         setShowHeadingMenu(false);
         setShowColorPicker(null);
@@ -326,12 +335,13 @@ const Toolbar = ({
               }}
               onClick={() => {
                 if (isFocusNodeOnly) return;
+                if (isInsideCodeBlock) return;
                 setShowHeadingMenu(!showHeadingMenu);
               }}
               className={cn(
                 "editor-toolbar-btn",
                 (showHeadingMenu || currentHeadingLevel !== null) && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               title={locale.toolbar.heading}
             >
@@ -350,10 +360,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("bulletList") && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 block.toggleBulletList();
               }}
               title={locale.toolbar.bulletList}
@@ -372,10 +382,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("orderedList") && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 block.toggleOrderedList();
               }}
               title={locale.toolbar.orderedList}
@@ -394,10 +404,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("taskList") && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 block.toggleTaskList();
               }}
               title={locale.toolbar.taskList}
@@ -420,15 +430,37 @@ const Toolbar = ({
               }}
               className={cn(
                 "editor-toolbar-btn",
-                (editor.isActive("table") || isFocusNodeOnly) && "is-disabled"
+                (editor.isActive("table") || isToolbarLocked) && "is-disabled"
               )}
               onClick={() => {
-                if (editor.isActive("table") || isFocusNodeOnly) return;
+                if (editor.isActive("table") || isToolbarLocked) return;
                 setShowTableSizePicker(true);
               }}
               title={locale.toolbar.insertTable}
             >
               <Table size={16} />
+            </button>
+          ),
+        };
+      case BuiltinToolbarItemKey.CodeBlock:
+        return {
+          key: item.key,
+          group,
+          element: (
+            <button
+              type="button"
+              className={cn(
+                "editor-toolbar-btn",
+                editor.isActive("codeBlock") && "is-active",
+                isCodeBlockToggleLocked && "is-disabled"
+              )}
+              onClick={() => {
+                if (isCodeBlockToggleLocked) return;
+                block.toggleCodeBlock();
+              }}
+              title={locale.toolbar.codeBlock}
+            >
+              <SquareCode size={16} />
             </button>
           ),
         };
@@ -441,10 +473,10 @@ const Toolbar = ({
               type="button"
               className={cn(
                 "editor-toolbar-btn",
-                (!onOpenMathDialog || isFocusNodeOnly) && "is-disabled"
+                (!onOpenMathDialog || isToolbarLocked) && "is-disabled"
               )}
               onClick={() => {
-                if (!onOpenMathDialog || isFocusNodeOnly) return;
+                if (!onOpenMathDialog || isToolbarLocked) return;
                 dialogs.openInlineMath();
               }}
               title={locale.toolbar.inlineMath}
@@ -462,10 +494,10 @@ const Toolbar = ({
               type="button"
               className={cn(
                 "editor-toolbar-btn",
-                (!onOpenMathDialog || isFocusNodeOnly) && "is-disabled"
+                (!onOpenMathDialog || isToolbarLocked) && "is-disabled"
               )}
               onClick={() => {
-                if (!onOpenMathDialog || isFocusNodeOnly) return;
+                if (!onOpenMathDialog || isToolbarLocked) return;
                 dialogs.openBlockMath();
               }}
               title={locale.toolbar.blockMath}
@@ -483,10 +515,10 @@ const Toolbar = ({
               type="button"
               className={cn(
                 "editor-toolbar-btn",
-                (!onOpenImageDialog || isFocusNodeOnly) && "is-disabled"
+                (!onOpenImageDialog || isToolbarLocked) && "is-disabled"
               )}
               onClick={() => {
-                if (!onOpenImageDialog || isFocusNodeOnly) return;
+                if (!onOpenImageDialog || isToolbarLocked) return;
                 dialogs.openImage();
               }}
               title={locale.toolbar.image}
@@ -505,10 +537,10 @@ const Toolbar = ({
               type="button"
               className={cn(
                 "editor-toolbar-btn",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 dialogs.openFileUpload();
               }}
               title={locale.toolbar.uploadAttachment}
@@ -527,10 +559,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("bold") && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 format.toggleBold();
               }}
               title={locale.toolbar.bold}
@@ -549,10 +581,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("italic") && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 format.toggleItalic();
               }}
               title={locale.toolbar.italic}
@@ -571,10 +603,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("underline") && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 format.toggleUnderline();
               }}
               title={locale.toolbar.underline}
@@ -593,10 +625,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("strike") && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 format.toggleStrike();
               }}
               title={locale.toolbar.strikethrough}
@@ -615,10 +647,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("code") && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 format.toggleCode();
               }}
               title={locale.toolbar.inlineCode}
@@ -640,7 +672,7 @@ const Toolbar = ({
                 }
               }}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 setShowColorPicker(
                   showColorPicker === "highlight" ? null : "highlight"
                 );
@@ -648,7 +680,7 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("highlight") && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               title={locale.toolbar.highlight}
             >
@@ -669,13 +701,13 @@ const Toolbar = ({
                 }
               }}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 setShowColorPicker(showColorPicker === "text" ? null : "text");
               }}
               className={cn(
                 "editor-toolbar-btn",
                 !!editor.getAttributes("textStyle").color && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               title={locale.toolbar.textColor}
             >
@@ -693,10 +725,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("superscript") && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 format.toggleSuperscript();
               }}
               title={locale.toolbar.superscript}
@@ -715,10 +747,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive("subscript") && "is-active",
-                (isFocusNodeOnly || isInsideCode) && "is-disabled"
+                (isToolbarLocked || isInsideCode) && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly || isInsideCode) return;
+                if (isToolbarLocked || isInsideCode) return;
                 format.toggleSubscript();
               }}
               title={locale.toolbar.subscript}
@@ -737,10 +769,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive({ textAlign: "left" }) && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 format.setTextAlign("left");
               }}
               title={locale.toolbar.alignLeft}
@@ -759,10 +791,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive({ textAlign: "center" }) && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 format.setTextAlign("center");
               }}
               title={locale.toolbar.alignCenter}
@@ -781,10 +813,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive({ textAlign: "right" }) && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 format.setTextAlign("right");
               }}
               title={locale.toolbar.alignRight}
@@ -803,10 +835,10 @@ const Toolbar = ({
               className={cn(
                 "editor-toolbar-btn",
                 editor.isActive({ textAlign: "justify" }) && "is-active",
-                isFocusNodeOnly && "is-disabled"
+                isToolbarLocked && "is-disabled"
               )}
               onClick={() => {
-                if (isFocusNodeOnly) return;
+                if (isToolbarLocked) return;
                 format.setTextAlign("justify");
               }}
               title={locale.toolbar.justify}

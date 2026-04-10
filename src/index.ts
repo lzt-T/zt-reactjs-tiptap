@@ -24,6 +24,11 @@ export type {
 export * from "./core";
 export { FORMULA_CATEGORIES } from "./shared/config/formulaCategories";
 export type { FormulaPickerCategory } from "./shared/config/formulaCategories";
+export {
+  DEFAULT_CODE_BLOCK_LANGUAGE,
+  DEFAULT_CODE_BLOCK_LANGUAGES,
+} from "./shared/config";
+export type { CodeBlockLanguageOption } from "./shared/config";
 export { htmlToPlainText, domToPlainText } from "./shared/utils/htmlToPlainText";
 export type { HtmlToPlainTextOptions } from "./shared/utils/htmlToPlainText";
 

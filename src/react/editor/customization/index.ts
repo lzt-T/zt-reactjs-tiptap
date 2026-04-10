@@ -11,6 +11,7 @@ export const BuiltinToolbarItemKey = {
   OrderedList: "orderedList",
   TaskList: "taskList",
   InsertTable: "insertTable",
+  CodeBlock: "codeBlock",
   InlineMath: "inlineMath",
   BlockMath: "blockMath",
   Image: "image",
@@ -39,6 +40,7 @@ export const BuiltinSlashCommandKey = {
   NumberedList: "numberedList",
   TaskList: "taskList",
   InlineCode: "inlineCode",
+  CodeBlock: "codeBlock",
   Table: "table",
   InlineMath: "inlineMath",
   BlockMath: "blockMath",
@@ -75,6 +77,8 @@ export interface EditorActionContext {
   block: {
     setHeading: (level: 1 | 2 | 3) => void;
     toggleHeading: (level: 1 | 2 | 3) => void;
+    toggleCodeBlock: () => void;
+    setCodeBlockLanguage: (language: string) => void;
     toggleBulletList: () => void;
     toggleOrderedList: () => void;
     toggleTaskList: () => void;
@@ -144,6 +148,7 @@ export function createDefaultToolbarItems(locale: EditorLocale): ToolbarItemConf
     { type: "builtin", key: BuiltinToolbarItemKey.OrderedList, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.TaskList, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.InsertTable, group: "block" },
+    { type: "builtin", key: BuiltinToolbarItemKey.CodeBlock, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.InlineMath, group: "insert" },
     { type: "builtin", key: BuiltinToolbarItemKey.BlockMath, group: "insert" },
     { type: "builtin", key: BuiltinToolbarItemKey.Image, group: "insert" },
@@ -175,6 +180,7 @@ export function createDefaultSlashCommands(locale: EditorLocale): SlashCommandCo
     { type: "builtin", key: BuiltinSlashCommandKey.NumberedList, group: "list" },
     { type: "builtin", key: BuiltinSlashCommandKey.TaskList, group: "list" },
     { type: "builtin", key: BuiltinSlashCommandKey.InlineCode, group: "insert" },
+    { type: "builtin", key: BuiltinSlashCommandKey.CodeBlock, group: "insert" },
     { type: "builtin", key: BuiltinSlashCommandKey.Table, group: "insert" },
     { type: "builtin", key: BuiltinSlashCommandKey.InlineMath, group: "math" },
     { type: "builtin", key: BuiltinSlashCommandKey.BlockMath, group: "math" },

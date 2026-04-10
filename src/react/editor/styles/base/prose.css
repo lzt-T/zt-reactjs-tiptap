@@ -94,10 +94,28 @@
   display: none;
   pointer-events: none;
   position: relative;
-  /* 用 padding 撑开与上下块的距离（不参与 margin 折叠） */
-  padding-top: 4px;
-  padding-bottom: 4px;
-  margin-bottom: 0;
+  height: 0;
+}
+
+.editor-wrapper .ProseMirror-focused .ProseMirror-gapcursor {
+  display: block;
+}
+
+.editor-wrapper .ProseMirror-gapcursor::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  border-top: 2px solid #3b82f6;
+  animation: zt-gap-cursor-blink 1s steps(2, start) infinite;
+}
+
+@keyframes zt-gap-cursor-blink {
+  to {
+    visibility: hidden;
+  }
 }
 
 /* Horizontal rule */
