@@ -3,7 +3,7 @@ import {
   SlashCommandKey,
   type CommandItem as SlashCommandItem,
 } from "@/core/extensions/SlashCommands";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type Ref } from "react";
 import { Command, CommandList, CommandItem } from "@/react/components/ui/command";
 import { cn } from "@/shared/utils/utils";
 import { MenuPlacement } from "@/react/editor/types";
@@ -16,10 +16,13 @@ interface CommandMenuProps {
   position: { top: number; left: number; placement: MenuPlacement };
   maxHeight: number;
   minHeight: number;
+  /** 菜单根节点 ref，用于回填真实尺寸后重算位置。 */
+  overlayRef?: Ref<HTMLDivElement>;
   /** 用于判断是否禁用「表格」等依赖上下文的选项（如在表格内禁用插入表格） */
   editor?: Editor | null;
 }
 
+/** Slash 命令菜单：负责渲染与滚动到当前选中项。 */
 const CommandMenu = ({
   items,
   command,
@@ -27,8 +30,10 @@ const CommandMenu = ({
   position,
   maxHeight,
   minHeight,
+  overlayRef,
   editor,
 }: CommandMenuProps) => {
+  // 当前高亮项的 DOM 引用，用于自动滚动到可视区域。
   const selectedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,6 +62,7 @@ const CommandMenu = ({
             ? "translateY(-100%)"
             : undefined,
       }}
+      ref={overlayRef}
     >
       <Command shouldFilter={false} className="rounded-lg border shadow-md">
         <CommandList style={{ maxHeight: `${maxHeight}px`, minHeight: minHeight > 0 ? `${minHeight}px` : undefined, minWidth: "160px" }}>

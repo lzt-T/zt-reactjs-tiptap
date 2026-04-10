@@ -265,6 +265,7 @@ const ReactTiptapEditor = ({
     [],
   );
   const disabledRef = useRef(disabled);
+  const codeBlockLanguageMenuRootRef = useRef<HTMLDivElement | null>(null);
   const isNotionLike = editorMode === EditorMode.NotionLike;
   // 记录当前全局暗色状态，用于给编辑器容器补充 dark 类。
   const [isDocumentDark, setIsDocumentDark] = useState(
@@ -281,6 +282,18 @@ const ReactTiptapEditor = ({
     isBlock: boolean;
   } | null>(null);
   const isEditorFocusedRef = useRef(false);
+  const setCodeBlockLanguageMenuRoot = useCallback(
+    (node: HTMLDivElement | null) => {
+      codeBlockLanguageMenuRootRef.current = node;
+    },
+    [],
+  );
+
+  const isInsideCodeBlockLanguageSelect = useCallback((target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    if (codeBlockLanguageMenuRootRef.current?.contains(target)) return true;
+    return !!target.closest(".code-block-language-select-content");
+  }, []);
 
   useEffect(() => {
     disabledRef.current = disabled;
@@ -419,7 +432,10 @@ const ReactTiptapEditor = ({
 
     const handleMouseDown = (e: MouseEvent) => {
       // 只要点击发生在容器内，就标记为内部点击，阻止 onBlur 清除焦点状态
-      if (containerRef.current?.contains(e.target as Node)) {
+      if (
+        containerRef.current?.contains(e.target as Node) ||
+        isInsideCodeBlockLanguageSelect(e.target)
+      ) {
         mouseDownInsideRef.current = true;
         // 延迟重置，确保 blur 处理链路全部完成后再允许下次触发
         setTimeout(() => {
@@ -468,7 +484,10 @@ const ReactTiptapEditor = ({
       if (mouseDownInsideRef.current) return;
       // 否则延迟一帧：焦点若移到容器内的可聚焦元素（如工具栏按钮），不隐藏工具栏
       requestAnimationFrame(() => {
-        if (!containerRef.current?.contains(document.activeElement)) {
+        if (
+          !containerRef.current?.contains(document.activeElement) &&
+          !isInsideCodeBlockLanguageSelect(document.activeElement)
+        ) {
           setIsEditorFocused(false);
         }
       });
@@ -482,13 +501,18 @@ const ReactTiptapEditor = ({
       editor.off("focus", onFocus);
       editor.off("blur", onBlur);
     };
-  }, [editor, isNotionLike, mathDialog]);
+  }, [editor, isNotionLike, mathDialog, isInsideCodeBlockLanguageSelect]);
 
   /** Headless 模式下是否显示顶部工具栏 */
   const showHeadlessToolbar =
     !isNotionLike &&
     (headlessToolbarMode === HeadlessToolbarMode.Always ||
       (headlessToolbarMode === HeadlessToolbarMode.OnFocus && isEditorFocused));
+  /** 代码语言菜单显示门控：Headless + on-focus 时跟随 isEditorFocused，其它场景保持显示。 */
+  const showCodeBlockLanguageMenu =
+    isNotionLike ||
+    headlessToolbarMode !== HeadlessToolbarMode.OnFocus ||
+    isEditorFocused;
 
   /** 斜杠命令选中后执行：先删除 "/" 及后续输入，再执行对应命令 */
   const handleCommand = useCallback(
@@ -586,6 +610,8 @@ const ReactTiptapEditor = ({
             editorWrapperRef={editorWrapperRef}
             languages={resolvedCodeBlockLanguages}
             defaultLanguage={resolvedDefaultCodeBlockLanguage}
+            enabled={showCodeBlockLanguageMenu}
+            onMenuRootChange={setCodeBlockLanguageMenuRoot}
           />
         )}
         {editor && !disabled && isNotionLike && (
@@ -603,6 +629,7 @@ const ReactTiptapEditor = ({
               position={commandMenu.menuPosition}
               maxHeight={commandMenuMaxHeight}
               minHeight={commandMenuMinHeight}
+              overlayRef={commandMenu.menuOverlayRef}
               editor={editor}
             />
           )}

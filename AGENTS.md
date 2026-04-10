@@ -14,6 +14,8 @@
 
 ## 2. 常用命令
 
+禁止执行以下命令
+
 ```bash
 # 开发调试
 pnpm dev
@@ -118,6 +120,14 @@ examples/
 - 变更应最小化且与现有分层一致，不引入反向依赖。
 - 提交前至少执行：`pnpm lint`；涉及导出/类型时执行 `pnpm exec tsc --project tsconfig.lib.json --noEmit false`。
 - 若改动导出接口、目录结构或行为语义，必须同步更新 README 与 CHANGELOG。
+
+### 8.1 注释 Skill 默认使用（强约束）
+
+- 当任务涉及 TS/JS 代码注释补全或注释规范化时，Agent 必须启用 `comment-first-tsjs` skill。
+- 触发场景：新增/修改 `.ts`、`.tsx`、`.js`、`.jsx`、`.mjs`、`.cjs` 文件，且需要保障注释完整性。
+- 默认执行标准：函数定义使用 `/** ... */`；变量定义与枚举成员使用 `// ...`；新增注释默认使用中文。
+- 边界约束：保留已有有效注释；不无故改写现有英文注释；仅补齐缺失注释，保持最小化变更。
+- 覆盖率核查（只读）：若仓库提供该脚本，可执行 `node scripts/check_comment_coverage.js . --json` 进行缺失注释检查；若未提供，按现有 lint/tsc 流程与代码审查补充校验。
 
 ## 9. 常见任务指引
 

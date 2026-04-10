@@ -56,58 +56,21 @@
 }
 
 .code-block-language-menu {
-  position: fixed;
   z-index: 45;
-  transform: translateX(-100%);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
 }
 
 .code-block-language-trigger {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: #f3f4f6;
-  color: #374151;
   font-size: 12px;
-  line-height: 1;
-  padding: 7px 10px;
-  cursor: pointer;
+  min-width: 132px;
+  background: color-mix(in oklab, var(--background) 92%, transparent);
 }
 
-.code-block-language-trigger:hover {
-  background: #e5e7eb;
-}
-
-.code-block-language-dropdown {
+.code-block-language-select-content {
   min-width: 150px;
   max-height: 260px;
-  overflow-y: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 10px 24px rgba(2, 8, 23, 0.14);
-  padding: 4px;
+  z-index: 46;
 }
 
 .code-block-language-option {
-  width: 100%;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: #374151;
-  text-align: left;
   font-size: 13px;
-  padding: 8px 10px;
-  cursor: pointer;
-}
-
-.code-block-language-option:hover {
-  background: #f3f4f6;
-}
-
-.code-block-language-option.is-active {
-  background: #eff6ff;
-  color: #1d4ed8;
 }
