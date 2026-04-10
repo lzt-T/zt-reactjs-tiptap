@@ -17,6 +17,12 @@
   background: #eff6ff;
 }
 
+.editor-container.is-editor-blurred .editor-wrapper .ProseMirror .file-attachment-wrapper.file-attachment-selected,
+.editor-container.is-editor-blurred .editor-wrapper .ProseMirror .file-attachment-wrapper.ProseMirror-selectednode {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
 .editor-wrapper .ProseMirror .file-attachment-link {
   display: inline-flex;
   align-items: center;

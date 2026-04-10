@@ -553,6 +553,7 @@ const ReactTiptapEditor = ({
         "text-foreground",
         isDocumentDark && "dark",
         disabled && "is-disabled",
+        !isEditorFocused && "is-editor-blurred",
         !border && "no-border",
         !isNotionLike && "editor-container-headless",
         maxHeight != null && "editor-container-has-max-height",
