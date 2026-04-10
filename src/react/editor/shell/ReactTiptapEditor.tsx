@@ -22,15 +22,9 @@ import {
   useTiptapEditor,
   useEditorCommands,
 } from "@/react/hooks";
-import {
-  DEFAULT_CODE_BLOCK_LANGUAGE,
-  config,
-} from "@/shared/config";
+import { DEFAULT_CODE_BLOCK_LANGUAGE, config } from "@/shared/config";
 import { cn } from "@/shared/utils/utils";
-import {
-  EditorMode,
-  HeadlessToolbarMode,
-} from "@/react/editor/types";
+import { EditorMode, HeadlessToolbarMode } from "@/react/editor/types";
 import { resolveEditorLocale } from "@/shared/locales";
 import { useEditorResolvedConfig } from "@/react/editor/shell/hooks/useEditorResolvedConfig";
 import { useEditorThemePortalState } from "@/react/editor/shell/hooks/useEditorThemePortalState";
@@ -126,10 +120,13 @@ const ReactTiptapEditor = ({
   }, [disabled]);
 
   /** 判断事件目标是否位于代码块语言菜单浮层。 */
-  const isInsideCodeBlockLanguageSelect = useCallback((target: EventTarget | null) => {
-    if (!(target instanceof Element)) return false;
-    return !!target.closest(".code-block-language-select-content");
-  }, []);
+  const isInsideCodeBlockLanguageSelect = useCallback(
+    (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false;
+      return !!target.closest(".code-block-language-select-content");
+    },
+    [],
+  );
 
   // 斜杠命令菜单状态。
   const commandMenu = useCommandMenu({
@@ -160,11 +157,15 @@ const ReactTiptapEditor = ({
     onImageDelete,
     onFileDelete,
     onStart: resolvedConfig.isNotionLike ? commandMenu.handleStart : noop,
-    onUpdate: resolvedConfig.isNotionLike ? commandMenu.handleUpdate : noopUpdate,
+    onUpdate: resolvedConfig.isNotionLike
+      ? commandMenu.handleUpdate
+      : noopUpdate,
     onIndexChange: resolvedConfig.isNotionLike
       ? commandMenu.handleIndexChange
       : noopIndex,
-    onClientRect: resolvedConfig.isNotionLike ? commandMenu.handleClientRect : noopRect,
+    onClientRect: resolvedConfig.isNotionLike
+      ? commandMenu.handleClientRect
+      : noopRect,
     onExit: resolvedConfig.isNotionLike ? commandMenu.handleExit : noop,
     onMathDialog: resolvedConfig.isNotionLike
       ? mathDialog.handleMathDialogFromSlash
@@ -269,6 +270,7 @@ const ReactTiptapEditor = ({
     themePortalState.isDocumentDark && "dark",
     disabled && "is-disabled",
     !focusController.isEditorFocused && "is-editor-blurred",
+    !focusController.isEditorFocusStable && "is-editor-focus-unstable",
     !border && "no-border",
     !resolvedConfig.isNotionLike && "editor-container-headless",
     maxHeight != null && "editor-container-has-max-height",
@@ -284,12 +286,17 @@ const ReactTiptapEditor = ({
       : undefined;
 
   return (
-    <div ref={containerRef} className={containerClassName} style={containerStyle}>
+    <div
+      ref={containerRef}
+      className={containerClassName}
+      style={containerStyle}
+    >
       <EditorSurface
         editor={editor}
         disabled={disabled}
         isNotionLike={resolvedConfig.isNotionLike}
         isEditorFocused={focusController.isEditorFocused}
+        isEditorFocusStable={focusController.isEditorFocusStable}
         showHeadlessToolbar={focusController.showHeadlessToolbar}
         showCodeBlockLanguageMenu={focusController.showCodeBlockLanguageMenu}
         locale={locale}

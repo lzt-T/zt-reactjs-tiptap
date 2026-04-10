@@ -18,6 +18,8 @@
 }
 
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .file-attachment-wrapper.file-attachment-selected,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .file-attachment-wrapper.file-attachment-selected,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .file-attachment-wrapper.ProseMirror-selectednode,
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .file-attachment-wrapper.ProseMirror-selectednode {
   border-color: #e2e8f0;
   background: #f8fafc;

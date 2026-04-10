@@ -29,6 +29,7 @@ interface EditorSurfaceProps {
   disabled: boolean;
   isNotionLike: boolean;
   isEditorFocused: boolean;
+  isEditorFocusStable: boolean;
   showHeadlessToolbar: boolean;
   showCodeBlockLanguageMenu: boolean;
   locale: EditorLocale;
@@ -57,6 +58,7 @@ export default function EditorSurface({
   disabled,
   isNotionLike,
   isEditorFocused,
+  isEditorFocusStable,
   showHeadlessToolbar,
   showCodeBlockLanguageMenu,
   locale,
@@ -86,6 +88,7 @@ export default function EditorSurface({
           editor={editor}
           items={resolvedToolbarItems}
           isEditorFocused={isEditorFocused}
+          isEditorFocusStable={isEditorFocusStable}
           onOpenMathDialog={onOpenMathDialog}
           onOpenImageDialog={onOpenImageDialog}
           locale={locale}

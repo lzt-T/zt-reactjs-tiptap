@@ -28,8 +28,12 @@ export function useHeadlessFocusController({
 }: UseHeadlessFocusControllerOptions) {
   // 编辑器聚焦状态。
   const [isEditorFocused, setIsEditorFocused] = useState(false);
+  // 编辑器聚焦稳定状态（focus 后下一帧才置为 true，避免首帧抖动）。
+  const [isEditorFocusStable, setIsEditorFocusStable] = useState(false);
   // mousedown 是否发生在容器内部。
   const mouseDownInsideRef = useRef(false);
+  // focus 稳定化 requestAnimationFrame id。
+  const focusStableRafIdRef = useRef<number | null>(null);
   // 编辑器聚焦状态引用，供事件回调读取最新值。
   const isEditorFocusedRef = useRef(false);
   // 未聚焦点击公式时缓存待处理元素。
@@ -94,6 +98,13 @@ export function useHeadlessFocusController({
     /** 聚焦后补触发未聚焦点击公式事件。 */
     const onFocus = () => {
       setIsEditorFocused(true);
+      if (focusStableRafIdRef.current != null) {
+        cancelAnimationFrame(focusStableRafIdRef.current);
+      }
+      focusStableRafIdRef.current = setTimeout(() => {
+        setIsEditorFocusStable(true);
+        focusStableRafIdRef.current = null;
+      }, 80);
       const pending = pendingMathClickRef.current;
       if (!pending) return;
       pendingMathClickRef.current = null;
@@ -115,6 +126,11 @@ export function useHeadlessFocusController({
 
     /** 失焦后按点击位置决定是否保留聚焦态。 */
     const onBlur = () => {
+      setIsEditorFocusStable(false);
+      if (focusStableRafIdRef.current != null) {
+        cancelAnimationFrame(focusStableRafIdRef.current);
+        focusStableRafIdRef.current = null;
+      }
       if (mouseDownInsideRef.current) return;
       requestAnimationFrame(() => {
         if (
@@ -132,6 +148,10 @@ export function useHeadlessFocusController({
 
     return () => {
       document.removeEventListener("mousedown", handleMouseDown);
+      if (focusStableRafIdRef.current != null) {
+        cancelAnimationFrame(focusStableRafIdRef.current);
+        focusStableRafIdRef.current = null;
+      }
       editor.off("focus", onFocus);
       editor.off("blur", onBlur);
     };
@@ -151,10 +171,11 @@ export function useHeadlessFocusController({
       (headlessToolbarMode === HeadlessToolbarMode.OnFocus && isEditorFocused));
 
   // 代码语言菜单显示开关。
-  const showCodeBlockLanguageMenu = isEditorFocused;
+  const showCodeBlockLanguageMenu = isEditorFocused && isEditorFocusStable;
 
   return {
     isEditorFocused,
+    isEditorFocusStable,
     showHeadlessToolbar,
     showCodeBlockLanguageMenu,
     setCodeBlockLanguageMenuRoot,

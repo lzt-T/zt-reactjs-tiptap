@@ -58,6 +58,10 @@
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .image-node-wrapper img.image-selected,
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode img,
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .image-node-wrapper .image-error-placeholder.image-selected,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .image-node-wrapper img.image-selected,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode img,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .image-node-wrapper .image-error-placeholder.image-selected,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode .image-error-placeholder,
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode .image-error-placeholder {
   outline: none;
 }
