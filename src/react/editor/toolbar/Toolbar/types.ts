@@ -52,7 +52,10 @@ export interface ToolbarRenderContext {
   canUseMathDialog: boolean;
   canUseImageDialog: boolean;
   canUseFileUploadDialog: boolean;
-  runToolbarAction: (action: () => void) => void;
+  runToolbarAction: (
+    action: () => void,
+    options?: { gapPolicy?: "insert-anchor" | "keep-gap" },
+  ) => void;
   onToggleHeadingMenu: () => void;
   onToggleColorPicker: (type: "text" | "highlight") => void;
   onOpenTableSizePicker: () => void;

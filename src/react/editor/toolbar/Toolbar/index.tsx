@@ -1,4 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { GapCursor } from "@tiptap/pm/gapcursor";
+import { TextSelection } from "@tiptap/pm/state";
 import { useEditorCommands } from "@/react/hooks";
 import type { EditorActionContext } from "@/react/editor/customization";
 import { renderToolbarItem } from "./renderers/renderToolbarItem";
@@ -127,9 +129,37 @@ const Toolbar = ({
     editor.chain().focus().setTextSelection(endPos).run();
   };
 
+  /**
+   * GapCursor 下的执行策略：
+   * - insert-anchor：先在 gap 位置插入段落锚点，后续命令以“插入”语义执行；
+   * - keep-gap：保留 gap 选区（用于本就执行插入节点的命令）。
+   */
+  const handleGapCursorBeforeAction = (
+    gapPolicy: "insert-anchor" | "keep-gap",
+  ) => {
+    const { state, view } = editor;
+    const { selection } = state;
+    if (!(selection instanceof GapCursor)) return;
+    if (gapPolicy === "keep-gap") return;
+
+    const paragraph = state.schema.nodes.paragraph;
+    if (!paragraph) return;
+
+    const anchorPos = selection.from;
+    let tr = state.tr.insert(anchorPos, paragraph.create());
+    const nextPos = Math.min(anchorPos + 1, tr.doc.content.size);
+    tr = tr.setSelection(TextSelection.near(tr.doc.resolve(nextPos), 1));
+    view.dispatch(tr);
+  };
+
   /** 工具栏命令统一入口：先修正失焦锚点，再执行实际动作。 */
-  const runToolbarAction = (action: () => void) => {
+  const runToolbarAction = (
+    action: () => void,
+    options?: { gapPolicy?: "insert-anchor" | "keep-gap" },
+  ) => {
+    const gapPolicy = options?.gapPolicy ?? "insert-anchor";
     prepareEndAnchorWhenBlurred();
+    handleGapCursorBeforeAction(gapPolicy);
     action();
   };
 
@@ -262,7 +292,10 @@ const Toolbar = ({
         isReady={isTableSizePickerReady}
         locale={locale}
         onSelect={(rows, cols) => {
-          runToolbarAction(() => block.insertTable({ rows, cols }));
+          runToolbarAction(
+            () => block.insertTable({ rows, cols }),
+            { gapPolicy: "keep-gap" },
+          );
           setShowTableSizePicker(false);
         }}
       />

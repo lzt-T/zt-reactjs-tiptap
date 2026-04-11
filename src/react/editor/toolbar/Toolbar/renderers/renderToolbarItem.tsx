@@ -233,7 +233,10 @@ export function renderToolbarItem(
             )}
             onClick={() => {
               if (!ctx.canUseMathDialog || ctx.isToolbarLocked) return;
-              ctx.runToolbarAction(() => ctx.actionContext.dialogs.openInlineMath());
+              ctx.runToolbarAction(
+                () => ctx.actionContext.dialogs.openInlineMath(),
+                { gapPolicy: "keep-gap" },
+              );
             }}
             title={ctx.locale.toolbar.inlineMath}
           >
@@ -254,7 +257,10 @@ export function renderToolbarItem(
             )}
             onClick={() => {
               if (!ctx.canUseMathDialog || ctx.isToolbarLocked) return;
-              ctx.runToolbarAction(() => ctx.actionContext.dialogs.openBlockMath());
+              ctx.runToolbarAction(
+                () => ctx.actionContext.dialogs.openBlockMath(),
+                { gapPolicy: "keep-gap" },
+              );
             }}
             title={ctx.locale.toolbar.blockMath}
           >
@@ -275,7 +281,10 @@ export function renderToolbarItem(
             )}
             onClick={() => {
               if (!ctx.canUseImageDialog || ctx.isToolbarLocked) return;
-              ctx.runToolbarAction(() => ctx.actionContext.dialogs.openImage());
+              ctx.runToolbarAction(
+                () => ctx.actionContext.dialogs.openImage(),
+                { gapPolicy: "keep-gap" },
+              );
             }}
             title={ctx.locale.toolbar.image}
           >
@@ -294,7 +303,10 @@ export function renderToolbarItem(
             className={cn("editor-toolbar-btn", ctx.isToolbarLocked && "is-disabled")}
             onClick={() => {
               if (ctx.isToolbarLocked) return;
-              ctx.runToolbarAction(() => ctx.actionContext.dialogs.openFileUpload());
+              ctx.runToolbarAction(
+                () => ctx.actionContext.dialogs.openFileUpload(),
+                { gapPolicy: "keep-gap" },
+              );
             }}
             title={ctx.locale.toolbar.uploadAttachment}
           >
