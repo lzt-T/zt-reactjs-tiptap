@@ -75,6 +75,7 @@ const ReactTiptapEditor = ({
   fileUploadTypes,
   codeBlockLanguages,
   defaultCodeBlockLanguage = DEFAULT_CODE_BLOCK_LANGUAGE,
+  onCodeBlockFormat,
   formulaCategories,
   maxHeight,
   toolbarItems,
@@ -307,6 +308,7 @@ const ReactTiptapEditor = ({
         resolvedDefaultCodeBlockLanguage={
           resolvedConfig.resolvedDefaultCodeBlockLanguage
         }
+        onCodeBlockFormat={onCodeBlockFormat}
         commandMenu={commandMenu}
         commandMenuMaxHeight={commandMenuMaxHeight}
         commandMenuMinHeight={commandMenuMinHeight}

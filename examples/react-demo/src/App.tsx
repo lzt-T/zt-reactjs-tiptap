@@ -93,6 +93,17 @@ function App() {
     console.log("🗑️ 删除附件:", params);
   };
 
+  const onCodeBlockFormat = async ({
+    code,
+    language,
+  }: {
+    code: string;
+    language: string;
+  }) => {
+    console.log("🧹 格式化代码:", { language });
+    return code;
+  };
+
   useEffect(() => {
     console.log("📡 准备从接口加载数据...");
     setTimeout(() => {
@@ -106,8 +117,15 @@ function App() {
   return (
     <div className="app">
       <h1>Tiptap Markdown Editor</h1>
-      <div onClick={() => setDisabled(true)}>disabled</div>
-      <div onClick={() => setDisabled(false)}> not disabled</div>
+      <div
+        onClick={() => {
+          setDisabled(!disabled);
+        }}
+      >
+        切换disable
+      </div>
+      {/*<div onClick={() => setDisabled(true)}>disabled</div>
+      <div onClick={() => setDisabled(false)}> not disabled</div>*/}
       <div
         className="flex-1"
         style={{ height: "calc(100vh - 400px)", width: "400px" }}
@@ -130,6 +148,7 @@ function App() {
           onFileUpload={onFileUpload}
           onFileDelete={onFileDelete}
           onFileAttachmentClick={onFileAttachmentClick}
+          onCodeBlockFormat={onCodeBlockFormat}
         />
       </div>
       <div className="h-[900px]"></div>

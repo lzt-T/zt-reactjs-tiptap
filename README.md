@@ -230,6 +230,7 @@ function EditorExample() {
 | `fileUploadTypes` | `string[]` | 否 | `['pdf']` | 附件可上传扩展名列表（不区分大小写），如 `['pdf', 'docx']`。会自动去空格、去重、去掉前导 `.`；为空时回落到默认 `['pdf']` |
 | `codeBlockLanguages` | `Array<{ value: string; label: string }>` | 否 | 内置 20 种常用语言 | 代码块语言列表。传入后覆盖内置列表（会自动去重并回落无效语言） |
 | `defaultCodeBlockLanguage` | `string` | 否 | `'plaintext'` | 新增代码块默认语言。传入无效值时自动回落 `plaintext` |
+| `onCodeBlockFormat` | `(payload: { code: string; language: string }) => string \| Promise<string>` | 否 | - | 代码块格式化回调。点击代码块右上角“格式化代码”按钮时触发；返回值会覆盖当前代码块文本内容（保留语言） |
 | `formulaCategories` | `FormulaPickerCategory[]` | 否 | 内置默认分类 | 公式选择器的分类列表。不传则使用内置分类；传入时可完全自定义或在默认基础上扩展（见下方「扩展公式分类」） |
 | `maxHeight` | `number \| string` | 否 | - | 编辑器容器的最大高度。不配置时容器为 `height: 100%`；配置后高度限制为该值，内容超出时在编辑区内滚动。数字为像素（如 `400`），字符串为任意合法 CSS 长度（如 `"50vh"`、`"20rem"`） |
 | `toolbarItems` | `ToolbarItemConfig[]` | 否 | 内置默认工具栏 | 工具栏配置：支持重排/裁剪内置按钮与追加自定义按钮 |
@@ -280,6 +281,8 @@ function EditorExample() {
 - 光标位于代码块中时，右上角会显示“代码语言（Code language）”按钮。
 - 点击后可选择语言，选中项会高亮，代码块会即时按语言高亮渲染。
 - 默认内置常用 20 种语言（含 `plaintext` 兜底）。
+- 光标位于代码块中时，会显示一体化的代码块控件（语言选择 + 格式化 + 删除）。
+- 未传入 `onCodeBlockFormat` 时，“格式化代码”按钮为禁用态。
 
 ```tsx
 import {
@@ -299,6 +302,22 @@ const customLanguages: CodeBlockLanguageOption[] = [
 <ReactTiptapEditor
   defaultCodeBlockLanguage={DEFAULT_CODE_BLOCK_LANGUAGE}
   codeBlockLanguages={customLanguages}
+/>
+```
+
+如果你希望接入业务侧格式化（例如调用后端、Monaco、Prettier Worker 等），可传入 `onCodeBlockFormat`：
+
+```tsx
+<ReactTiptapEditor
+  onCodeBlockFormat={async ({ code, language }) => {
+    const response = await fetch('/api/format-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language }),
+    })
+    const data = await response.json()
+    return data.formattedCode ?? code
+  }}
 />
 ```
 

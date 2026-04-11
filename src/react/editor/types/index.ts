@@ -176,6 +176,12 @@ export interface TiptapEditorProps {
   defaultCodeBlockLanguage?: string
 
   /**
+   * 代码块格式化回调。点击代码块右上角“格式化代码”按钮时触发。
+   * 返回字符串（或 Promise<string>）后会覆盖当前代码块内容，语言属性保持不变。
+   */
+  onCodeBlockFormat?: (payload: { code: string; language: string }) => string | Promise<string>
+
+  /**
    * 公式选择器的分类列表。不传则使用默认 FORMULA_CATEGORIES；
    * 传入时可完全自定义或通过 [...FORMULA_CATEGORIES, ...extra] 扩展默认列表。
    */

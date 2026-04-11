@@ -72,6 +72,8 @@ export interface EditorLocale {
     plainText: string;
     searchPlaceholder: string;
     noMatch: string;
+    delete: string;
+    formatCode: string;
   };
   mathDialog: {
     insertInlineMath: string;

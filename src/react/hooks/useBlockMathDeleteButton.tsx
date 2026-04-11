@@ -45,7 +45,7 @@ export function useBlockMathDeleteButton({
   useEffect(() => {
     if (!editor || disabled || !editorWrapperRef.current) return;
 
-    const roots = new Set<ReturnType<typeof createRoot>>();
+    const roots = new Map<HTMLElement, ReturnType<typeof createRoot>>();
 
     const injectDeleteButtons = () => {
       const wrapper = editorWrapperRef.current;
@@ -53,26 +53,38 @@ export function useBlockMathDeleteButton({
       const blockMathNodes = wrapper.querySelectorAll<HTMLElement>(
         BLOCK_MATH_SELECTOR
       );
-      blockMathNodes.forEach((el) => {
-        const existing = el.querySelector(`.${DELETE_BTN_WRAPPER_CLASS}`);
-        if (existing) {
-          if (existing.childNodes.length > 0) return;
-          existing.remove();
-        }
-        const container = document.createElement("div");
-        container.className = DELETE_BTN_WRAPPER_CLASS;
-        el.appendChild(container);
+      const activeNodes = new Set<HTMLElement>(Array.from(blockMathNodes));
 
-        const root = createRoot(container);
-        roots.add(root);
+      roots.forEach((root, node) => {
+        if (activeNodes.has(node)) return;
+        root.unmount();
+        roots.delete(node);
+      });
+
+      blockMathNodes.forEach((el) => {
+        let container = el.querySelector<HTMLElement>(`.${DELETE_BTN_WRAPPER_CLASS}`);
+        if (!container) {
+          container = document.createElement("div");
+          container.className = DELETE_BTN_WRAPPER_CLASS;
+          el.appendChild(container);
+        }
+        let root = roots.get(el);
+        if (!root) {
+          root = createRoot(container);
+          roots.set(el, root);
+        }
 
         root.render(
           <DeleteButton
             onDelete={() => {
-              const pos = editor.view.posAtDOM(el, 0);
+              let pos = -1;
+              try {
+                pos = editor.view.posAtDOM(el, 0);
+              } catch {
+                return;
+              }
+              if (pos < 0) return;
               editor.chain().setNodeSelection(pos).deleteSelection().run();
-              roots.delete(root);
-              root.unmount();
             }}
           />
         );
@@ -82,15 +94,21 @@ export function useBlockMathDeleteButton({
     const onUpdate = () => {
       requestAnimationFrame(injectDeleteButtons);
     };
+    const observer = new MutationObserver(onUpdate);
+    observer.observe(editorWrapperRef.current, { childList: true, subtree: true });
+
     editor.on("update", onUpdate);
+    editor.on("transaction", onUpdate);
     onUpdate();
 
     return () => {
+      observer.disconnect();
       editor.off("update", onUpdate);
-      const rootsToUnmount = Array.from(roots);
+      editor.off("transaction", onUpdate);
+      const rootsToUnmount = Array.from(roots.values());
       roots.clear();
       queueMicrotask(() => {
-        rootsToUnmount.forEach((r) => r.unmount());
+        rootsToUnmount.forEach((root) => root.unmount());
       });
     };
   }, [editor, disabled, editorWrapperRef]);

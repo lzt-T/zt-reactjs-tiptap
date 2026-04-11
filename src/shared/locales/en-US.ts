@@ -73,6 +73,8 @@ const enUS: EditorLocale = {
     plainText: 'Plain text',
     searchPlaceholder: 'Search language',
     noMatch: 'No matching language',
+    delete: 'Delete',
+    formatCode: 'Format code',
   },
   mathDialog: {
     insertInlineMath: 'Insert inline math',

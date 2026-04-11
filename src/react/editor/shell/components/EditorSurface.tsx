@@ -38,6 +38,7 @@ interface EditorSurfaceProps {
   resolvedToolbarItems: ToolbarItemConfig[];
   resolvedCodeBlockLanguages: CodeBlockLanguageOption[];
   resolvedDefaultCodeBlockLanguage: string;
+  onCodeBlockFormat?: (payload: { code: string; language: string }) => string | Promise<string>;
   commandMenu: CommandMenuState;
   commandMenuMaxHeight: number;
   commandMenuMinHeight: number;
@@ -67,6 +68,7 @@ export default function EditorSurface({
   resolvedToolbarItems,
   resolvedCodeBlockLanguages,
   resolvedDefaultCodeBlockLanguage,
+  onCodeBlockFormat,
   commandMenu,
   commandMenuMaxHeight,
   commandMenuMinHeight,
@@ -126,6 +128,7 @@ export default function EditorSurface({
             editorWrapperRef={editorWrapperRef}
             languages={resolvedCodeBlockLanguages}
             defaultLanguage={resolvedDefaultCodeBlockLanguage}
+            onCodeBlockFormat={onCodeBlockFormat}
             enabled={showCodeBlockLanguageMenu}
             onMenuRootChange={onMenuRootChange}
           />

@@ -70,6 +70,8 @@ const zhCN: EditorLocale = {
     plainText: '纯文本',
     searchPlaceholder: '搜索语言',
     noMatch: '没有匹配的语言',
+    delete: '删除',
+    formatCode: '格式化代码',
   },
   mathDialog: {
     insertInlineMath: '插入行内公式',

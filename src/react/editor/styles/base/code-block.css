@@ -85,34 +85,83 @@
   z-index: 45;
 }
 
-.code-block-language-trigger {
+.code-block-control-bar {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  box-shadow: var(--shadow-xs, 0 1px 2px rgb(0 0 0 / 0.05));
+  overflow: hidden;
+}
+
+.code-block-control-bar:focus-within {
+  border-color: var(--border, #e5e7eb);
+  box-shadow: var(--shadow-xs, 0 1px 2px rgb(0 0 0 / 0.05));
+}
+
+.code-block-control-language-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.375rem;
   height: 1.75rem;
   width: 100%;
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 0.375rem;
+  border: none;
   padding: 0 0.5rem;
   font-size: 12px;
   color: inherit;
   min-width: 132px;
-  box-shadow: var(--shadow-xs, 0 1px 2px rgb(0 0 0 / 0.05));
-  background: color-mix(in oklab, var(--background) 92%, transparent);
+  background: transparent;
   cursor: pointer;
 }
 
-.code-block-language-trigger:focus-visible {
+.code-block-control-language-trigger:focus-visible {
   outline: none;
-  border-color: var(--ring, #3b82f6);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, #3b82f6) 35%, transparent);
 }
 
-.code-block-language-trigger-text {
+.code-block-control-language-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.code-block-control-actions {
+  display: inline-flex;
+  align-items: center;
+  border-left: 1px solid var(--border, #e5e7eb);
+}
+
+.code-block-control-action-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.code-block-control-action-btn + .code-block-control-action-btn {
+  border-left: 1px solid var(--border, #e5e7eb);
+}
+
+.code-block-control-action-btn:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--muted) 58%, var(--background) 42%);
+}
+
+.code-block-control-action-btn:focus-visible {
+  outline: none;
+}
+
+.code-block-control-action-btn:disabled {
+  cursor: not-allowed;
+  color: color-mix(in oklab, var(--muted-foreground, #64748b) 65%, transparent);
 }
 
 .code-block-language-select-content {
@@ -155,4 +204,14 @@
   padding: 0.5rem 0.625rem;
   font-size: 12px;
   color: var(--muted-foreground, #64748b);
+}
+
+.editor-wrapper .ProseMirror .code-block-action-spin {
+  animation: code-block-action-spin 1s linear infinite;
+}
+
+@keyframes code-block-action-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

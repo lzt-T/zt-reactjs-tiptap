@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Editor } from "@tiptap/react";
-import { CheckIcon, ChevronDownIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, Loader2Icon, Trash2Icon, WandSparklesIcon } from "lucide-react";
 import type { CodeBlockLanguageOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import {
@@ -34,12 +34,14 @@ interface CodeBlockLanguageMenuProps {
   editorWrapperRef: React.RefObject<HTMLDivElement | null>;
   languages: CodeBlockLanguageOption[];
   defaultLanguage: string;
+  onCodeBlockFormat?: (payload: { code: string; language: string }) => string | Promise<string>;
   enabled?: boolean;
   onMenuRootChange?: (node: HTMLDivElement | null) => void;
 }
 
 /** 从当前选区向上查找激活的代码块节点与对应 DOM。 */
 function findActiveCodeBlock(editor: Editor): {
+  pos: number;
   language: string | undefined;
   dom: HTMLElement;
 } | null {
@@ -51,6 +53,7 @@ function findActiveCodeBlock(editor: Editor): {
     const dom = editor.view.nodeDOM(pos);
     if (!(dom instanceof HTMLElement)) return null;
     return {
+      pos,
       language:
         typeof node.attrs.language === "string"
           ? node.attrs.language
@@ -69,6 +72,7 @@ export default function CodeBlockLanguageMenu({
   editorWrapperRef,
   languages,
   defaultLanguage,
+  onCodeBlockFormat,
   enabled = true,
   onMenuRootChange,
 }: CodeBlockLanguageMenuProps) {
@@ -76,6 +80,10 @@ export default function CodeBlockLanguageMenu({
   const [currentLanguage, setCurrentLanguage] = useState<string | null>(null);
   // 菜单打开状态。
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // 当前激活代码块节点位置。
+  const [activeCodeBlockPos, setActiveCodeBlockPos] = useState<number | null>(null);
+  // 代码格式化进行中状态。
+  const [isFormattingCode, setIsFormattingCode] = useState(false);
   // 语言菜单检索关键词。
   const [searchQuery, setSearchQuery] = useState("");
   // 统一复用编辑器内浮层定位逻辑。
@@ -147,12 +155,16 @@ export default function CodeBlockLanguageMenu({
   const updateMenuState = useCallback(() => {
     if (!enabled) {
       setCurrentLanguage(null);
+      setActiveCodeBlockPos(null);
+      setIsFormattingCode(false);
       setIsMenuOpen(false);
       clearPosition();
       return;
     }
     if (!editor.isActive("codeBlock")) {
       setCurrentLanguage(null);
+      setActiveCodeBlockPos(null);
+      setIsFormattingCode(false);
       setIsMenuOpen(false);
       clearPosition();
       return;
@@ -160,10 +172,13 @@ export default function CodeBlockLanguageMenu({
     const active = findActiveCodeBlock(editor);
     if (!active) {
       setCurrentLanguage(null);
+      setActiveCodeBlockPos(null);
+      setIsFormattingCode(false);
       setIsMenuOpen(false);
       clearPosition();
       return;
     }
+    setActiveCodeBlockPos(active.pos);
     setCurrentLanguage(resolveCodeBlockLanguage(active.language, defaultLanguage));
     updatePosition(active.dom, {
       fallbackWidth: CODE_BLOCK_LANGUAGE_TRIGGER_MIN_WIDTH,
@@ -214,6 +229,68 @@ export default function CodeBlockLanguageMenu({
 
   if (!portalContainer || !position || !currentLanguage) return null;
 
+  const formatDisabled = !onCodeBlockFormat || isFormattingCode;
+
+  const updateCodeBlockText = (codeBlockPos: number, code: string) => {
+    const node = editor.state.doc.nodeAt(codeBlockPos);
+    if (!node || node.type.name !== "codeBlock") return;
+    const from = codeBlockPos + 1;
+    const to = codeBlockPos + node.nodeSize - 1;
+    const transaction = editor.state.tr.insertText(code, from, to);
+    editor.view.dispatch(transaction.scrollIntoView());
+  };
+
+  const handleDeleteCodeBlock = () => {
+    if (activeCodeBlockPos == null) return;
+    editor.chain().focus().setNodeSelection(activeCodeBlockPos).deleteSelection().run();
+    requestAnimationFrame(() => {
+      updateMenuState();
+    });
+  };
+
+  const handleFormatCodeBlock = () => {
+    if (!onCodeBlockFormat || activeCodeBlockPos == null || isFormattingCode) return;
+    const node = editor.state.doc.nodeAt(activeCodeBlockPos);
+    if (!node || node.type.name !== "codeBlock") return;
+    const language =
+      typeof node.attrs.language === "string" && node.attrs.language.trim()
+        ? node.attrs.language
+        : defaultLanguage;
+    let result: string | Promise<string>;
+    try {
+      result = onCodeBlockFormat({ code: node.textContent, language });
+    } catch {
+      return;
+    }
+    if (typeof result === "string") {
+      editor.commands.focus();
+      updateCodeBlockText(activeCodeBlockPos, result);
+      requestAnimationFrame(() => {
+        updateMenuState();
+      });
+      return;
+    }
+    if (typeof result?.then !== "function") return;
+    setIsFormattingCode(true);
+    void Promise.resolve(result)
+      .then((nextCode) => {
+        if (typeof nextCode !== "string") return;
+        const latest = findActiveCodeBlock(editor);
+        if (!latest) return;
+        editor.commands.focus();
+        updateCodeBlockText(latest.pos, nextCode);
+      })
+      .catch(() => {
+        // 格式化失败时保持当前代码不变。
+      })
+      .finally(() => {
+        setIsFormattingCode(false);
+        requestAnimationFrame(() => {
+          updateMenuState();
+        });
+      });
+  };
+
   return (
     <div
       className="code-block-language-menu"
@@ -225,92 +302,132 @@ export default function CodeBlockLanguageMenu({
       }}
       ref={handleMenuRootRef}
     >
-      <Popover
-        open={isMenuOpen}
-        onOpenChange={(open) => {
-          setIsMenuOpen(open);
-        }}
-      >
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="code-block-language-trigger"
-            aria-label={locale.codeBlock.languageButton}
-            aria-expanded={isMenuOpen}
-          >
-            <span className="code-block-language-trigger-text">
-              {resolvedLanguages.find((item) => item.value === currentLanguage)?.label ??
-                locale.codeBlock.plainText}
-            </span>
-            <ChevronDownIcon className="size-3.5 opacity-50" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent
-          container={portalContainer}
-          align="end"
-          sideOffset={6}
-          className="code-block-language-select-content"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-            if (event.currentTarget instanceof Element) {
-              focusSearchInputFromRoot(event.currentTarget);
-            }
-          }}
-          onEscapeKeyDown={() => {
-            setIsMenuOpen(false);
-            requestAnimationFrame(() => {
-              editor.commands.focus();
-            });
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
+      <div className="code-block-control-bar">
+        <Popover
+          open={isMenuOpen}
+          onOpenChange={(open) => {
+            setIsMenuOpen(open);
           }}
         >
-          <Command shouldFilter={false} className="code-block-language-command">
-            <CommandInput
-              value={searchQuery}
-              className="code-block-language-search"
-              placeholder={locale.codeBlock.searchPlaceholder}
-              onValueChange={(value) => {
-                setSearchQuery(value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") {
-                  setIsMenuOpen(false);
-                  requestAnimationFrame(() => {
-                    editor.commands.focus();
-                  });
-                }
-              }}
-            />
-            <CommandList className="code-block-language-list">
-              <CommandEmpty className="code-block-language-empty">
-                {locale.codeBlock.noMatch}
-              </CommandEmpty>
-              {filteredLanguages.map((item) => (
-                <CommandItem
-                  key={item.value}
-                  value={`${item.value} ${getLanguageLabel(item)}`}
-                  className="code-block-language-option"
-                  onSelect={() => {
-                    setCodeBlockLanguage(editor, item.value);
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="code-block-control-language-trigger"
+              aria-label={locale.codeBlock.languageButton}
+              aria-expanded={isMenuOpen}
+            >
+              <span className="code-block-control-language-text">
+                {resolvedLanguages.find((item) => item.value === currentLanguage)?.label ??
+                  locale.codeBlock.plainText}
+              </span>
+              <ChevronDownIcon className="size-3.5 opacity-50" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            container={portalContainer}
+            align="end"
+            sideOffset={6}
+            className="code-block-language-select-content"
+            onOpenAutoFocus={(event) => {
+              event.preventDefault();
+              if (event.currentTarget instanceof Element) {
+                focusSearchInputFromRoot(event.currentTarget);
+              }
+            }}
+            onEscapeKeyDown={() => {
+              setIsMenuOpen(false);
+              requestAnimationFrame(() => {
+                editor.commands.focus();
+              });
+            }}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+            }}
+          >
+            <Command shouldFilter={false} className="code-block-language-command">
+              <CommandInput
+                value={searchQuery}
+                className="code-block-language-search"
+                placeholder={locale.codeBlock.searchPlaceholder}
+                onValueChange={(value) => {
+                  setSearchQuery(value);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
                     setIsMenuOpen(false);
                     requestAnimationFrame(() => {
                       editor.commands.focus();
                     });
-                    updateMenuState();
-                  }}
-                >
-                  <span>{getLanguageLabel(item)}</span>
-                  {item.value === currentLanguage ? (
-                    <CheckIcon className="ml-auto size-4" />
-                  ) : null}
-                </CommandItem>
-              ))}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+                  }
+                }}
+              />
+              <CommandList className="code-block-language-list">
+                <CommandEmpty className="code-block-language-empty">
+                  {locale.codeBlock.noMatch}
+                </CommandEmpty>
+                {filteredLanguages.map((item) => (
+                  <CommandItem
+                    key={item.value}
+                    value={`${item.value} ${getLanguageLabel(item)}`}
+                    className="code-block-language-option"
+                    onSelect={() => {
+                      setCodeBlockLanguage(editor, item.value);
+                      setIsMenuOpen(false);
+                      requestAnimationFrame(() => {
+                        editor.commands.focus();
+                      });
+                      updateMenuState();
+                    }}
+                  >
+                    <span>{getLanguageLabel(item)}</span>
+                    {item.value === currentLanguage ? (
+                      <CheckIcon className="ml-auto size-4" />
+                    ) : null}
+                  </CommandItem>
+                ))}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        <div
+          className="code-block-control-actions"
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
+        >
+          <button
+            type="button"
+            className="code-block-control-action-btn"
+            aria-label={locale.codeBlock.formatCode}
+            title={locale.codeBlock.formatCode}
+            disabled={formatDisabled}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              handleFormatCodeBlock();
+            }}
+          >
+            {isFormattingCode ? (
+              <Loader2Icon className="size-3.5 code-block-action-spin" />
+            ) : (
+              <WandSparklesIcon className="size-3.5" />
+            )}
+          </button>
+          <button
+            type="button"
+            className="code-block-control-action-btn"
+            aria-label={locale.codeBlock.delete}
+            title={locale.codeBlock.delete}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              handleDeleteCodeBlock();
+            }}
+          >
+            <Trash2Icon className="size-3.5" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
