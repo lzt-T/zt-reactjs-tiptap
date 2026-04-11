@@ -54,7 +54,6 @@
     .ProseMirror
     .tiptap-mathematics-render[data-type="block-math"] {
     display: block;
-    margin: 1em auto;
     padding: 1em;
     background: #f8fafc;
     border-radius: 8px;

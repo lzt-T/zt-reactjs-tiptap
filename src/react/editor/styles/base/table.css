@@ -1,49 +1,48 @@
 .editor-wrapper .ProseMirror .tableWrapper {
-  position: relative;
-  overflow-x: auto;
-  overflow-y: hidden; /* 仅横向滚动，不出现纵向滚动条 */
-  margin: 1em 0;
-  /* 为行/列操作按钮留出空间，由 config.TABLE_ACTION_BUTTON_PADDING 注入 */
-  padding-left: var(--table-action-padding, 14px);
-  padding-top: var(--table-action-padding, 14px);
-  /* 隐藏水平滚动条但保留滚动功能 */
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden; /* 仅横向滚动，不出现纵向滚动条 */
+    /* 为行/列操作按钮留出空间，由 config.TABLE_ACTION_BUTTON_PADDING 注入 */
+    padding-left: var(--table-action-padding, 14px);
+    padding-top: var(--table-action-padding, 14px);
+    /* 隐藏水平滚动条但保留滚动功能 */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
 }
 
 .editor-wrapper .ProseMirror .tableWrapper::-webkit-scrollbar {
-  height: 4px;
+    height: 4px;
 }
 
 .editor-wrapper .ProseMirror .tableWrapper::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 .editor-wrapper .ProseMirror .tableWrapper::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 2px;
+    background: #cbd5e1;
+    border-radius: 2px;
 }
 
 .editor-wrapper .ProseMirror table {
-  border-collapse: collapse;
-  margin: 0;
-  /* 至少撑满容器宽度，列多时可超出并横向滚动 */
-  width: max-content;
-  min-width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    /* 至少撑满容器宽度，列多时可超出并横向滚动 */
+    width: max-content;
+    min-width: 100%;
 }
 
 .editor-wrapper .ProseMirror td,
 .editor-wrapper .ProseMirror th {
-  border: 1px solid #e2e8f0;
-  padding: 8px 12px;
-  min-width: 100px;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    min-width: 100px;
 }
 
 .editor-wrapper .ProseMirror th {
-  background: #f8fafc;
-  font-weight: 600;
+    background: #f8fafc;
+    font-weight: 600;
 }
 
 .editor-wrapper .ProseMirror .selectedCell {
-  background: #e0f2fe;
+    background: #e0f2fe;
 }
