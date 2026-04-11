@@ -1,0 +1,28 @@
+import { BuiltinToolbarItemKey } from "@/react/editor/customization";
+
+/** 内置项默认分组：当外部未显式传 group 时回退到此映射。 */
+export const BUILTIN_GROUP_MAP: Record<string, string> = {
+  [BuiltinToolbarItemKey.Heading]: "block",
+  [BuiltinToolbarItemKey.BulletList]: "block",
+  [BuiltinToolbarItemKey.OrderedList]: "block",
+  [BuiltinToolbarItemKey.TaskList]: "block",
+  [BuiltinToolbarItemKey.InsertTable]: "block",
+  [BuiltinToolbarItemKey.CodeBlock]: "block",
+  [BuiltinToolbarItemKey.InlineMath]: "insert",
+  [BuiltinToolbarItemKey.BlockMath]: "insert",
+  [BuiltinToolbarItemKey.Image]: "insert",
+  [BuiltinToolbarItemKey.UploadAttachment]: "insert",
+  [BuiltinToolbarItemKey.Bold]: "format",
+  [BuiltinToolbarItemKey.Italic]: "format",
+  [BuiltinToolbarItemKey.Underline]: "format",
+  [BuiltinToolbarItemKey.Strikethrough]: "format",
+  [BuiltinToolbarItemKey.InlineCode]: "format",
+  [BuiltinToolbarItemKey.Highlight]: "color",
+  [BuiltinToolbarItemKey.TextColor]: "color",
+  [BuiltinToolbarItemKey.Superscript]: "script",
+  [BuiltinToolbarItemKey.Subscript]: "script",
+  [BuiltinToolbarItemKey.AlignLeft]: "align",
+  [BuiltinToolbarItemKey.AlignCenter]: "align",
+  [BuiltinToolbarItemKey.AlignRight]: "align",
+  [BuiltinToolbarItemKey.AlignJustify]: "align",
+};
