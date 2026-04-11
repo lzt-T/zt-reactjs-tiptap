@@ -1,3 +1,4 @@
+import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 import { useFloating, offset, flip, shift } from "@floating-ui/react";
 
@@ -5,11 +6,37 @@ interface UseToolbarUIStateOptions {
   isEditorFocused: boolean;
 }
 
+type ToolbarColorPickerType = "text" | "highlight" | null;
+
+interface ToolbarFloatingRefs {
+  setReference: (el: HTMLElement | null) => void;
+  setFloating: (el: HTMLDivElement | null) => void;
+}
+
+interface UseToolbarUIStateReturn {
+  showColorPicker: ToolbarColorPickerType;
+  setShowColorPicker: Dispatch<SetStateAction<ToolbarColorPickerType>>;
+  showHeadingMenu: boolean;
+  setShowHeadingMenu: Dispatch<SetStateAction<boolean>>;
+  showTableSizePicker: boolean;
+  setShowTableSizePicker: Dispatch<SetStateAction<boolean>>;
+  isColorPickerReady: boolean;
+  isHeadingMenuReady: boolean;
+  isTableSizePickerReady: boolean;
+  colorPickerRefs: ToolbarFloatingRefs;
+  colorPickerFloatingStyles: CSSProperties;
+  headingMenuRefs: ToolbarFloatingRefs;
+  headingMenuFloatingStyles: CSSProperties;
+  tableSizePickerRefs: ToolbarFloatingRefs;
+  tableSizePickerFloatingStyles: CSSProperties;
+}
+
 /** 管理 Toolbar 内部浮层状态与定位信息。 */
-export function useToolbarUIState({ isEditorFocused }: UseToolbarUIStateOptions) {
-  const [showColorPicker, setShowColorPicker] = useState<
-    "text" | "highlight" | null
-  >(null);
+export function useToolbarUIState({
+  isEditorFocused,
+}: UseToolbarUIStateOptions): UseToolbarUIStateReturn {
+  const [showColorPicker, setShowColorPicker] =
+    useState<ToolbarColorPickerType>(null);
   const [showHeadingMenu, setShowHeadingMenu] = useState(false);
   const [showTableSizePicker, setShowTableSizePicker] = useState(false);
   const [isColorPickerReady, setIsColorPickerReady] = useState(false);
