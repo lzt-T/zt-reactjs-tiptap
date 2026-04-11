@@ -51,6 +51,7 @@ interface EditorSurfaceProps {
   onOpenImageDialog: (callback: (src: string, alt?: string) => void) => void;
   onOpenFileUploadDialog?: (callback: (url: string, name: string) => void) => void;
   onMenuRootChange: (node: HTMLDivElement | null) => void;
+  onCodeBlockLanguageMenuOpenChecked: (editorFocused: boolean) => void;
 }
 
 /** 编辑器主体渲染：工具栏、内容区、菜单与表格操作。 */
@@ -77,6 +78,7 @@ export default function EditorSurface({
   onOpenImageDialog,
   onOpenFileUploadDialog,
   onMenuRootChange,
+  onCodeBlockLanguageMenuOpenChecked,
 }: EditorSurfaceProps) {
   // 编辑器容器 CSS 变量样式。
   const wrapperStyle = {
@@ -131,6 +133,7 @@ export default function EditorSurface({
             onCodeBlockFormat={onCodeBlockFormat}
             enabled={showCodeBlockLanguageMenu}
             onMenuRootChange={onMenuRootChange}
+            onMenuOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
           />
         )}
         {editor && !disabled && isNotionLike && (

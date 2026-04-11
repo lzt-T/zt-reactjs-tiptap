@@ -46,7 +46,7 @@ export function useHeadlessFocusController({
 
   useEffect(() => {
     isEditorFocusedRef.current = isEditorFocused;
-    console.log(isEditorFocused);
+    console.log(isEditorFocused, "isEditorFocused");
   }, [isEditorFocused]);
 
   /** 保存代码语言菜单根节点，用于 blur 命中判断。 */
@@ -56,6 +56,13 @@ export function useHeadlessFocusController({
     },
     [],
   );
+
+  /** 代码语言菜单关闭后延迟校验聚焦状态，必要时同步清空聚焦态。 */
+  const syncFocusStateAfterMenuClose = useCallback((editorFocused: boolean) => {
+    if (editorFocused) return;
+    setIsEditorFocused(false);
+    setIsEditorFocusStable(false);
+  }, []);
 
   /** 判断事件目标是否命中代码语言菜单区域。 */
   const isInsideLanguageMenu = useCallback(
@@ -179,5 +186,6 @@ export function useHeadlessFocusController({
     showHeadlessToolbar,
     showCodeBlockLanguageMenu,
     setCodeBlockLanguageMenuRoot,
+    syncFocusStateAfterMenuClose,
   };
 }

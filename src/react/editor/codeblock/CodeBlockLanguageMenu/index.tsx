@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Editor } from "@tiptap/react";
-import { CheckIcon, ChevronDownIcon, Loader2Icon, Trash2Icon, WandSparklesIcon } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  Loader2Icon,
+  Trash2Icon,
+  WandSparklesIcon,
+} from "lucide-react";
 import type { CodeBlockLanguageOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import {
@@ -10,7 +16,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/react/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/react/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/react/components/ui/popover";
 import {
   resolveCodeBlockLanguage,
   isRegisteredCodeBlockLanguage,
@@ -34,9 +44,13 @@ interface CodeBlockLanguageMenuProps {
   editorWrapperRef: React.RefObject<HTMLDivElement | null>;
   languages: CodeBlockLanguageOption[];
   defaultLanguage: string;
-  onCodeBlockFormat?: (payload: { code: string; language: string }) => string | Promise<string>;
+  onCodeBlockFormat?: (payload: {
+    code: string;
+    language: string;
+  }) => string | Promise<string>;
   enabled?: boolean;
   onMenuRootChange?: (node: HTMLDivElement | null) => void;
+  onMenuOpenStateChecked?: (editorFocused: boolean) => void;
 }
 
 /** 从当前选区向上查找激活的代码块节点与对应 DOM。 */
@@ -75,13 +89,16 @@ export default function CodeBlockLanguageMenu({
   onCodeBlockFormat,
   enabled = true,
   onMenuRootChange,
+  onMenuOpenStateChecked,
 }: CodeBlockLanguageMenuProps) {
   // 当前激活代码块对应的语言值。
   const [currentLanguage, setCurrentLanguage] = useState<string | null>(null);
   // 菜单打开状态。
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // 当前激活代码块节点位置。
-  const [activeCodeBlockPos, setActiveCodeBlockPos] = useState<number | null>(null);
+  const [activeCodeBlockPos, setActiveCodeBlockPos] = useState<number | null>(
+    null,
+  );
   // 代码格式化进行中状态。
   const [isFormattingCode, setIsFormattingCode] = useState(false);
   // 语言菜单检索关键词。
@@ -131,7 +148,9 @@ export default function CodeBlockLanguageMenu({
     if (!keyword) return resolvedLanguages;
     return resolvedLanguages.filter((item) => {
       const label = getLanguageLabel(item).toLowerCase();
-      return label.includes(keyword) || item.value.toLowerCase().includes(keyword);
+      return (
+        label.includes(keyword) || item.value.toLowerCase().includes(keyword)
+      );
     });
   }, [getLanguageLabel, resolvedLanguages, searchQuery]);
 
@@ -179,7 +198,9 @@ export default function CodeBlockLanguageMenu({
       return;
     }
     setActiveCodeBlockPos(active.pos);
-    setCurrentLanguage(resolveCodeBlockLanguage(active.language, defaultLanguage));
+    setCurrentLanguage(
+      resolveCodeBlockLanguage(active.language, defaultLanguage),
+    );
     updatePosition(active.dom, {
       fallbackWidth: CODE_BLOCK_LANGUAGE_TRIGGER_MIN_WIDTH,
       fallbackHeight: CODE_BLOCK_LANGUAGE_TRIGGER_HEIGHT,
@@ -243,14 +264,20 @@ export default function CodeBlockLanguageMenu({
 
   const handleDeleteCodeBlock = () => {
     if (activeCodeBlockPos == null) return;
-    editor.chain().focus().setNodeSelection(activeCodeBlockPos).deleteSelection().run();
+    editor
+      .chain()
+      .focus()
+      .setNodeSelection(activeCodeBlockPos)
+      .deleteSelection()
+      .run();
     requestAnimationFrame(() => {
       updateMenuState();
     });
   };
 
   const handleFormatCodeBlock = () => {
-    if (!onCodeBlockFormat || activeCodeBlockPos == null || isFormattingCode) return;
+    if (!onCodeBlockFormat || activeCodeBlockPos == null || isFormattingCode)
+      return;
     const node = editor.state.doc.nodeAt(activeCodeBlockPos);
     if (!node || node.type.name !== "codeBlock") return;
     const language =
@@ -308,6 +335,10 @@ export default function CodeBlockLanguageMenu({
           open={isMenuOpen}
           onOpenChange={(open) => {
             setIsMenuOpen(open);
+            if (open) return;
+            requestAnimationFrame(() => {
+              onMenuOpenStateChecked?.(editor.isFocused);
+            });
           }}
         >
           <PopoverTrigger asChild>
@@ -318,8 +349,9 @@ export default function CodeBlockLanguageMenu({
               aria-expanded={isMenuOpen}
             >
               <span className="code-block-control-language-text">
-                {resolvedLanguages.find((item) => item.value === currentLanguage)?.label ??
-                  locale.codeBlock.plainText}
+                {resolvedLanguages.find(
+                  (item) => item.value === currentLanguage,
+                )?.label ?? locale.codeBlock.plainText}
               </span>
               <ChevronDownIcon className="size-3.5 opacity-50" />
             </button>
@@ -345,7 +377,10 @@ export default function CodeBlockLanguageMenu({
               event.preventDefault();
             }}
           >
-            <Command shouldFilter={false} className="code-block-language-command">
+            <Command
+              shouldFilter={false}
+              className="code-block-language-command"
+            >
               <CommandInput
                 value={searchQuery}
                 className="code-block-language-search"

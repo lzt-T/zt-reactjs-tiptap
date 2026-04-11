@@ -319,6 +319,9 @@ const ReactTiptapEditor = ({
           onFilePreUpload ? fileUploadDialog.openFileUploadDialog : undefined
         }
         onMenuRootChange={focusController.setCodeBlockLanguageMenuRoot}
+        onCodeBlockLanguageMenuOpenChecked={
+          focusController.syncFocusStateAfterMenuClose
+        }
       />
       <EditorDialogs
         portalContainer={themePortalState.portalContainer}
