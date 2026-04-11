@@ -10,6 +10,19 @@ function App() {
   const [content, setContent] = useState("");
   const [count, setCount] = useState(0);
   const [disabled, setDisabled] = useState(false);
+  const [editorMode, setEditorMode] = useState(EditorMode.Headless);
+
+  const handleToggleMode = () => {
+    setEditorMode((prevMode) =>
+      prevMode === EditorMode.Headless
+        ? EditorMode.NotionLike
+        : EditorMode.Headless,
+    );
+  };
+
+  const handleToggleDisabled = () => {
+    setDisabled((prevDisabled) => !prevDisabled);
+  };
 
   const handleEditorChange = (html: string) => {
     setCount(count + 1);
@@ -117,12 +130,13 @@ function App() {
   return (
     <div className="app">
       <h1>Tiptap Markdown Editor</h1>
-      <div
-        onClick={() => {
-          setDisabled(!disabled);
-        }}
-      >
-        切换disable
+      <div className="demo-actions">
+        <button type="button" onClick={handleToggleMode}>
+          切换模式
+        </button>
+        <button type="button" onClick={handleToggleDisabled}>
+          切换disabled
+        </button>
       </div>
       {/*<div onClick={() => setDisabled(true)}>disabled</div>
       <div onClick={() => setDisabled(false)}> not disabled</div>*/}
@@ -132,7 +146,7 @@ function App() {
       >
         <ReactTiptapEditor
           disabled={disabled}
-          editorMode={EditorMode.Headless}
+          editorMode={editorMode}
           value={content}
           onChange={(str: string) => {
             console.log("str", str);
@@ -148,7 +162,7 @@ function App() {
           onFileUpload={onFileUpload}
           onFileDelete={onFileDelete}
           onFileAttachmentClick={onFileAttachmentClick}
-          onCodeBlockFormat={onCodeBlockFormat}
+          // onCodeBlockFormat={onCodeBlockFormat}
         />
       </div>
       <div className="h-[900px]"></div>

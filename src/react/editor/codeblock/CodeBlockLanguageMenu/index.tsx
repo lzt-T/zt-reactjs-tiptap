@@ -229,7 +229,8 @@ export default function CodeBlockLanguageMenu({
 
   if (!portalContainer || !position || !currentLanguage) return null;
 
-  const formatDisabled = !onCodeBlockFormat || isFormattingCode;
+  const showFormatAction = typeof onCodeBlockFormat === "function";
+  const formatDisabled = !showFormatAction || isFormattingCode;
 
   const updateCodeBlockText = (codeBlockPos: number, code: string) => {
     const node = editor.state.doc.nodeAt(codeBlockPos);
@@ -395,24 +396,26 @@ export default function CodeBlockLanguageMenu({
             event.preventDefault();
           }}
         >
-          <button
-            type="button"
-            className="code-block-control-action-btn"
-            aria-label={locale.codeBlock.formatCode}
-            title={locale.codeBlock.formatCode}
-            disabled={formatDisabled}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              handleFormatCodeBlock();
-            }}
-          >
-            {isFormattingCode ? (
-              <Loader2Icon className="size-3.5 code-block-action-spin" />
-            ) : (
-              <WandSparklesIcon className="size-3.5" />
-            )}
-          </button>
+          {showFormatAction ? (
+            <button
+              type="button"
+              className="code-block-control-action-btn"
+              aria-label={locale.codeBlock.formatCode}
+              title={locale.codeBlock.formatCode}
+              disabled={formatDisabled}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                handleFormatCodeBlock();
+              }}
+            >
+              {isFormattingCode ? (
+                <Loader2Icon className="size-3.5 code-block-action-spin" />
+              ) : (
+                <WandSparklesIcon className="size-3.5" />
+              )}
+            </button>
+          ) : null}
           <button
             type="button"
             className="code-block-control-action-btn"
