@@ -71,6 +71,8 @@ const enUS: EditorLocale = {
   codeBlock: {
     languageButton: 'Code language',
     plainText: 'Plain text',
+    searchPlaceholder: 'Search language',
+    noMatch: 'No matching language',
   },
   mathDialog: {
     insertInlineMath: 'Insert inline math',

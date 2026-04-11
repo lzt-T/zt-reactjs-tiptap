@@ -68,7 +68,7 @@ export function useHeadlessFocusController({
   );
 
   useEffect(() => {
-    if (!editor || isNotionLike) return;
+    if (!editor) return;
 
     /** 处理容器内点击，保护 blur 链路并记录公式节点。 */
     const handleMouseDown = (event: MouseEvent) => {

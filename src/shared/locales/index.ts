@@ -70,6 +70,8 @@ export interface EditorLocale {
   codeBlock: {
     languageButton: string;
     plainText: string;
+    searchPlaceholder: string;
+    noMatch: string;
   };
   mathDialog: {
     insertInlineMath: string;

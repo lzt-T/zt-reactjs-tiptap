@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Editor } from "@tiptap/react";
+import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import type { CodeBlockLanguageOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/react/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/react/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/react/components/ui/popover";
 import {
   resolveCodeBlockLanguage,
   isRegisteredCodeBlockLanguage,
@@ -72,6 +74,10 @@ export default function CodeBlockLanguageMenu({
 }: CodeBlockLanguageMenuProps) {
   // 当前激活代码块对应的语言值。
   const [currentLanguage, setCurrentLanguage] = useState<string | null>(null);
+  // 菜单打开状态。
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // 语言菜单检索关键词。
+  const [searchQuery, setSearchQuery] = useState("");
   // 统一复用编辑器内浮层定位逻辑。
   const { position, overlayRef, updatePosition, clearPosition } =
     useEditorOverlayPosition({
@@ -104,21 +110,57 @@ export default function CodeBlockLanguageMenu({
     return Array.from(map.values());
   }, [languages, defaultLanguage, locale.codeBlock.plainText]);
 
+  /** 统一语言展示文案：plaintext 使用本地化文本，其余使用配置标签。 */
+  const getLanguageLabel = useCallback(
+    (item: CodeBlockLanguageOption) =>
+      item.value === "plaintext" ? locale.codeBlock.plainText : item.label,
+    [locale.codeBlock.plainText],
+  );
+
+  // 根据输入内容实时过滤可选语言（大小写不敏感，匹配 label 与 value）。
+  const filteredLanguages = useMemo(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+    if (!keyword) return resolvedLanguages;
+    return resolvedLanguages.filter((item) => {
+      const label = getLanguageLabel(item).toLowerCase();
+      return label.includes(keyword) || item.value.toLowerCase().includes(keyword);
+    });
+  }, [getLanguageLabel, resolvedLanguages, searchQuery]);
+
+  /** 聚焦语言搜索输入框。 */
+  const focusSearchInput = useCallback(() => {
+    const input = document.querySelector<HTMLInputElement>(
+      '.code-block-language-select-content [data-slot="command-input"]',
+    );
+    input?.focus();
+  }, []);
+
+  /** 根据给定根节点聚焦语言搜索输入框。 */
+  const focusSearchInputFromRoot = useCallback((root: Element) => {
+    const input = root.querySelector<HTMLInputElement>(
+      '[data-slot="command-input"]',
+    );
+    input?.focus();
+  }, []);
+
   /** 重新计算语言选择器在编辑器内容坐标系内的位置。 */
   const updateMenuState = useCallback(() => {
     if (!enabled) {
       setCurrentLanguage(null);
+      setIsMenuOpen(false);
       clearPosition();
       return;
     }
     if (!editor.isActive("codeBlock")) {
       setCurrentLanguage(null);
+      setIsMenuOpen(false);
       clearPosition();
       return;
     }
     const active = findActiveCodeBlock(editor);
     if (!active) {
       setCurrentLanguage(null);
+      setIsMenuOpen(false);
       clearPosition();
       return;
     }
@@ -146,9 +188,20 @@ export default function CodeBlockLanguageMenu({
 
   useEffect(() => {
     if (!position) {
+      setIsMenuOpen(false);
       onMenuRootChange?.(null);
     }
   }, [onMenuRootChange, position]);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setSearchQuery("");
+      return;
+    }
+    requestAnimationFrame(() => {
+      focusSearchInput();
+    });
+  }, [focusSearchInput, isMenuOpen]);
 
   /** 同步菜单根节点引用，并在首次挂载后用真实尺寸重算坐标。 */
   const handleMenuRootRef = useCallback(
@@ -172,46 +225,92 @@ export default function CodeBlockLanguageMenu({
       }}
       ref={handleMenuRootRef}
     >
-      <Select
-        value={currentLanguage}
-        onValueChange={(value) => {
-          setCodeBlockLanguage(editor, value);
-          requestAnimationFrame(() => {
-            editor.commands.focus();
-          });
-          updateMenuState();
+      <Popover
+        open={isMenuOpen}
+        onOpenChange={(open) => {
+          setIsMenuOpen(open);
         }}
       >
-        <SelectTrigger
-          size="sm"
-          className="code-block-language-trigger"
-          aria-label={locale.codeBlock.languageButton}
-        >
-          <SelectValue placeholder={locale.codeBlock.languageButton} />
-        </SelectTrigger>
-        <SelectContent
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="code-block-language-trigger"
+            aria-label={locale.codeBlock.languageButton}
+            aria-expanded={isMenuOpen}
+          >
+            <span className="code-block-language-trigger-text">
+              {resolvedLanguages.find((item) => item.value === currentLanguage)?.label ??
+                locale.codeBlock.plainText}
+            </span>
+            <ChevronDownIcon className="size-3.5 opacity-50" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
           container={portalContainer}
-          position="popper"
           align="end"
           sideOffset={6}
           className="code-block-language-select-content"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            if (event.currentTarget instanceof Element) {
+              focusSearchInputFromRoot(event.currentTarget);
+            }
+          }}
+          onEscapeKeyDown={() => {
+            setIsMenuOpen(false);
+            requestAnimationFrame(() => {
+              editor.commands.focus();
+            });
+          }}
           onCloseAutoFocus={(event) => {
             event.preventDefault();
           }}
         >
-          {resolvedLanguages.map((item) => (
-            <SelectItem
-              key={item.value}
-              value={item.value}
-              className="code-block-language-option"
-            >
-              {item.value === "plaintext"
-                ? locale.codeBlock.plainText
-                : item.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <Command shouldFilter={false} className="code-block-language-command">
+            <CommandInput
+              value={searchQuery}
+              className="code-block-language-search"
+              placeholder={locale.codeBlock.searchPlaceholder}
+              onValueChange={(value) => {
+                setSearchQuery(value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  setIsMenuOpen(false);
+                  requestAnimationFrame(() => {
+                    editor.commands.focus();
+                  });
+                }
+              }}
+            />
+            <CommandList className="code-block-language-list">
+              <CommandEmpty className="code-block-language-empty">
+                {locale.codeBlock.noMatch}
+              </CommandEmpty>
+              {filteredLanguages.map((item) => (
+                <CommandItem
+                  key={item.value}
+                  value={`${item.value} ${getLanguageLabel(item)}`}
+                  className="code-block-language-option"
+                  onSelect={() => {
+                    setCodeBlockLanguage(editor, item.value);
+                    setIsMenuOpen(false);
+                    requestAnimationFrame(() => {
+                      editor.commands.focus();
+                    });
+                    updateMenuState();
+                  }}
+                >
+                  <span>{getLanguageLabel(item)}</span>
+                  {item.value === currentLanguage ? (
+                    <CheckIcon className="ml-auto size-4" />
+                  ) : null}
+                </CommandItem>
+              ))}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
