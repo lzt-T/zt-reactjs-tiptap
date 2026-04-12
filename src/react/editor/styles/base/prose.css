@@ -108,6 +108,11 @@
     margin: 0.5em 0;
 }
 
+/* 聚焦恢复的首帧可能先短暂回到旧 GapCursor，稳定前隐藏以避免可见跳闪。 */
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror-gapcursor {
+    display: none;
+}
+
 .editor-wrapper .ProseMirror-gapcursor::after {
     content: "";
     display: block;
