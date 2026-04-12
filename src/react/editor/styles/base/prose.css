@@ -102,7 +102,10 @@
 
 .editor-wrapper .ProseMirror-focused .ProseMirror-gapcursor {
     display: block;
-    height: 24px;
+    /* Fallback for browsers without lh unit support */
+    height: 1em;
+    height: 1lh;
+    margin: 0.5em 0;
 }
 
 .editor-wrapper .ProseMirror-gapcursor::after {
