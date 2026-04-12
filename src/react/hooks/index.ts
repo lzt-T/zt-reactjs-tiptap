@@ -1,6 +1,7 @@
 export { useBlockMathDeleteButton } from "./useBlockMathDeleteButton";
 export { useCommandMenu } from "./useCommandMenu";
 export { useEditorOverlayPosition } from "./useEditorOverlayPosition";
+export { usePortalOverlayPosition } from "./usePortalOverlayPosition";
 export { useMathDialog } from "./useMathDialog";
 export { useImageUploadDialog } from "./useImageUploadDialog";
 export { useFileUploadDialog } from "./useFileUploadDialog";
@@ -17,3 +18,7 @@ export type {
   UpdateEditorOverlayPositionOptions,
   UseEditorOverlayPositionOptions,
 } from "./useEditorOverlayPosition";
+export type {
+  PortalOverlayViewportPosition,
+  UsePortalOverlayPositionOptions,
+} from "./usePortalOverlayPosition";

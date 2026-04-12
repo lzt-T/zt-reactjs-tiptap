@@ -7,21 +7,16 @@ import {
   useCallback,
   useEffect,
   useRef,
-  useState,
   type MutableRefObject,
   type RefObject,
   type Ref,
 } from "react";
 import { createPortal } from "react-dom";
 import { Command, CommandList, CommandItem } from "@/react/components/ui/command";
+import { usePortalOverlayPosition } from "@/react/hooks/usePortalOverlayPosition";
 import { cn } from "@/shared/utils/utils";
 import { MenuPlacement } from "@/react/editor/types";
 import "./CommandMenu.css";
-
-interface ViewportPosition {
-  top: number;
-  left: number;
-}
 
 interface CommandMenuProps {
   items: SlashCommandItem[];
@@ -40,20 +35,6 @@ interface CommandMenuProps {
   editorWrapperRef: RefObject<HTMLDivElement | null>;
 }
 
-/** 将编辑器内容坐标换算为视口坐标。 */
-function resolveViewportPosition(
-  wrapper: HTMLDivElement | null,
-  position: { top: number; left: number },
-): ViewportPosition | null {
-  if (!wrapper) return null;
-
-  const wrapperRect = wrapper.getBoundingClientRect();
-  return {
-    top: wrapperRect.top + position.top - wrapper.scrollTop,
-    left: wrapperRect.left + position.left - wrapper.scrollLeft,
-  };
-}
-
 /** Slash 命令菜单：负责渲染与滚动到当前选中项。 */
 const CommandMenu = ({
   items,
@@ -69,14 +50,12 @@ const CommandMenu = ({
 }: CommandMenuProps) => {
   // 当前高亮项的 DOM 引用，用于自动滚动到可视区域。
   const selectedRef = useRef<HTMLDivElement>(null);
-  // 当前编辑器滚动容器节点（用于依赖追踪，处理 ref 节点切换）。
-  const wrapperElement = editorWrapperRef.current;
-  // 动画帧 ID：用于合并高频滚动/缩放重算请求。
-  const rafIdRef = useRef<number | null>(null);
-  // 视口坐标：Portal + fixed 渲染时使用。
-  const [viewportPosition, setViewportPosition] = useState<ViewportPosition | null>(
-    null,
-  );
+  // 通用 Portal 浮层视口定位。
+  const { viewportPosition, scheduleSync } = usePortalOverlayPosition({
+    editorWrapperRef,
+    position,
+    enabled: items.length > 0,
+  });
 
   /** 同步本地 ref 与外部 overlayRef。 */
   const setMenuRefs = useCallback(
@@ -91,84 +70,22 @@ const CommandMenu = ({
     [overlayRef],
   );
 
-  /** 重新计算菜单视口坐标。 */
-  const syncViewportPosition = useCallback(() => {
-    const next = resolveViewportPosition(wrapperElement, position);
-    setViewportPosition((prev) => {
-      if (!next) return null;
-      if (prev && prev.top === next.top && prev.left === next.left) return prev;
-      return next;
-    });
-  }, [position.left, position.top, position.placement, wrapperElement]);
-
-  /** 通过 RAF 节流重算，减少外部滚动场景的重排抖动。 */
-  const scheduleSyncViewportPosition = useCallback(() => {
-    if (typeof window === "undefined") return;
-
-    if (rafIdRef.current !== null) {
-      window.cancelAnimationFrame(rafIdRef.current);
-    }
-
-    rafIdRef.current = window.requestAnimationFrame(() => {
-      rafIdRef.current = null;
-      syncViewportPosition();
-    });
-  }, [syncViewportPosition]);
-
   useEffect(() => {
     if (selectedRef.current) {
       selectedRef.current.scrollIntoView({
         block: "nearest",
         behavior: "smooth",
       });
+      // 列表滚动后同步一次菜单锚点，避免视觉漂移。
+      scheduleSync();
     }
-  }, [selectedIndex]);
-
-  useEffect(() => {
-    scheduleSyncViewportPosition();
-  }, [scheduleSyncViewportPosition]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (typeof document === "undefined") return;
-
-    const handleRecalc = () => scheduleSyncViewportPosition();
-
-    window.addEventListener("resize", handleRecalc);
-    document.addEventListener("scroll", handleRecalc, {
-      capture: true,
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener("resize", handleRecalc);
-      document.removeEventListener("scroll", handleRecalc, {
-        capture: true,
-      });
-    };
-  }, [
-    position.left,
-    position.top,
-    position.placement,
-    portalContainer,
-    scheduleSyncViewportPosition,
-    wrapperElement,
-  ]);
-
-  useEffect(
-    () => () => {
-      if (typeof window === "undefined" || rafIdRef.current === null) return;
-      window.cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    },
-    [],
-  );
+  }, [scheduleSync, selectedIndex]);
 
   if (items.length === 0) {
     return null;
   }
 
-  const viewport = viewportPosition ?? resolveViewportPosition(wrapperElement, position);
+  const viewport = viewportPosition;
   const transform =
     position.placement === MenuPlacement.Top
       ? "translateY(-100%)"
