@@ -166,6 +166,8 @@ export default function EditorSurface({
               minHeight={commandMenuMinHeight}
               overlayRef={commandMenu.menuOverlayRef}
               editor={editor}
+              portalContainer={portalContainer}
+              editorWrapperRef={editorWrapperRef}
             />
           )}
       </div>
