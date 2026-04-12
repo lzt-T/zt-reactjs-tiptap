@@ -30,6 +30,7 @@ import { resolveEditorLocale } from "@/shared/locales";
 import { useEditorResolvedConfig } from "@/react/editor/shell/hooks/useEditorResolvedConfig";
 import { useEditorThemePortalState } from "@/react/editor/shell/hooks/useEditorThemePortalState";
 import { useHeadlessFocusController } from "@/react/editor/shell/hooks/useHeadlessFocusController";
+import { useSlashMenuFocusSync } from "@/react/editor/shell/hooks/useSlashMenuFocusSync";
 import EditorSurface from "@/react/editor/shell/components/EditorSurface";
 import EditorDialogs from "@/react/editor/shell/components/EditorDialogs";
 
@@ -228,6 +229,15 @@ const ReactTiptapEditor = ({
     isInsideCodeBlockLanguageSelect,
     onInlineMathClick: mathDialog.handleInlineMathClick,
     onBlockMathClick: mathDialog.handleBlockMathClick,
+  });
+
+  useSlashMenuFocusSync({
+    editor,
+    isEditorFocused: focusController.isEditorFocused,
+    isNotionLike: resolvedConfig.isNotionLike,
+    enabled: !disabled,
+    containerRef,
+    commandMenu,
   });
 
   // 编辑器命令执行器。

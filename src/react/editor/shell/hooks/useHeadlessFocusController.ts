@@ -140,7 +140,8 @@ export function useHeadlessFocusController({
       if (mouseDownInsideRef.current) return;
       requestAnimationFrame(() => {
         if (
-          !containerRef.current?.contains(document.activeElement) &&
+          (!containerRef.current?.contains(document.activeElement) ||
+            !editor.isFocused) &&
           !isInsideLanguageMenu(document.activeElement)
         ) {
           setIsEditorFocused(false);

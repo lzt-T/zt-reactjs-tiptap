@@ -39,7 +39,10 @@ interface EditorSurfaceProps {
   resolvedCodeBlockLanguages: CodeBlockLanguageOption[];
   resolvedDefaultCodeBlockLanguage: string;
   resolvedPlaceholder: string;
-  onCodeBlockFormat?: (payload: { code: string; language: string }) => string | Promise<string>;
+  onCodeBlockFormat?: (payload: {
+    code: string;
+    language: string;
+  }) => string | Promise<string>;
   commandMenu: CommandMenuState;
   commandMenuMaxHeight: number;
   commandMenuMinHeight: number;
@@ -50,7 +53,9 @@ interface EditorSurfaceProps {
     callback: (latex: string) => void,
   ) => void;
   onOpenImageDialog: (callback: (src: string, alt?: string) => void) => void;
-  onOpenFileUploadDialog?: (callback: (url: string, name: string) => void) => void;
+  onOpenFileUploadDialog?: (
+    callback: (url: string, name: string) => void,
+  ) => void;
   onMenuRootChange: (node: HTMLDivElement | null) => void;
   onCodeBlockLanguageMenuOpenChecked: (editorFocused: boolean) => void;
 }
@@ -153,6 +158,7 @@ export default function EditorSurface({
           <BubbleMenu editor={editor} locale={locale} />
         )}
         {isNotionLike &&
+          isEditorFocused &&
           commandMenu.showCommandMenu &&
           editor &&
           !disabled &&
