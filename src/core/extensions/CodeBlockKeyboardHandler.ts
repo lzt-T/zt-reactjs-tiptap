@@ -1,7 +1,7 @@
 import { Extension } from "@tiptap/core";
 import { NodeSelection, TextSelection } from "@tiptap/pm/state";
 import { GapCursor } from "@tiptap/pm/gapcursor";
-import type { ResolvedPos } from "@tiptap/pm/model";
+import type { Node as ProseMirrorNode, ResolvedPos } from "@tiptap/pm/model";
 
 interface CodeBlockRange {
   start: number;
@@ -37,6 +37,25 @@ function findCodeBlockRange(selection: TextSelection | NodeSelection): CodeBlock
     };
   }
   return null;
+}
+
+function isBlockMathematicsNode(node: ProseMirrorNode): boolean {
+  if (node.type.name !== "mathematics") return false;
+  const attrs = node.attrs as Record<string, unknown> | null | undefined;
+  if (!attrs) return false;
+  if (attrs.block === true) return true;
+  if (attrs.displayMode === true) return true;
+  if (attrs.type === "block" || attrs.type === "block-math") return true;
+  return false;
+}
+
+function isStructuredBlockNode(node: ProseMirrorNode | null | undefined): boolean {
+  if (!node) return false;
+  if (node.type.name === "table") return true;
+  if (node.type.name === "fileAttachment") return true;
+  if (node.type.name === "image") return true;
+  if (isBlockMathematicsNode(node)) return true;
+  return node.isAtom && node.isBlock;
 }
 
 /** 修复代码块内全选和方向键行为。 */
@@ -75,6 +94,7 @@ export const CodeBlockKeyboardHandler = Extension.create({
         if (!isLastLine) return false;
         if (range.after > doc.content.size) return false;
         const $from = doc.resolve(range.after);
+        if (!isStructuredBlockNode($from.nodeAfter)) return false;
         const $target =
           GapCursorImpl.findGapCursorFrom?.($from, 1, false) ?? $from;
         try {
@@ -97,6 +117,7 @@ export const CodeBlockKeyboardHandler = Extension.create({
         if (!isFirstLine) return false;
         if (range.before < 0) return false;
         const $from = doc.resolve(range.before);
+        if (!isStructuredBlockNode($from.nodeBefore)) return false;
         const $target =
           GapCursorImpl.findGapCursorFrom?.($from, -1, false) ?? $from;
         try {
