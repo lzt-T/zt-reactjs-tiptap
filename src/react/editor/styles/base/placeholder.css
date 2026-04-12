@@ -7,6 +7,14 @@
   height: 0;
 }
 
+/* 选中结构化块（如 block math）时，隐藏空段落提示文案。 */
+.editor-container.is-structured-block-selected
+  .editor-wrapper.notion-editor
+  .ProseMirror
+  p.is-empty::before {
+  content: none;
+}
+
 /* Headless: placeholder only when the whole editor is empty */
 /* is-editor-empty may be on the root node (p) or on .ProseMirror depending on extension version */
 .editor-wrapper.headless-editor .ProseMirror p.is-empty.is-editor-empty::before,

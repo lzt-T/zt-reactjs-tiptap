@@ -38,6 +38,7 @@ interface EditorSurfaceProps {
   resolvedToolbarItems: ToolbarItemConfig[];
   resolvedCodeBlockLanguages: CodeBlockLanguageOption[];
   resolvedDefaultCodeBlockLanguage: string;
+  resolvedPlaceholder: string;
   onCodeBlockFormat?: (payload: { code: string; language: string }) => string | Promise<string>;
   commandMenu: CommandMenuState;
   commandMenuMaxHeight: number;
@@ -52,6 +53,16 @@ interface EditorSurfaceProps {
   onOpenFileUploadDialog?: (callback: (url: string, name: string) => void) => void;
   onMenuRootChange: (node: HTMLDivElement | null) => void;
   onCodeBlockLanguageMenuOpenChecked: (editorFocused: boolean) => void;
+}
+
+/** 将 placeholder 转为可用于 CSS content 的字符串。 */
+function toCssContentString(value: string): string {
+  if (value.length === 0) return '""';
+  const escaped = value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\r\n|\r|\n/g, "\\A ");
+  return `"${escaped}"`;
 }
 
 /** 编辑器主体渲染：工具栏、内容区、菜单与表格操作。 */
@@ -69,6 +80,7 @@ export default function EditorSurface({
   resolvedToolbarItems,
   resolvedCodeBlockLanguages,
   resolvedDefaultCodeBlockLanguage,
+  resolvedPlaceholder,
   onCodeBlockFormat,
   commandMenu,
   commandMenuMaxHeight,
@@ -83,6 +95,7 @@ export default function EditorSurface({
   // 编辑器容器 CSS 变量样式。
   const wrapperStyle = {
     "--table-action-padding": `${config.TABLE_ACTION_BUTTON_PADDING}px`,
+    "--zt-gap-placeholder-content": toCssContentString(resolvedPlaceholder),
   } as CSSProperties;
 
   return (

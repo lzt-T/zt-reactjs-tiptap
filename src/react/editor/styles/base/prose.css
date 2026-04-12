@@ -109,7 +109,9 @@
 }
 
 /* 聚焦恢复的首帧可能先短暂回到旧 GapCursor，稳定前隐藏以避免可见跳闪。 */
-.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror-gapcursor {
+.editor-container.is-editor-focus-unstable
+    .editor-wrapper
+    .ProseMirror-gapcursor {
     display: none;
 }
 
@@ -124,6 +126,29 @@
     transform: translateY(-50%);
     background-color: currentColor;
     animation: zt-gap-cursor-blink 1s steps(2, start) infinite;
+}
+
+/* Notion-like: show placeholder text on gap cursor using CSS content */
+.editor-wrapper.notion-editor
+    .ProseMirror-focused
+    .ProseMirror-gapcursor::before {
+    content: var(--zt-gap-placeholder-content);
+    position: absolute;
+    left: 0.5em;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre-wrap;
+}
+
+/* 选中结构化块（如 block math）时，隐藏 gap cursor 的提示文案。 */
+.editor-container.is-structured-block-selected
+    .editor-wrapper.notion-editor
+    .ProseMirror-focused
+    .ProseMirror-gapcursor::before {
+    content: none;
 }
 
 @keyframes zt-gap-cursor-blink {

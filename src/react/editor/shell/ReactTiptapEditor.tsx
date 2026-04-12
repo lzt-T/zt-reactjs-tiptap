@@ -8,9 +8,10 @@
  * 功能：数学公式（行内/块级）、图片上传、表格、任务列表等。
  */
 import type { Editor } from "@tiptap/react";
+import { NodeSelection } from "@tiptap/pm/state";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import "@/react/editor/styles/TiptapEditor.css";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import type { CSSProperties } from "react";
 import type { TiptapEditorProps } from "@/react/editor/types";
 import {
@@ -115,6 +116,9 @@ const ReactTiptapEditor = ({
 
   // 主题与 portal 状态。
   const themePortalState = useEditorThemePortalState();
+  // 结构化块节点（NodeSelection 且 block 非 textblock）选中态。
+  const [isStructuredBlockSelected, setIsStructuredBlockSelected] =
+    useState(false);
 
   useEffect(() => {
     disabledRef.current = disabled;
@@ -187,6 +191,33 @@ const ReactTiptapEditor = ({
     recreateDeps: resolvedConfig.editorRecreateDeps,
     extensions: resolvedConfig.stableExtensions as typeof extensions,
   });
+
+  useEffect(() => {
+    if (!editor) {
+      setIsStructuredBlockSelected(false);
+      return;
+    }
+
+    const syncStructuredBlockSelectionState = () => {
+      const { selection } = editor.state;
+      const isStructuredBlock =
+        selection instanceof NodeSelection &&
+        selection.node.isBlock &&
+        !selection.node.isTextblock;
+      setIsStructuredBlockSelected((prev) =>
+        prev === isStructuredBlock ? prev : isStructuredBlock,
+      );
+    };
+
+    syncStructuredBlockSelectionState();
+    editor.on("selectionUpdate", syncStructuredBlockSelectionState);
+    editor.on("transaction", syncStructuredBlockSelectionState);
+
+    return () => {
+      editor.off("selectionUpdate", syncStructuredBlockSelectionState);
+      editor.off("transaction", syncStructuredBlockSelectionState);
+    };
+  }, [editor]);
 
   // Headless 模式焦点控制。
   const focusController = useHeadlessFocusController({
@@ -272,6 +303,9 @@ const ReactTiptapEditor = ({
     disabled && "is-disabled",
     !focusController.isEditorFocused && "is-editor-blurred",
     !focusController.isEditorFocusStable && "is-editor-focus-unstable",
+    resolvedConfig.isNotionLike &&
+      isStructuredBlockSelected &&
+      "is-structured-block-selected",
     !border && "no-border",
     !resolvedConfig.isNotionLike && "editor-container-headless",
     maxHeight != null && "editor-container-has-max-height",
@@ -308,6 +342,7 @@ const ReactTiptapEditor = ({
         resolvedDefaultCodeBlockLanguage={
           resolvedConfig.resolvedDefaultCodeBlockLanguage
         }
+        resolvedPlaceholder={resolvedConfig.resolvedPlaceholder}
         onCodeBlockFormat={onCodeBlockFormat}
         commandMenu={commandMenu}
         commandMenuMaxHeight={commandMenuMaxHeight}
