@@ -2,11 +2,16 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
 import { useEditorCommands } from "@/react/hooks";
+import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
+import ColorPicker from "@/react/editor/toolbar/ColorPicker";
+import TableSizePicker from "@/react/editor/table/TableSizePicker";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/react/components/ui/popover";
 import { renderToolbarItem } from "./renderers/renderToolbarItem";
-import { ColorPickerDropdown } from "./renderers/ColorPickerDropdown";
-import { HeadingMenuDropdown } from "./renderers/HeadingMenuDropdown";
-import { TableSizePickerDropdown } from "./renderers/TableSizePickerDropdown";
 import type { RenderedToolbarItem, ToolbarProps, ToolbarRenderContext } from "./types";
 import { useToolbarUIState } from "./hooks/useToolbarUIState";
 import "./Toolbar.css";
@@ -20,6 +25,8 @@ const Toolbar = ({
   onOpenMathDialog,
   onOpenImageDialog,
   onOpenFileUploadDialog,
+  portalContainer,
+  onPopoverOpenStateChecked,
 }: ToolbarProps) => {
   /** 选区/内容变化时自增，用于让工具栏根据当前选区重新计算 isActive 并重渲染 */
   const [selectionKey, setSelectionKey] = useState(0);
@@ -31,15 +38,6 @@ const Toolbar = ({
     setShowHeadingMenu,
     showTableSizePicker,
     setShowTableSizePicker,
-    isColorPickerReady,
-    isHeadingMenuReady,
-    isTableSizePickerReady,
-    colorPickerRefs,
-    colorPickerFloatingStyles,
-    headingMenuRefs,
-    headingMenuFloatingStyles,
-    tableSizePickerRefs,
-    tableSizePickerFloatingStyles,
   } = useToolbarUIState({ isEditorFocused });
 
   /**
@@ -196,6 +194,24 @@ const Toolbar = ({
     setShowHeadingMenu(false);
   };
 
+  // 统一关闭工具栏所有浮层，避免多个 Popover 同时打开。
+  const closeAllPopovers = () => {
+    setShowColorPicker(null);
+    setShowHeadingMenu(false);
+    setShowTableSizePicker(false);
+  };
+
+  /** Popover 关闭后延迟校验编辑器聚焦状态，必要时补触发 blur 链路。 */
+  const notifyPopoverClosed = () => {
+    requestAnimationFrame(() => {
+      onPopoverOpenStateChecked?.(editor.isFocused);
+    });
+  };
+
+  const isHeadingDisabled = isFocusNodeOnly || isInsideCodeBlock;
+  const isColorDisabled = isToolbarLocked || isInsideCode;
+  const isInsertTableDisabled = isInsideTable || isToolbarLocked;
+
   const renderContext: ToolbarRenderContext = {
     actionContext,
     locale,
@@ -214,32 +230,172 @@ const Toolbar = ({
     canUseImageDialog: !!onOpenImageDialog,
     canUseFileUploadDialog: !!onOpenFileUploadDialog,
     runToolbarAction,
-    onToggleHeadingMenu: () => setShowHeadingMenu(!showHeadingMenu),
-    onToggleColorPicker: (type) => {
-      setShowColorPicker(showColorPicker === type ? null : type);
-    },
-    onOpenTableSizePicker: () => setShowTableSizePicker(true),
-    setHeadingReference: (el) => {
-      if (showHeadingMenu) {
-        headingMenuRefs.setReference(el);
-      }
-    },
-    setColorReference: (el, type) => {
-      if (showColorPicker === type) {
-        colorPickerRefs.setReference(el);
-      }
-    },
-    setTableSizeReference: (el) => {
-      if (showTableSizePicker) {
-        tableSizePickerRefs.setReference(el);
-      }
-    },
   };
 
   // 按配置渲染工具栏项，并按 group 自动插入分隔符。
   const renderedItems = items
     .map((item) => renderToolbarItem(item, renderContext))
     .filter((item): item is RenderedToolbarItem => item !== null);
+
+  const renderItemElement = (item: RenderedToolbarItem) => {
+    if (item.key === BuiltinToolbarItemKey.Highlight) {
+      return (
+        <Popover
+          open={showColorPicker === "highlight"}
+          onOpenChange={(open) => {
+            if (open && isColorDisabled) return;
+            if (open) {
+              setShowHeadingMenu(false);
+              setShowTableSizePicker(false);
+              setShowColorPicker("highlight");
+              return;
+            }
+            if (showColorPicker === "highlight") {
+              setShowColorPicker(null);
+            }
+            notifyPopoverClosed();
+          }}
+        >
+          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverContent
+            container={portalContainer ?? undefined}
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="editor-toolbar-popover-panel"
+          >
+            <ColorPicker
+              type="highlight"
+              selectedColor={editor.getAttributes("highlight").color}
+              onColorSelect={onHighlightColorSelect}
+              locale={locale}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (item.key === BuiltinToolbarItemKey.TextColor) {
+      return (
+        <Popover
+          open={showColorPicker === "text"}
+          onOpenChange={(open) => {
+            if (open && isColorDisabled) return;
+            if (open) {
+              setShowHeadingMenu(false);
+              setShowTableSizePicker(false);
+              setShowColorPicker("text");
+              return;
+            }
+            if (showColorPicker === "text") {
+              setShowColorPicker(null);
+            }
+            notifyPopoverClosed();
+          }}
+        >
+          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverContent
+            container={portalContainer ?? undefined}
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="editor-toolbar-popover-panel"
+          >
+            <ColorPicker
+              type="text"
+              selectedColor={editor.getAttributes("textStyle").color}
+              onColorSelect={onTextColorSelect}
+              locale={locale}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (item.key === BuiltinToolbarItemKey.Heading) {
+      return (
+        <Popover
+          open={showHeadingMenu}
+          onOpenChange={(open) => {
+            if (open && isHeadingDisabled) return;
+            if (open) {
+              setShowColorPicker(null);
+              setShowTableSizePicker(false);
+            }
+            setShowHeadingMenu(open);
+            if (!open) {
+              notifyPopoverClosed();
+            }
+          }}
+        >
+          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverContent
+            container={portalContainer ?? undefined}
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="editor-toolbar-heading-menu"
+          >
+            {([1, 2, 3] as const).map((level) => (
+              <button
+                key={level}
+                type="button"
+                className={`editor-toolbar-heading-item ${
+                  showActiveState && currentHeadingLevel === level ? "is-active" : ""
+                }`}
+                onClick={() => onHeadingSelect(level)}
+                title={locale.toolbar.headingLevel(level)}
+              >
+                <span className="editor-toolbar-heading-num">H{["₁", "₂", "₃"][level - 1]}</span>
+                <span>{locale.toolbar.headingLevel(level)}</span>
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (item.key === BuiltinToolbarItemKey.InsertTable) {
+      return (
+        <Popover
+          open={showTableSizePicker}
+          onOpenChange={(open) => {
+            if (open && isInsertTableDisabled) return;
+            if (open) {
+              setShowColorPicker(null);
+              setShowHeadingMenu(false);
+            }
+            setShowTableSizePicker(open);
+            if (!open) {
+              notifyPopoverClosed();
+            }
+          }}
+        >
+          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverContent
+            container={portalContainer ?? undefined}
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="editor-toolbar-table-size-popover"
+          >
+            <TableSizePicker
+              onSelect={(rows, cols) => {
+                runToolbarAction(
+                  () => block.insertTable({ rows, cols }),
+                  { gapPolicy: "keep-gap" },
+                );
+                closeAllPopovers();
+              }}
+              locale={locale}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    return item.element;
+  };
 
   return (
     <div
@@ -254,51 +410,11 @@ const Toolbar = ({
           return (
             <Fragment key={item.key}>
               {showSeparator && <span className="editor-toolbar-separator" />}
-              {item.element}
+              {renderItemElement(item)}
             </Fragment>
           );
         })}
       </div>
-
-      <ColorPickerDropdown
-        showColorPicker={showColorPicker}
-        onClose={() => setShowColorPicker(null)}
-        setFloating={colorPickerRefs.setFloating}
-        floatingStyles={colorPickerFloatingStyles}
-        isReady={isColorPickerReady}
-        editor={editor}
-        locale={locale}
-        onTextColorSelect={onTextColorSelect}
-        onHighlightColorSelect={onHighlightColorSelect}
-      />
-
-      <HeadingMenuDropdown
-        showHeadingMenu={showHeadingMenu}
-        onClose={() => setShowHeadingMenu(false)}
-        setFloating={headingMenuRefs.setFloating}
-        floatingStyles={headingMenuFloatingStyles}
-        isReady={isHeadingMenuReady}
-        showActiveState={showActiveState}
-        currentHeadingLevel={currentHeadingLevel}
-        locale={locale}
-        onHeadingSelect={onHeadingSelect}
-      />
-
-      <TableSizePickerDropdown
-        showTableSizePicker={showTableSizePicker}
-        onClose={() => setShowTableSizePicker(false)}
-        setFloating={tableSizePickerRefs.setFloating}
-        floatingStyles={tableSizePickerFloatingStyles}
-        isReady={isTableSizePickerReady}
-        locale={locale}
-        onSelect={(rows, cols) => {
-          runToolbarAction(
-            () => block.insertTable({ rows, cols }),
-            { gapPolicy: "keep-gap" },
-          );
-          setShowTableSizePicker(false);
-        }}
-      />
     </div>
   );
 };

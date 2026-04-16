@@ -115,6 +115,8 @@ export default function EditorSurface({
           onOpenImageDialog={onOpenImageDialog}
           locale={locale}
           onOpenFileUploadDialog={onOpenFileUploadDialog}
+          portalContainer={portalContainer}
+          onPopoverOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
         />
       )}
       <div
@@ -154,8 +156,13 @@ export default function EditorSurface({
             onMenuOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
           />
         )}
-        {editor && !disabled && isNotionLike && (
-          <BubbleMenu editor={editor} locale={locale} />
+        {editor && !disabled && isNotionLike && isEditorFocused&& (
+          <BubbleMenu
+            editor={editor}
+            locale={locale}
+            portalContainer={portalContainer}
+            onPopoverOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
+          />
         )}
         {isNotionLike &&
           isEditorFocused &&

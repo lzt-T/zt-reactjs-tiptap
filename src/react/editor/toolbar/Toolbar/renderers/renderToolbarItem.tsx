@@ -82,12 +82,6 @@ export function renderToolbarItem(
         element: (
           <button
             type="button"
-            ref={ctx.setHeadingReference}
-            onClick={() => {
-              if (ctx.isFocusNodeOnly) return;
-              if (ctx.isInsideCodeBlock) return;
-              ctx.onToggleHeadingMenu();
-            }}
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState &&
@@ -181,15 +175,10 @@ export function renderToolbarItem(
         element: (
           <button
             type="button"
-            ref={ctx.setTableSizeReference}
             className={cn(
               "editor-toolbar-btn",
               (ctx.isInsideTable || ctx.isToolbarLocked) && "is-disabled",
             )}
-            onClick={() => {
-              if (ctx.isInsideTable || ctx.isToolbarLocked) return;
-              ctx.onOpenTableSizePicker();
-            }}
             title={ctx.locale.toolbar.insertTable}
           >
             <Table size={16} />
@@ -433,11 +422,6 @@ export function renderToolbarItem(
         element: (
           <button
             type="button"
-            ref={(el) => ctx.setColorReference(el, "highlight")}
-            onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
-              ctx.onToggleColorPicker("highlight");
-            }}
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState && ctx.editor.isActive("highlight") && "is-active",
@@ -456,11 +440,6 @@ export function renderToolbarItem(
         element: (
           <button
             type="button"
-            ref={(el) => ctx.setColorReference(el, "text")}
-            onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
-              ctx.onToggleColorPicker("text");
-            }}
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState &&

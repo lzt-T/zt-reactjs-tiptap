@@ -11,6 +11,8 @@
   gap: 2px;
   row-gap: 4px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 41;
 }
 
 /* 工具栏操作按钮（主栏与更多菜单共用），按类名选择，不作用于 .color-picker-dropdown 等内部 button */
@@ -73,8 +75,6 @@
 }
 
 .editor-toolbar-heading-menu {
-  position: fixed;
-  z-index: 40;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -116,24 +116,19 @@
   min-width: 1.5em;
 }
 
-.editor-toolbar-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
+.editor-toolbar-popover-panel {
+  width: auto;
+  padding: 0;
+  border: none;
   background: transparent;
+  box-shadow: none;
 }
 
-.editor-toolbar-dropdown {
-  position: fixed;
-  z-index: 40;
-}
-
-.editor-toolbar-table-size-dropdown {
-  position: fixed;
-  z-index: 40;
+.editor-toolbar-table-size-popover {
+  width: auto;
+  padding: 0;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
 }
-

@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/react";
-import type { CSSProperties, ReactElement } from "react";
+import type { ReactElement } from "react";
 import type { EditorLocale } from "@/shared/locales";
 import type {
   EditorActionContext,
@@ -26,6 +26,10 @@ export interface ToolbarProps {
   onOpenFileUploadDialog?: (
     callback: (url: string, name: string) => void,
   ) => void;
+  /** Popover Portal 挂载容器（用于主题作用域隔离）。 */
+  portalContainer?: HTMLElement | null;
+  /** Toolbar 内 Popover 开关状态校验回调（关闭后用于补齐 blur 链路）。 */
+  onPopoverOpenStateChecked?: (editorFocused: boolean) => void;
 }
 
 /** 工具栏项渲染后的中间结构。 */
@@ -56,47 +60,4 @@ export interface ToolbarRenderContext {
     action: () => void,
     options?: { gapPolicy?: "insert-anchor" | "keep-gap" },
   ) => void;
-  onToggleHeadingMenu: () => void;
-  onToggleColorPicker: (type: "text" | "highlight") => void;
-  onOpenTableSizePicker: () => void;
-  setHeadingReference: (el: HTMLButtonElement | null) => void;
-  setColorReference: (
-    el: HTMLButtonElement | null,
-    type: "text" | "highlight",
-  ) => void;
-  setTableSizeReference: (el: HTMLButtonElement | null) => void;
-}
-
-export interface ColorPickerDropdownProps {
-  showColorPicker: "text" | "highlight" | null;
-  onClose: () => void;
-  setFloating: (el: HTMLDivElement | null) => void;
-  floatingStyles: CSSProperties;
-  isReady: boolean;
-  editor: Editor;
-  locale: EditorLocale;
-  onTextColorSelect: (color: string) => void;
-  onHighlightColorSelect: (color: string) => void;
-}
-
-export interface HeadingMenuDropdownProps {
-  showHeadingMenu: boolean;
-  onClose: () => void;
-  setFloating: (el: HTMLDivElement | null) => void;
-  floatingStyles: CSSProperties;
-  isReady: boolean;
-  showActiveState: boolean;
-  currentHeadingLevel: 1 | 2 | 3 | null;
-  locale: EditorLocale;
-  onHeadingSelect: (level: 1 | 2 | 3) => void;
-}
-
-export interface TableSizePickerDropdownProps {
-  showTableSizePicker: boolean;
-  onClose: () => void;
-  setFloating: (el: HTMLDivElement | null) => void;
-  floatingStyles: CSSProperties;
-  isReady: boolean;
-  locale: EditorLocale;
-  onSelect: (rows: number, cols: number) => void;
 }

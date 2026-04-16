@@ -36,6 +36,8 @@ export function useHeadlessFocusController({
   const focusStableRafIdRef = useRef<number | null>(null);
   // 编辑器聚焦状态引用，供事件回调读取最新值。
   const isEditorFocusedRef = useRef(false);
+  // 当前焦点周期内是否已完成 blur 收口，避免重复触发。
+  const hasBlurFinalizedRef = useRef(false);
   // 未聚焦点击公式时缓存待处理元素。
   const pendingMathClickRef = useRef<{
     el: Element;
@@ -46,7 +48,8 @@ export function useHeadlessFocusController({
 
   useEffect(() => {
     isEditorFocusedRef.current = isEditorFocused;
-    console.log(isEditorFocused, "isEditorFocused");
+    console.log(isEditorFocused,'isEditorFocused');
+    
   }, [isEditorFocused]);
 
   /** 保存代码语言菜单根节点，用于 blur 命中判断。 */
@@ -57,13 +60,6 @@ export function useHeadlessFocusController({
     [],
   );
 
-  /** 代码语言菜单关闭后延迟校验聚焦状态，必要时同步清空聚焦态。 */
-  const syncFocusStateAfterMenuClose = useCallback((editorFocused: boolean) => {
-    if (editorFocused) return;
-    setIsEditorFocused(false);
-    setIsEditorFocusStable(false);
-  }, []);
-
   /** 判断事件目标是否命中代码语言菜单区域。 */
   const isInsideLanguageMenu = useCallback(
     (target: EventTarget | null) => {
@@ -72,6 +68,29 @@ export function useHeadlessFocusController({
       return Boolean(codeBlockLanguageMenuRootRef.current?.contains(target));
     },
     [isInsideCodeBlockLanguageSelect],
+  );
+
+  /** 统一 blur 收口：同步焦点状态、清理可见选区并触发 TipTap blur。 */
+  const finalizeBlurIfNeeded = useCallback(
+    (editorFocused: boolean) => {
+      if (!editor || editorFocused || hasBlurFinalizedRef.current) return;
+      if (isInsideLanguageMenu(document.activeElement)) return;
+      hasBlurFinalizedRef.current = true;
+      // 清除浏览器可见选区高亮，不改动 TipTap 内部 selection。
+      window.getSelection()?.removeAllRanges();
+      setIsEditorFocused(false);
+      setIsEditorFocusStable(false);
+      editor.commands.blur();
+    },
+    [editor, isInsideLanguageMenu],
+  );
+
+  /** 代码语言菜单关闭后延迟校验聚焦状态，必要时同步清空聚焦态。 */
+  const syncFocusStateAfterMenuClose = useCallback(
+    (editorFocused: boolean) => {
+      finalizeBlurIfNeeded(editorFocused);
+    },
+    [finalizeBlurIfNeeded],
   );
 
   useEffect(() => {
@@ -104,6 +123,7 @@ export function useHeadlessFocusController({
 
     /** 聚焦后补触发未聚焦点击公式事件。 */
     const onFocus = () => {
+      hasBlurFinalizedRef.current = false;
       setIsEditorFocused(true);
       if (focusStableRafIdRef.current != null) {
         cancelAnimationFrame(focusStableRafIdRef.current);
@@ -144,8 +164,7 @@ export function useHeadlessFocusController({
             !editor.isFocused) &&
           !isInsideLanguageMenu(document.activeElement)
         ) {
-          setIsEditorFocused(false);
-          setIsEditorFocusStable(false);
+          finalizeBlurIfNeeded(editor.isFocused);
         }
       });
     };
@@ -170,6 +189,7 @@ export function useHeadlessFocusController({
     isNotionLike,
     onBlockMathClick,
     onInlineMathClick,
+    finalizeBlurIfNeeded,
   ]);
 
   // Headless 模式工具栏显示开关。

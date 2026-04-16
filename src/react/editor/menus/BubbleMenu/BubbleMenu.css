@@ -7,8 +7,6 @@
   gap: 2px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
   animation: fadeIn 0.15s ease;
-  /* 避免被表格等编辑器内容遮挡，但低于弹窗 z-50 */
-  z-index: 40;
   position: relative;
 }
 
@@ -88,35 +86,8 @@
   align-self: stretch;
 }
 
-.color-picker-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  background: transparent;
-}
-
-.color-picker-container {
-  position: fixed;
-  z-index: 40;
-}
-
 /* 更多菜单样式 */
-.more-menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  background: transparent;
-}
-
 .more-menu {
-  position: fixed;
-  z-index: 40;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -167,4 +138,12 @@
   align-self: stretch;
   background: #e5e7eb;
   margin: 4px 0;
+}
+
+.bubble-menu-popover-panel {
+  width: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }

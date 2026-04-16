@@ -401,6 +401,7 @@ const TableRowActions = ({
 
   const singleButton = (
     <button
+      key="row-action-button"
       ref={buttonRef}
       type="button"
       className="table-row-action-trigger"
