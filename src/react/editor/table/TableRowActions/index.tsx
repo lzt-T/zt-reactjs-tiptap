@@ -1,7 +1,6 @@
 import { createPortal } from 'react-dom'
 import { Editor } from '@tiptap/react'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { useFloating, flip, shift, offset, FloatingPortal, autoUpdate } from '@floating-ui/react'
 import {
   EllipsisVertical,
   Trash2,
@@ -12,6 +11,7 @@ import {
   BetweenVerticalStart,
 } from 'lucide-react'
 import { IconTableDeleteRow } from '@/react/components/Icon'
+import { Popover, PopoverContent, PopoverTrigger } from '@/react/components/ui/popover'
 import { useTableInsertRowRunAndClose } from '@/react/hooks'
 import { config } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
@@ -54,7 +54,6 @@ const TableRowActions = ({
   /** 当前焦点所在表格的行数，用于菜单中「删除行」/「删除表格」 */
   const [focusedTableRowCount, setFocusedTableRowCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   /**
    * 打开菜单时记录目标行信息，供 useTableInsertRowRunAndClose 用。
@@ -80,28 +79,6 @@ const TableRowActions = ({
   const [tableSize, setTableSize] = useState<{ width: number; height: number } | null>(null)
   /** 聚焦表格 index，加号按钮点击时用于定位表格 */
   const [focusedTableIndexForPlus, setFocusedTableIndexForPlus] = useState<number | null>(null)
-  /** 编辑器边界元素，在 effect 中同步，避免 render 中读 ref */
-  const [boundaryElement, setBoundaryElement] = useState<Element | null>(null)
-
-  const { refs: floatingRefs, floatingStyles } = useFloating({
-    open: menuOpen,
-    placement: 'top',
-    strategy: 'absolute',
-    middleware: [
-      offset(8),
-      flip({ padding: 16, boundary: boundaryElement ?? undefined }),
-      shift({ padding: 16, boundary: boundaryElement ?? undefined }),
-    ],
-    whileElementsMounted: autoUpdate,
-  })
-
-  useEffect(() => {
-    if (menuOpen) {
-      floatingRefs.setReference(buttonRef.current)
-    } else {
-      floatingRefs.setReference(null)
-    }
-  }, [menuOpen, floatingRefs])
 
   const clearTableRowStates = useCallback(() => {
     setCurrentRow(null)
@@ -319,11 +296,27 @@ const TableRowActions = ({
     /* 按钮已 Portal 到 tableWrapper 内，随表格滚动，无需监听 scroll */
   }, [editor, editorWrapperRef, updatePositions])
 
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+    menuTargetRef.current = null
+  }, [])
+  // Popover 开关状态统一收敛到这里，关闭时同步清理目标引用。
+  const handleMenuOpenChange = useCallback((open: boolean) => {
+    setMenuOpen(open)
+    if (!open) {
+      menuTargetRef.current = null
+    }
+  }, [])
+
   const handleRowButtonClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
       if (!currentRow) return
+      if (menuOpen) {
+        closeMenu()
+        return
+      }
       menuTargetRef.current = {
         firstCellPos: currentRow.firstCellPos,
         tableIndex: currentRow.tableIndex,
@@ -331,17 +324,10 @@ const TableRowActions = ({
         lastRowFirstCellPos: currentRow.lastRowFirstCellPos,
         lastRowIndex: currentRow.lastRowIndex,
       }
-      setBoundaryElement(editorWrapperRef.current ?? null)
-      floatingRefs.setReference(buttonRef.current)
       setMenuOpen(true)
     },
-    [currentRow, editorWrapperRef, floatingRefs]
+    [closeMenu, currentRow, menuOpen]
   )
-
-  const closeMenu = useCallback(() => {
-    setMenuOpen(false)
-    menuTargetRef.current = null
-  }, [])
 
   /** 「在上方插入行」：以最上方选中行为基准 */
   const runRowAndClose = useTableInsertRowRunAndClose(
@@ -373,59 +359,161 @@ const TableRowActions = ({
     closeMenu
   )
 
-  useEffect(() => {
-    if (!menuOpen) return
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeMenu()
-    }
-    const onClickOutside = (e: MouseEvent) => {
-      const hitBtn = buttonRef.current?.contains(e.target as Node)
-      if (menuRef.current && !menuRef.current.contains(e.target as Node) && !hitBtn) {
-        closeMenu()
-      }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    setTimeout(() => document.addEventListener('click', onClickOutside, true), 0)
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      document.removeEventListener('click', onClickOutside, true)
-    }
-  }, [menuOpen, closeMenu])
-
   if (!editor.isActive('table') || currentRow == null) {
     return null
   }
 
+  // Popover 挂到编辑器容器内，避免挂到 document.body 破坏主题隔离。
+  const popoverContainer = editorWrapperRef.current
   const usePortal = Boolean(portalTarget && portalButtonPosition)
   const showPlusButtons = Boolean(portalTarget && tableSize)
 
+  // 操作按钮视觉与定位保持不变，仅将菜单实现替换为 Popover。
   const singleButton = (
-    <button
-      key="row-action-button"
-      ref={buttonRef}
-      type="button"
-      className="table-row-action-trigger"
-      aria-label={locale.table.rowActionsAriaLabel}
-      style={
-        usePortal && portalButtonPosition
-          ? {
-              top: `${portalButtonPosition.top}px`,
-              left: `${portalButtonPosition.left}px`,
-              width: `${ROW_BUTTON_WIDTH}px`,
-              height: `${portalButtonPosition.height}px`,
-            }
-          : {
-              top: `${currentRow.top}px`,
-              left: `${currentRow.left}px`,
-              width: `${ROW_BUTTON_WIDTH}px`,
-              height: `${currentRow.height}px`,
-            }
-      }
-      onMouseDown={e => e.preventDefault()}
-      onClick={handleRowButtonClick}
-    >
-      <EllipsisVertical className="table-row-action-icon" size={14} aria-hidden="true" />
-    </button>
+    <Popover key="row-action-button" open={menuOpen} onOpenChange={handleMenuOpenChange}>
+      <PopoverTrigger asChild>
+        <button
+          ref={buttonRef}
+          type="button"
+          className="table-row-action-trigger"
+          aria-label={locale.table.rowActionsAriaLabel}
+          style={
+            usePortal && portalButtonPosition
+              ? {
+                  top: `${portalButtonPosition.top}px`,
+                  left: `${portalButtonPosition.left}px`,
+                  width: `${ROW_BUTTON_WIDTH}px`,
+                  height: `${portalButtonPosition.height}px`,
+                }
+              : {
+                  top: `${currentRow.top}px`,
+                  left: `${currentRow.left}px`,
+                  width: `${ROW_BUTTON_WIDTH}px`,
+                  height: `${currentRow.height}px`,
+                }
+          }
+          onMouseDown={e => e.preventDefault()}
+          onClick={handleRowButtonClick}
+        >
+          <EllipsisVertical className="table-row-action-icon" size={14} aria-hidden="true" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        container={popoverContainer}
+        side="top"
+        align="start"
+        sideOffset={8}
+        role="menu"
+        className="table-row-action-menu w-auto p-1"
+        onMouseDown={e => e.preventDefault()}
+        onOpenAutoFocus={e => e.preventDefault()}
+      >
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.insertRowAbove}
+          onClick={() =>
+            runRowAndClose(() => editor.chain().focus().addRowBefore().run(), 1)
+          }
+        >
+          <BetweenVerticalStart size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.insertRowBelow}
+          onClick={() =>
+            runRowAndCloseAfter(() => editor.chain().focus().addRowAfter().run(), 0)
+          }
+        >
+          <BetweenVerticalEnd size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={(() => {
+            const numRows = currentRow
+              ? currentRow.lastRowIndex - currentRow.rowIndex + 1
+              : 1
+            if (focusedTableRowCount <= numRows) return locale.table.deleteWholeTable
+            return numRows > 1
+              ? locale.table.deleteSelectedRows(numRows)
+              : locale.table.deleteCurrentRow
+          })()}
+          disabled={
+            focusedTableRowCount <= 1
+              ? false
+              : !editor.can().deleteRow()
+          }
+          onClick={() => {
+            const target = menuTargetRef.current
+            const numRows = target ? target.lastRowIndex - target.rowIndex + 1 : 1
+            runRowAndClose(() => {
+              if (focusedTableRowCount <= numRows) {
+                editor.chain().focus().deleteTable().run()
+              } else {
+                /* 链式删除 numRows 次：每次删除后光标留在同一行位置，下一行顶上来继续删 */
+                let chain = editor.chain().focus()
+                for (let i = 0; i < numRows; i++) {
+                  chain = chain.deleteRow()
+                }
+                chain.run()
+              }
+            })
+          }}
+        >
+          <IconTableDeleteRow size={16} />
+        </button>
+        <span className="separator" />
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.mergeCells}
+          disabled={
+            !('mergeCells' in editor.commands) || !editor.can().mergeCells?.()
+          }
+          onClick={() =>
+            runRowAndClose(() => editor.chain().focus().mergeCells().run())
+          }
+        >
+          <TableCellsMerge size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.splitCell}
+          disabled={
+            !('splitCell' in editor.commands) || !editor.can().splitCell?.()
+          }
+          onClick={() =>
+            runRowAndClose(() => editor.chain().focus().splitCell().run())
+          }
+        >
+          <TableCellsSplit size={16} />
+        </button>
+        <span className="separator" />
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.toggleHeaderRow}
+          onClick={() =>
+            runRowAndClose(() => editor.chain().focus().toggleHeaderRow().run())
+          }
+        >
+          <TableProperties size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.deleteWholeTable}
+          onClick={() =>
+            runRowAndClose(() => editor.chain().focus().deleteTable().run())
+          }
+        >
+          <Trash2 size={16} />
+        </button>
+      </PopoverContent>
+    </Popover>
   )
 
   return (
@@ -449,125 +537,6 @@ const TableRowActions = ({
             portalTarget
           )
         : singleButton}
-      {menuOpen && boundaryElement && (
-        <FloatingPortal root={boundaryElement as HTMLElement}>
-          <div
-            ref={el => {
-              ;(menuRef as React.MutableRefObject<HTMLDivElement | null>).current = el
-              floatingRefs.setFloating(el)
-            }}
-            className="table-row-action-menu"
-            role="menu"
-            style={floatingStyles}
-            onMouseDown={e => e.preventDefault()}
-          >
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.insertRowAbove}
-            onClick={() =>
-              runRowAndClose(() => editor.chain().focus().addRowBefore().run(), 1)
-            }
-          >
-            <BetweenVerticalStart size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.insertRowBelow}
-            onClick={() =>
-              runRowAndCloseAfter(() => editor.chain().focus().addRowAfter().run(), 0)
-            }
-          >
-            <BetweenVerticalEnd size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={(() => {
-              const numRows = currentRow
-                ? currentRow.lastRowIndex - currentRow.rowIndex + 1
-                : 1
-              if (focusedTableRowCount <= numRows) return locale.table.deleteWholeTable
-              return numRows > 1
-                ? locale.table.deleteSelectedRows(numRows)
-                : locale.table.deleteCurrentRow
-            })()}
-            disabled={
-              focusedTableRowCount <= 1
-                ? false
-                : !editor.can().deleteRow()
-            }
-            onClick={() => {
-              const target = menuTargetRef.current
-              const numRows = target ? target.lastRowIndex - target.rowIndex + 1 : 1
-              runRowAndClose(() => {
-                if (focusedTableRowCount <= numRows) {
-                  editor.chain().focus().deleteTable().run()
-                } else {
-                  /* 链式删除 numRows 次：每次删除后光标留在同一行位置，下一行顶上来继续删 */
-                  let chain = editor.chain().focus()
-                  for (let i = 0; i < numRows; i++) {
-                    chain = chain.deleteRow()
-                  }
-                  chain.run()
-                }
-              })
-            }}
-          >
-            <IconTableDeleteRow size={16} />
-          </button>
-          <span className="separator" />
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.mergeCells}
-            disabled={
-              !('mergeCells' in editor.commands) || !editor.can().mergeCells?.()
-            }
-            onClick={() =>
-              runRowAndClose(() => editor.chain().focus().mergeCells().run())
-            }
-          >
-            <TableCellsMerge size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.splitCell}
-            disabled={
-              !('splitCell' in editor.commands) || !editor.can().splitCell?.()
-            }
-            onClick={() =>
-              runRowAndClose(() => editor.chain().focus().splitCell().run())
-            }
-          >
-            <TableCellsSplit size={16} />
-          </button>
-          <span className="separator" />
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.toggleHeaderRow}
-            onClick={() =>
-              runRowAndClose(() => editor.chain().focus().toggleHeaderRow().run())
-            }
-          >
-            <TableProperties size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.deleteWholeTable}
-            onClick={() =>
-              runRowAndClose(() => editor.chain().focus().deleteTable().run())
-            }
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-        </FloatingPortal>
-      )}
     </>
   )
 }

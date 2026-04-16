@@ -1,7 +1,6 @@
 import { createPortal } from 'react-dom'
 import { Editor } from '@tiptap/react'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { useFloating, flip, shift, offset, FloatingPortal, autoUpdate } from '@floating-ui/react'
 import {
   Ellipsis,
   Trash2,
@@ -12,6 +11,7 @@ import {
   BetweenHorizontalStart,
 } from 'lucide-react'
 import { IconTableDeleteColumn } from '@/react/components/Icon'
+import { Popover, PopoverContent, PopoverTrigger } from '@/react/components/ui/popover'
 import { useTableInsertColumnRunAndClose } from '@/react/hooks'
 import { config } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
@@ -52,7 +52,6 @@ const TableColumnActions = ({
   /** 当前焦点所在表格的列数，用于菜单中「删除列」/「删除表格」 */
   const [focusedTableColCount, setFocusedTableColCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   /**
    * 打开菜单时记录目标列信息，供 useTableInsertColumnRunAndClose 用。
@@ -74,28 +73,6 @@ const TableColumnActions = ({
     left: number
     width: number
   } | null>(null)
-  /** 编辑器边界元素，在 effect 中同步，避免 render 中读 ref */
-  const [boundaryElement, setBoundaryElement] = useState<Element | null>(null)
-
-  const { refs: floatingRefs, floatingStyles } = useFloating({
-    open: menuOpen,
-    placement: 'top',
-    strategy: 'absolute',
-    middleware: [
-      offset(8),
-      flip({ padding: 16, boundary: boundaryElement ?? undefined }),
-      shift({ padding: 16, boundary: boundaryElement ?? undefined }),
-    ],
-    whileElementsMounted: autoUpdate,
-  })
-
-  useEffect(() => {
-    if (menuOpen) {
-      floatingRefs.setReference(buttonRef.current)
-    } else {
-      floatingRefs.setReference(null)
-    }
-  }, [menuOpen, floatingRefs])
 
   const clearTableColumnStates = useCallback(() => {
     setCurrentColumn(null)
@@ -292,11 +269,27 @@ const TableColumnActions = ({
     /* 列按钮已 Portal 到 scroll wrapper 内，随表格滚动，无需监听 scroll */
   }, [editor, editorWrapperRef, updatePositions])
 
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+    menuTargetRef.current = null
+  }, [])
+  // Popover 开关状态统一收敛到这里，关闭时同步清理目标引用。
+  const handleMenuOpenChange = useCallback((open: boolean) => {
+    setMenuOpen(open)
+    if (!open) {
+      menuTargetRef.current = null
+    }
+  }, [])
+
   const handleColumnButtonClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
       if (!currentColumn) return
+      if (menuOpen) {
+        closeMenu()
+        return
+      }
       menuTargetRef.current = {
         firstCellPos: currentColumn.firstCellPos,
         tableIndex: currentColumn.tableIndex,
@@ -304,17 +297,10 @@ const TableColumnActions = ({
         lastColumnFirstCellPos: currentColumn.lastColumnFirstCellPos,
         lastColumnIndex: currentColumn.lastColumnIndex,
       }
-      setBoundaryElement(editorWrapperRef.current ?? null)
-      floatingRefs.setReference(buttonRef.current)
       setMenuOpen(true)
     },
-    [currentColumn, editorWrapperRef, floatingRefs]
+    [closeMenu, currentColumn, menuOpen]
   )
-
-  const closeMenu = useCallback(() => {
-    setMenuOpen(false)
-    menuTargetRef.current = null
-  }, [])
 
   /** 「在左侧插入列」：以最左侧选中列为基准 */
   const runColumnAndClose = useTableInsertColumnRunAndClose(
@@ -346,185 +332,169 @@ const TableColumnActions = ({
     closeMenu
   )
 
-  useEffect(() => {
-    if (!menuOpen) return
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeMenu()
-    }
-    const onClickOutside = (e: MouseEvent) => {
-      const hitBtn = buttonRef.current?.contains(e.target as Node)
-      if (menuRef.current && !menuRef.current.contains(e.target as Node) && !hitBtn) {
-        closeMenu()
-      }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    setTimeout(() => document.addEventListener('click', onClickOutside, true), 0)
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      document.removeEventListener('click', onClickOutside, true)
-    }
-  }, [menuOpen, closeMenu])
-
   if (!editor.isActive('table') || currentColumn == null) {
     return null
   }
 
+  // Popover 挂到编辑器容器内，避免挂到 document.body 破坏主题隔离。
+  const popoverContainer = editorWrapperRef.current
   const usePortal = Boolean(portalTarget && portalButtonPosition)
 
+  // 操作按钮视觉与定位保持不变，仅将菜单实现替换为 Popover。
   const singleButton = (
-    <button
-      ref={buttonRef}
-      type="button"
-      className="table-column-action-trigger"
-      aria-label={locale.table.columnActionsAriaLabel}
-      style={
-        usePortal && portalButtonPosition
-          ? {
-              top: `${portalButtonPosition.top}px`,
-              left: `${portalButtonPosition.left}px`,
-              width: `${portalButtonPosition.width}px`,
-              height: `${COL_BUTTON_HEIGHT}px`,
-            }
-          : {
-              top: `${currentColumn.top}px`,
-              left: `${currentColumn.left}px`,
-              width: `${currentColumn.width}px`,
-              height: `${COL_BUTTON_HEIGHT}px`,
-            }
-      }
-      onMouseDown={e => e.preventDefault()}
-      onClick={handleColumnButtonClick}
-    >
-      <Ellipsis className="table-column-action-icon" size={16} aria-hidden="true" />
-    </button>
+    <Popover open={menuOpen} onOpenChange={handleMenuOpenChange}>
+      <PopoverTrigger asChild>
+        <button
+          ref={buttonRef}
+          type="button"
+          className="table-column-action-trigger"
+          aria-label={locale.table.columnActionsAriaLabel}
+          style={
+            usePortal && portalButtonPosition
+              ? {
+                  top: `${portalButtonPosition.top}px`,
+                  left: `${portalButtonPosition.left}px`,
+                  width: `${portalButtonPosition.width}px`,
+                  height: `${COL_BUTTON_HEIGHT}px`,
+                }
+              : {
+                  top: `${currentColumn.top}px`,
+                  left: `${currentColumn.left}px`,
+                  width: `${currentColumn.width}px`,
+                  height: `${COL_BUTTON_HEIGHT}px`,
+                }
+          }
+          onMouseDown={e => e.preventDefault()}
+          onClick={handleColumnButtonClick}
+        >
+          <Ellipsis className="table-column-action-icon" size={16} aria-hidden="true" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        container={popoverContainer}
+        side="top"
+        align="start"
+        sideOffset={8}
+        role="menu"
+        className="table-column-action-menu w-auto p-1"
+        onMouseDown={e => e.preventDefault()}
+        onOpenAutoFocus={e => e.preventDefault()}
+      >
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.insertColumnLeft}
+          onClick={() =>
+            runColumnAndClose(() => editor.chain().focus().addColumnBefore().run(), 'before')
+          }
+        >
+          <BetweenHorizontalStart size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.insertColumnRight}
+          onClick={() =>
+            runColumnAndCloseAfter(() => editor.chain().focus().addColumnAfter().run(), 'after')
+          }
+        >
+          <BetweenHorizontalEnd size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={(() => {
+            const numCols = currentColumn
+              ? currentColumn.lastColumnIndex - currentColumn.columnIndex + 1
+              : 1
+            if (focusedTableColCount <= numCols) return locale.table.deleteWholeTable
+            return numCols > 1
+              ? locale.table.deleteSelectedColumns(numCols)
+              : locale.table.deleteCurrentColumn
+          })()}
+          disabled={
+            focusedTableColCount <= 1
+              ? false
+              : !editor.can().deleteColumn()
+          }
+          onClick={() => {
+            const target = menuTargetRef.current
+            const numCols = target ? target.lastColumnIndex - target.columnIndex + 1 : 1
+            runColumnAndClose(() => {
+              if (focusedTableColCount <= numCols) {
+                editor.chain().focus().deleteTable().run()
+              } else {
+                /* 链式删除 numCols 次：每次删除后光标留在同一列位置，下一列顶上来继续删 */
+                let chain = editor.chain().focus()
+                for (let i = 0; i < numCols; i++) {
+                  chain = chain.deleteColumn()
+                }
+                chain.run()
+              }
+            })
+          }}
+        >
+          <IconTableDeleteColumn size={16} />
+        </button>
+        <span className="separator" />
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.mergeCells}
+          disabled={
+            !('mergeCells' in editor.commands) || !editor.can().mergeCells?.()
+          }
+          onClick={() => {
+            editor.chain().focus().mergeCells().run()
+            closeMenu()
+          }}
+        >
+          <TableCellsMerge size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.splitCell}
+          disabled={
+            !('splitCell' in editor.commands) || !editor.can().splitCell?.()
+          }
+          onClick={() => {
+            editor.chain().focus().splitCell().run()
+            closeMenu()
+          }}
+        >
+          <TableCellsSplit size={16} />
+        </button>
+        <span className="separator" />
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.toggleHeaderRow}
+          onClick={() => {
+            editor.chain().focus().toggleHeaderRow().run()
+            closeMenu()
+          }}
+        >
+          <TableProperties size={16} />
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          title={locale.table.deleteWholeTable}
+          onClick={() => {
+            editor.chain().focus().deleteTable().run()
+            closeMenu()
+          }}
+        >
+          <Trash2 size={16} />
+        </button>
+      </PopoverContent>
+    </Popover>
   )
 
   return (
     <>
       {usePortal && portalTarget ? createPortal(singleButton, portalTarget) : singleButton}
-      {menuOpen && boundaryElement && (
-        <FloatingPortal root={boundaryElement as HTMLElement}>
-          <div
-            ref={el => {
-              ;(menuRef as React.MutableRefObject<HTMLDivElement | null>).current = el
-              floatingRefs.setFloating(el)
-            }}
-            className="table-column-action-menu"
-            role="menu"
-            style={floatingStyles}
-            onMouseDown={e => e.preventDefault()}
-          >
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.insertColumnLeft}
-            onClick={() =>
-              runColumnAndClose(() => editor.chain().focus().addColumnBefore().run(), 'before')
-            }
-          >
-            <BetweenHorizontalStart size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.insertColumnRight}
-            onClick={() =>
-              runColumnAndCloseAfter(() => editor.chain().focus().addColumnAfter().run(), 'after')
-            }
-          >
-            <BetweenHorizontalEnd size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={(() => {
-              const numCols = currentColumn
-                ? currentColumn.lastColumnIndex - currentColumn.columnIndex + 1
-                : 1
-              if (focusedTableColCount <= numCols) return locale.table.deleteWholeTable
-              return numCols > 1
-                ? locale.table.deleteSelectedColumns(numCols)
-                : locale.table.deleteCurrentColumn
-            })()}
-            disabled={
-              focusedTableColCount <= 1
-                ? false
-                : !editor.can().deleteColumn()
-            }
-            onClick={() => {
-              const target = menuTargetRef.current
-              const numCols = target ? target.lastColumnIndex - target.columnIndex + 1 : 1
-              runColumnAndClose(() => {
-                if (focusedTableColCount <= numCols) {
-                  editor.chain().focus().deleteTable().run()
-                } else {
-                  /* 链式删除 numCols 次：每次删除后光标留在同一列位置，下一列顶上来继续删 */
-                  let chain = editor.chain().focus()
-                  for (let i = 0; i < numCols; i++) {
-                    chain = chain.deleteColumn()
-                  }
-                  chain.run()
-                }
-              })
-            }}
-          >
-            <IconTableDeleteColumn size={16} />
-          </button>
-          <span className="separator" />
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.mergeCells}
-            disabled={
-              !('mergeCells' in editor.commands) || !editor.can().mergeCells?.()
-            }
-            onClick={() => {
-              editor.chain().focus().mergeCells().run()
-              closeMenu()
-            }}
-          >
-            <TableCellsMerge size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.splitCell}
-            disabled={
-              !('splitCell' in editor.commands) || !editor.can().splitCell?.()
-            }
-            onClick={() => {
-              editor.chain().focus().splitCell().run()
-              closeMenu()
-            }}
-          >
-            <TableCellsSplit size={16} />
-          </button>
-          <span className="separator" />
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.toggleHeaderRow}
-            onClick={() => {
-              editor.chain().focus().toggleHeaderRow().run()
-              closeMenu()
-            }}
-          >
-            <TableProperties size={16} />
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            title={locale.table.deleteWholeTable}
-            onClick={() => {
-              editor.chain().focus().deleteTable().run()
-              closeMenu()
-            }}
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-        </FloatingPortal>
-      )}
     </>
   )
 }

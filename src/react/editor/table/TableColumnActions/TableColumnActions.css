@@ -29,16 +29,13 @@
 
 /* 列操作弹出菜单：与 TableRowActions 菜单一致 */
 .table-column-action-menu {
-  position: absolute;
   background: white;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  padding: 4px;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 4px;
-  z-index: 41;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 

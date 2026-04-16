@@ -31,17 +31,13 @@
 
 /* 行操作弹出菜单：横向图标栏，与 TableMenu 一致 */
 .table-row-action-menu {
-  position: absolute;
   background: white;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  padding: 4px;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 4px;
-  /* 与行操作按钮一致，高于列操作，避免被遮挡 */
-  z-index: 41;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 

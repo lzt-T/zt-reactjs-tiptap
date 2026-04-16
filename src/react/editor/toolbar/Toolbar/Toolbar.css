@@ -75,6 +75,9 @@
 }
 
 .editor-toolbar-heading-menu {
+  width: max-content;
+  height: auto;
+  min-height: 0;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -83,6 +86,12 @@
   display: flex;
   flex-direction: column;
   min-width: 140px;
+}
+
+[data-slot="popover-content"].editor-toolbar-heading-menu {
+  width: max-content;
+  height: auto;
+  min-height: 0;
 }
 
 .editor-toolbar-heading-item {
