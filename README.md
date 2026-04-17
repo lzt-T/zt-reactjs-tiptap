@@ -7,27 +7,6 @@
 
 **GitHub:** [https://github.com/lzt-T/md-tiptap](https://github.com/lzt-T/md-tiptap)
 
-## v1.0 破坏性升级说明
-
-`1.0.0` 开始，仓库已重构为 **core + react + shared** 三层结构：
-
-- `src/core/`：编辑器核心命令与扩展
-- `src/react/editor/`：React 编辑器主域（shell/menus/dialogs/table/toolbar/styles/types/customization）
-- `src/react/hooks/`：React 层复用 hooks
-- `src/shared/`：配置、国际化、工具函数、样式
-- `examples/react-demo/`：示例与调试入口
-
-### 导出策略
-
-- 主入口 `zt-reactjs-tiptap`：继续导出 `ReactTiptapEditor`、常用类型、工具函数。
-- 子路径入口 `zt-reactjs-tiptap/core`：导出核心扩展与命令（高级定制场景）。
-- 样式入口 `zt-reactjs-tiptap/style.css`：保持不变。
-
-### 迁移建议
-
-- 推荐继续使用主入口 + `style.css`，无需改动现有消费端样式引入方式。
-- 如需直接复用底层扩展，请改用 `zt-reactjs-tiptap/core`。
-
 ## 特性
 
 - ✨ 丰富的文本格式化选项（粗体、斜体、下划线、删除线、行内代码）
