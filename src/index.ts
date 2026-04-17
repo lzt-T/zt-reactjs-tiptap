@@ -14,7 +14,6 @@ export {
 // 导出 React 层类型。
 export type {
   TiptapEditorProps,
-  EditorTheme,
   ToolbarItemConfig,
   SlashCommandConfig,
   EditorActionContext,

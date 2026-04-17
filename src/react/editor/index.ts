@@ -10,7 +10,7 @@ export {
 } from "./types";
 
 // 组件类型导出。
-export type { TiptapEditorProps, EditorTheme } from "./types";
+export type { TiptapEditorProps } from "./types";
 
 // 工具栏/斜杠配置导出。
 export {
