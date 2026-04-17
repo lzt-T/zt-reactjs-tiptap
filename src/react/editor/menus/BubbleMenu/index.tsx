@@ -1,7 +1,7 @@
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
-import {  useState, type MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import { config, type ColorOption } from "@/shared/config";
 import {
   Bold,
@@ -19,7 +19,7 @@ import {
   AlignRight,
   AlignJustify,
 } from "lucide-react";
-import { useEditorCommands } from "@/react/hooks";
+import { useEditorCommands, useOverlayCloseDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/toolbar/ColorPopoverPicker";
 import {
   Popover,
@@ -35,6 +35,8 @@ interface BubbleMenuProps {
   textColorOptions: ColorOption[];
   highlightColorOptions: ColorOption[];
   portalContainer?: HTMLElement | null;
+  isInsideOverlayContainer?: (target: EventTarget | null) => boolean;
+  onOverlayCloseOutside?: () => void;
 }
 
 /** 判断 mousedown 事件是否来自 BubbleMenu 的颜色面板内容。 */
@@ -49,6 +51,8 @@ const BubbleMenu = ({
   textColorOptions = config.TEXT_COLORS,
   highlightColorOptions = config.HIGHLIGHT_COLORS,
   portalContainer,
+  isInsideOverlayContainer,
+  onOverlayCloseOutside,
 }: BubbleMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<
     "text" | "highlight" | null
@@ -62,6 +66,46 @@ const BubbleMenu = ({
     if (editor.isDestroyed) return;
     editor.commands.focus();
   };
+
+  /** 管理“高亮颜色弹层”关闭后的焦点分流。 */
+  const { handleOpenChange: handleHighlightColorPickerOpenChange } =
+    useOverlayCloseDispatcher({
+      isOpen: showColorPicker === "highlight",
+      setOpen: (open) => {
+        if (open) {
+          setShowMoreMenu(false);
+          setShowColorPicker("highlight");
+          return;
+        }
+        if (showColorPicker === "highlight") {
+          setShowColorPicker(null);
+        }
+      },
+      onCloseInside: focusEditorAfterColorPopoverClose,
+      onCloseOutside: onOverlayCloseOutside,
+      isInsideContainer: isInsideOverlayContainer,
+      closeDelay: "raf",
+    });
+
+  /** 管理“文字颜色弹层”关闭后的焦点分流。 */
+  const { handleOpenChange: handleTextColorPickerOpenChange } =
+    useOverlayCloseDispatcher({
+      isOpen: showColorPicker === "text",
+      setOpen: (open) => {
+        if (open) {
+          setShowMoreMenu(false);
+          setShowColorPicker("text");
+          return;
+        }
+        if (showColorPicker === "text") {
+          setShowColorPicker(null);
+        }
+      },
+      onCloseInside: focusEditorAfterColorPopoverClose,
+      onCloseOutside: onOverlayCloseOutside,
+      isInsideContainer: isInsideOverlayContainer,
+      closeDelay: "raf",
+    });
 
   const onTextColorSelect = (color: string) => {
     const current = (editor.getAttributes("textStyle").color ?? "")
@@ -183,17 +227,7 @@ const BubbleMenu = ({
           selectedColor={editor.getAttributes("highlight").color}
           active={editor.isActive("highlight")}
           open={showColorPicker === "highlight"}
-          onOpenChange={(open) => {
-            if (open) {
-              setShowMoreMenu(false);
-              setShowColorPicker("highlight");
-              return;
-            }
-            if (showColorPicker === "highlight") {
-              setShowColorPicker(null);
-              focusEditorAfterColorPopoverClose();
-            }
-          }}
+          onOpenChange={handleHighlightColorPickerOpenChange}
           onColorSelect={onHighlightColorSelect}
           locale={locale}
           portalContainer={portalContainer}
@@ -209,17 +243,7 @@ const BubbleMenu = ({
           selectedColor={editor.getAttributes("textStyle").color}
           active={!!editor.getAttributes("textStyle").color}
           open={showColorPicker === "text"}
-          onOpenChange={(open) => {
-            if (open) {
-              setShowMoreMenu(false);
-              setShowColorPicker("text");
-              return;
-            }
-            if (showColorPicker === "text") {
-              setShowColorPicker(null);
-              focusEditorAfterColorPopoverClose();
-            }
-          }}
+          onOpenChange={handleTextColorPickerOpenChange}
           onColorSelect={onTextColorSelect}
           locale={locale}
           portalContainer={portalContainer}

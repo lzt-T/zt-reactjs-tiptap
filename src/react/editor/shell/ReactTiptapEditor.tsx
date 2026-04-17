@@ -373,6 +373,8 @@ const ReactTiptapEditor = ({
         resolvedCodeBlockLanguages={resolvedConfig.resolvedCodeBlockLanguages}
         textColorOptions={textColorOptions}
         highlightColorOptions={highlightColorOptions}
+        isInsideOverlayContainer={focusController.isInsideEditorContainer}
+        onOverlayCloseOutside={focusController.finalizeBlurFromOverlayClose}
         resolvedDefaultCodeBlockLanguage={
           resolvedConfig.resolvedDefaultCodeBlockLanguage
         }

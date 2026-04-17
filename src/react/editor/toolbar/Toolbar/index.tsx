@@ -2,14 +2,13 @@ import {
   Fragment,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type MouseEvent,
 } from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
 import { Highlighter, Palette } from "lucide-react";
-import { useEditorCommands } from "@/react/hooks";
+import { useEditorCommands, useOverlayCloseDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
 import ColorPopoverPicker from "@/react/editor/toolbar/ColorPopoverPicker";
@@ -46,6 +45,8 @@ const Toolbar = ({
   textColorOptions,
   highlightColorOptions,
   portalContainer,
+  isInsideOverlayContainer,
+  onOverlayCloseOutside,
 }: ToolbarProps) => {
   /** 选区/内容变化时自增，用于让工具栏根据当前选区重新计算 isActive 并重渲染 */
   const [selectionKey, setSelectionKey] = useState(0);
@@ -59,21 +60,53 @@ const Toolbar = ({
     setShowTableSizePicker,
   } = useToolbarUIState({ isEditorFocused });
 
-  // 编辑器聚焦状态引用，供异步回调读取最新值，避免闭包拿到旧值。
-  const isEditorFocusedRef = useRef(isEditorFocused);
-  useEffect(() => {
-    isEditorFocusedRef.current = isEditorFocused;
-  }, [isEditorFocused]);
-
   /** 颜色弹层关闭后回焦编辑器，避免关闭后焦点丢失。 */
   const focusEditorAfterColorPopoverClose = () => {
-    // 仅在编辑器处于聚焦态时回焦，避免失焦场景被强制抢焦点。
-    if (!isEditorFocusedRef.current) return;
-    requestAnimationFrame(() => {
-      if (editor.isDestroyed) return;
-      editor.commands.focus();
-    });
+    if (editor.isDestroyed) return;
+    editor.commands.focus();
   };
+
+  /** 管理“高亮颜色弹层”关闭后的焦点分流。 */
+  const { handleOpenChange: handleHighlightColorPickerOpenChange } =
+    useOverlayCloseDispatcher({
+      isOpen: showColorPicker === "highlight",
+      setOpen: (open) => {
+        if (open) {
+          setShowHeadingMenu(false);
+          setShowTableSizePicker(false);
+          setShowColorPicker("highlight");
+          return;
+        }
+        if (showColorPicker === "highlight") {
+          setShowColorPicker(null);
+        }
+      },
+      onCloseInside: focusEditorAfterColorPopoverClose,
+      onCloseOutside: onOverlayCloseOutside,
+      isInsideContainer: isInsideOverlayContainer,
+      closeDelay: "raf",
+    });
+
+  /** 管理“文字颜色弹层”关闭后的焦点分流。 */
+  const { handleOpenChange: handleTextColorPickerOpenChange } =
+    useOverlayCloseDispatcher({
+      isOpen: showColorPicker === "text",
+      setOpen: (open) => {
+        if (open) {
+          setShowHeadingMenu(false);
+          setShowTableSizePicker(false);
+          setShowColorPicker("text");
+          return;
+        }
+        if (showColorPicker === "text") {
+          setShowColorPicker(null);
+        }
+      },
+      onCloseInside: focusEditorAfterColorPopoverClose,
+      onCloseOutside: onOverlayCloseOutside,
+      isInsideContainer: isInsideOverlayContainer,
+      closeDelay: "raf",
+    });
 
   /**
    * 是否聚焦在公式/图片节点内（此时禁用格式/块级操作按钮）。
@@ -275,18 +308,7 @@ const Toolbar = ({
           active={showActiveState && editor.isActive("highlight")}
           disabled={isColorDisabled}
           open={showColorPicker === "highlight"}
-          onOpenChange={(open) => {
-            if (open) {
-              setShowHeadingMenu(false);
-              setShowTableSizePicker(false);
-              setShowColorPicker("highlight");
-              return;
-            }
-            if (showColorPicker === "highlight") {
-              setShowColorPicker(null);
-              focusEditorAfterColorPopoverClose();
-            }
-          }}
+          onOpenChange={handleHighlightColorPickerOpenChange}
           onColorSelect={onHighlightColorSelect}
           locale={locale}
           portalContainer={portalContainer}
@@ -307,18 +329,7 @@ const Toolbar = ({
           active={showActiveState && !!editor.getAttributes("textStyle").color}
           disabled={isColorDisabled}
           open={showColorPicker === "text"}
-          onOpenChange={(open) => {
-            if (open) {
-              setShowHeadingMenu(false);
-              setShowTableSizePicker(false);
-              setShowColorPicker("text");
-              return;
-            }
-            if (showColorPicker === "text") {
-              setShowColorPicker(null);
-              focusEditorAfterColorPopoverClose();
-            }
-          }}
+          onOpenChange={handleTextColorPickerOpenChange}
           onColorSelect={onTextColorSelect}
           locale={locale}
           portalContainer={portalContainer}

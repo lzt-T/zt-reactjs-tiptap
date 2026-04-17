@@ -39,6 +39,8 @@ interface EditorSurfaceProps {
   resolvedCodeBlockLanguages: CodeBlockLanguageOption[];
   textColorOptions: ColorOption[];
   highlightColorOptions: ColorOption[];
+  isInsideOverlayContainer?: (target: EventTarget | null) => boolean;
+  onOverlayCloseOutside?: () => void;
   resolvedDefaultCodeBlockLanguage: string;
   resolvedPlaceholder: string;
   onCodeBlockFormat?: (payload: {
@@ -88,6 +90,8 @@ export default function EditorSurface({
   resolvedCodeBlockLanguages,
   textColorOptions,
   highlightColorOptions,
+  isInsideOverlayContainer,
+  onOverlayCloseOutside,
   resolvedDefaultCodeBlockLanguage,
   resolvedPlaceholder,
   onCodeBlockFormat,
@@ -122,7 +126,8 @@ export default function EditorSurface({
           textColorOptions={textColorOptions}
           highlightColorOptions={highlightColorOptions}
           portalContainer={portalContainer}
-          onPopoverOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
+          isInsideOverlayContainer={isInsideOverlayContainer}
+          onOverlayCloseOutside={onOverlayCloseOutside}
         />
       )}
       <div
@@ -169,6 +174,8 @@ export default function EditorSurface({
             textColorOptions={textColorOptions}
             highlightColorOptions={highlightColorOptions}
             portalContainer={portalContainer}
+            isInsideOverlayContainer={isInsideOverlayContainer}
+            onOverlayCloseOutside={onOverlayCloseOutside}
           />
         )}
         {isNotionLike &&

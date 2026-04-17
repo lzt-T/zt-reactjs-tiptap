@@ -105,6 +105,20 @@ export function useHeadlessFocusController({
     [finalizeBlurIfNeeded],
   );
 
+  /** 判定事件目标是否位于编辑器容器内。 */
+  const isInsideEditorContainer = useCallback(
+    (target: EventTarget | null) => {
+      if (!(target instanceof Node)) return false;
+      return Boolean(containerRef.current?.contains(target));
+    },
+    [containerRef],
+  );
+
+  /** 弹层关闭且焦点在容器外时，执行统一 blur 收口。 */
+  const finalizeBlurFromOverlayClose = useCallback(() => {
+    finalizeBlurIfNeeded(editor?.isFocused ?? false);
+  }, [editor, finalizeBlurIfNeeded]);
+
   useEffect(() => {
     if (!editor) return;
 
@@ -220,5 +234,7 @@ export function useHeadlessFocusController({
     showCodeBlockLanguageMenu,
     setCodeBlockLanguageMenuRoot,
     syncFocusStateAfterMenuClose,
+    isInsideEditorContainer,
+    finalizeBlurFromOverlayClose,
   };
 }
