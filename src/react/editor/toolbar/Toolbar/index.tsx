@@ -1,4 +1,11 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
 import { Highlighter, Palette } from "lucide-react";
@@ -20,6 +27,12 @@ import type {
 } from "./types";
 import { useToolbarUIState } from "./hooks/useToolbarUIState";
 import "./Toolbar.css";
+
+/** 判断 mousedown 事件是否来自颜色面板内容。 */
+function isFromColorPopoverContent(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest(".color-picker"));
+}
 
 const Toolbar = ({
   editor,
@@ -45,6 +58,22 @@ const Toolbar = ({
     showTableSizePicker,
     setShowTableSizePicker,
   } = useToolbarUIState({ isEditorFocused });
+
+  // 编辑器聚焦状态引用，供异步回调读取最新值，避免闭包拿到旧值。
+  const isEditorFocusedRef = useRef(isEditorFocused);
+  useEffect(() => {
+    isEditorFocusedRef.current = isEditorFocused;
+  }, [isEditorFocused]);
+
+  /** 颜色弹层关闭后回焦编辑器，避免关闭后焦点丢失。 */
+  const focusEditorAfterColorPopoverClose = () => {
+    // 仅在编辑器处于聚焦态时回焦，避免失焦场景被强制抢焦点。
+    if (!isEditorFocusedRef.current) return;
+    requestAnimationFrame(() => {
+      if (editor.isDestroyed) return;
+      editor.commands.focus();
+    });
+  };
 
   /**
    * 是否聚焦在公式/图片节点内（此时禁用格式/块级操作按钮）。
@@ -255,6 +284,7 @@ const Toolbar = ({
             }
             if (showColorPicker === "highlight") {
               setShowColorPicker(null);
+              focusEditorAfterColorPopoverClose();
             }
           }}
           onColorSelect={onHighlightColorSelect}
@@ -286,6 +316,7 @@ const Toolbar = ({
             }
             if (showColorPicker === "text") {
               setShowColorPicker(null);
+              focusEditorAfterColorPopoverClose();
             }
           }}
           onColorSelect={onTextColorSelect}
@@ -391,11 +422,17 @@ const Toolbar = ({
     return item.element;
   };
 
+  /** Toolbar 根层仅拦截非颜色弹层区域，避免输入控件被取消聚焦。 */
+  const handleToolbarMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (isFromColorPopoverContent(event.target)) return;
+    event.preventDefault();
+  };
+
   return (
     <div
       className="editor-toolbar"
       data-selection-key={selectionKey}
-      onMouseDown={(e) => e.preventDefault()}
+      onMouseDown={handleToolbarMouseDown}
     >
       <div className="editor-toolbar-inner">
         {renderedItems.map((item, index) => {

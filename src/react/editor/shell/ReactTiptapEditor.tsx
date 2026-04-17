@@ -357,11 +357,7 @@ const ReactTiptapEditor = ({
       : undefined;
 
   return (
-    <div
-      ref={containerRef}
-      className={containerClassName}
-      style={containerStyle}
-    >
+    <div ref={containerRef} className={containerClassName} style={containerStyle}>
       <EditorSurface
         editor={editor}
         disabled={disabled}

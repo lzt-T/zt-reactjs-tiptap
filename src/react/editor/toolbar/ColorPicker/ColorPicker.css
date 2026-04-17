@@ -1,43 +1,45 @@
 .color-picker {
-  background: var(--ui-text-inverse);
-  border-radius: 8px;
+  background: var(--ui-bg-panel);
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
   padding: 12px;
-  min-width: 200px;
-  box-shadow: 0 4px 16px var(--ui-scrollbar-thumb-hover);
+  width: 214px;
+  box-sizing: border-box;
+  box-shadow: var(--ui-shadow-popover);
+  display: grid;
+  gap: 10px;
 }
 
 .color-picker-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
 }
 
 .color-picker-swatch {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 2px solid var(--ui-border-muted);
   outline: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   padding: 0;
 }
 
 .color-picker-swatch:hover {
-  transform: scale(1.05);
+  transform: translateY(-1px);
   border-color: var(--ui-control-active);
   box-shadow: 0 2px 8px color-mix(in oklch, var(--ui-control-active) 30%, transparent);
 }
 
-/* 当前选中/使用中的颜色：细蓝色描边 */
 .color-picker-swatch--selected {
   border-color: var(--ui-control-active);
-  box-shadow: 0 0 0 1px var(--ui-control-active);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ui-control-active) 25%, transparent);
 }
 
 .color-picker-swatch--transparent {
-  background: var(--ui-text-inverse);
+  background: var(--ui-bg-panel);
   position: relative;
   overflow: hidden;
 }
@@ -57,61 +59,87 @@
 
 .color-picker-custom-btn {
   width: 100%;
-  padding: 6px 12px;
-  background: var(--ui-bg-muted);
+  height: 100%;
+  box-sizing: border-box;
+  padding: 7px 12px;
+  background: var(--ui-bg-subtle);
   border: 1px solid var(--ui-border-muted);
   outline: none;
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--ui-text-muted-strong);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   text-align: center;
 }
 
 .color-picker-custom-btn:hover {
-  background: var(--ui-bg-subtle);
-  border-color: var(--ui-border-strong);
+  background: var(--ui-bg-hover-soft);
+  border-color: var(--ui-border-selected);
+  color: var(--ui-text-strong);
+}
+
+.color-picker-custom-slot {
+  width: 100%;
+  height: 52px;
+  box-sizing: border-box;
 }
 
 .color-picker-custom {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   padding: 8px;
-  background: var(--ui-bg-muted);
-  border-radius: 6px;
+  background: var(--ui-bg-subtle);
+  border: 1px solid var(--ui-border-muted);
+  border-radius: 8px;
+}
+
+.color-picker-custom-preview {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-border-strong);
+  background: repeating-conic-gradient(
+    from 45deg,
+    var(--ui-bg-muted) 0% 25%,
+    var(--ui-bg-hover-soft) 0% 50%
+  ) 50% / 8px 8px;
+  flex-shrink: 0;
 }
 
 .color-picker-input {
   flex: 1;
-  height: 32px;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  background: var(--ui-bg-panel);
   border: 1px solid var(--ui-border-muted);
   outline: none;
-  border-radius: 4px;
-  cursor: pointer;
+  border-radius: 7px;
+  color: var(--ui-text-strong);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.color-picker-close-btn {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: var(--ui-danger-soft);
-  border: none;
-  outline: none;
-  border-radius: 4px;
-  color: var(--ui-text-inverse);
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
+.color-picker-input::placeholder {
+  color: var(--ui-text-placeholder);
 }
 
-.color-picker-close-btn:hover {
-  background: var(--ui-danger);
+.color-picker-input:focus {
+  border-color: var(--ui-border-selected);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ui-control-active) 18%, transparent);
 }
 
+.color-picker-input.is-invalid {
+  border-color: var(--ui-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ui-danger) 14%, transparent);
+}
 

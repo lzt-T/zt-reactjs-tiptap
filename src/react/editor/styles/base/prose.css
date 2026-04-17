@@ -177,6 +177,24 @@
     margin-bottom: 0;
 }
 
+/* 编辑器文本选区镜像高亮。 */
+.editor-wrapper .ProseMirror .zt-selection-mirror {
+    background: color-mix(in oklch, var(--ui-control-active) 28%, transparent);
+    border-radius: 2px;
+}
+
+/* 隐藏编辑器内浏览器默认选区高亮，统一交由镜像样式显示。 */
+.editor-wrapper .ProseMirror ::selection {
+    background: transparent;
+    color: inherit;
+}
+
+/* Firefox 兼容：隐藏默认选区高亮。 */
+.editor-wrapper .ProseMirror ::-moz-selection {
+    background: transparent;
+    color: inherit;
+}
+
 /* Focus outline for blocks */
 .editor-wrapper .ProseMirror [data-node-view-wrapper] {
     outline: none;

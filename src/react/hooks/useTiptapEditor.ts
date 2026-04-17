@@ -23,6 +23,7 @@ import TaskItem from "@tiptap/extension-task-item";
 import Mathematics from "@tiptap/extension-mathematics";
 import { createCodeBlockLowlightExtension } from "@/core/extensions/codeBlockLowlight";
 import { SlashCommands } from "@/core/extensions/SlashCommands";
+import { SelectionMirror } from "@/core/extensions/SelectionMirror";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import { TableBackspaceHandler } from "@/core/extensions/TableBackspaceHandler";
 import { CodeBlockKeyboardHandler } from "@/core/extensions/CodeBlockKeyboardHandler";
@@ -179,6 +180,7 @@ export function useTiptapEditor({
       Placeholder.configure({
         placeholder,
       }),
+      SelectionMirror,
       Mathematics.configure({
         inlineOptions: {
           onClick: onInlineMathClick,

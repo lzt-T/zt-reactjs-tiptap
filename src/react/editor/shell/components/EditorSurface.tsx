@@ -169,7 +169,6 @@ export default function EditorSurface({
             textColorOptions={textColorOptions}
             highlightColorOptions={highlightColorOptions}
             portalContainer={portalContainer}
-            onPopoverOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
           />
         )}
         {isNotionLike &&

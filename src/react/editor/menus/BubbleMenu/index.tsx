@@ -1,7 +1,7 @@
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
-import { useState } from "react";
+import {  useState, type MouseEvent } from "react";
 import { config, type ColorOption } from "@/shared/config";
 import {
   Bold,
@@ -35,8 +35,12 @@ interface BubbleMenuProps {
   textColorOptions: ColorOption[];
   highlightColorOptions: ColorOption[];
   portalContainer?: HTMLElement | null;
-  /** BubbleMenu 内 Popover 开关状态校验回调（关闭后用于补齐 blur 链路）。 */
-  onPopoverOpenStateChecked?: (editorFocused: boolean) => void;
+}
+
+/** 判断 mousedown 事件是否来自 BubbleMenu 的颜色面板内容。 */
+function isFromColorPopoverContent(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest(".color-picker"));
 }
 
 const BubbleMenu = ({
@@ -53,8 +57,16 @@ const BubbleMenu = ({
 
   const { format } = useEditorCommands(editor, {});
 
+  /** 颜色弹层关闭后回焦编辑器，避免关闭后焦点丢失。 */
+  const focusEditorAfterColorPopoverClose = () => {
+    if (editor.isDestroyed) return;
+    editor.commands.focus();
+  };
+
   const onTextColorSelect = (color: string) => {
-    const current = (editor.getAttributes("textStyle").color ?? "").trim().toLowerCase();
+    const current = (editor.getAttributes("textStyle").color ?? "")
+      .trim()
+      .toLowerCase();
     if (current && color.trim().toLowerCase() === current) {
       format.unsetColor();
     } else {
@@ -66,7 +78,9 @@ const BubbleMenu = ({
     if (color === "") {
       format.unsetHighlight();
     } else {
-      const current = (editor.getAttributes("highlight").color ?? "").trim().toLowerCase();
+      const current = (editor.getAttributes("highlight").color ?? "")
+        .trim()
+        .toLowerCase();
       if (current === color.trim().toLowerCase()) {
         format.unsetHighlight();
       } else {
@@ -79,12 +93,18 @@ const BubbleMenu = ({
     return null;
   }
 
+  /** BubbleMenu 根层仅拦截非颜色弹层区域，避免输入控件被取消聚焦。 */
+  const handleBubbleMenuMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (isFromColorPopoverContent(event.target)) return;
+    event.preventDefault();
+  };
+
   return (
     <>
       <TiptapBubbleMenu
         editor={editor}
         className="bubble-menu"
-        onMouseDown={(event) => event.preventDefault()}
+        onMouseDown={handleBubbleMenuMouseDown}
         shouldShow={({ state }) => {
           // 颜色 Popover 打开时保活锚点，关闭后立即回到选区驱动显示逻辑。
           if (showColorPicker !== null) return true;
@@ -92,7 +112,7 @@ const BubbleMenu = ({
           // NodeSelection（图片、公式、整个表格节点等）不显示
           if (selection instanceof NodeSelection) return false;
           // CellSelection（表格多单元格选中）不显示，$anchorCell 是 CellSelection 的专有属性
-          if ('$anchorCell' in selection) return false;
+          if ("$anchorCell" in selection) return false;
           // 代码块内不显示气泡菜单（NotionLike 模式下避免与代码语言菜单重叠）
           if (editor.isActive("codeBlock")) return false;
           return !selection.empty;
@@ -100,35 +120,55 @@ const BubbleMenu = ({
       >
         <button
           onClick={() => format.toggleBold()}
-          className={editor.isActive("bold") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+          className={
+            editor.isActive("bold")
+              ? "bubble-menu-btn is-active"
+              : "bubble-menu-btn"
+          }
           title={locale.bubbleMenu.bold}
         >
           <Bold size={16} />
         </button>
         <button
           onClick={() => format.toggleItalic()}
-          className={editor.isActive("italic") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+          className={
+            editor.isActive("italic")
+              ? "bubble-menu-btn is-active"
+              : "bubble-menu-btn"
+          }
           title={locale.bubbleMenu.italic}
         >
           <Italic size={16} />
         </button>
         <button
           onClick={() => format.toggleUnderline()}
-          className={editor.isActive("underline") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+          className={
+            editor.isActive("underline")
+              ? "bubble-menu-btn is-active"
+              : "bubble-menu-btn"
+          }
           title={locale.bubbleMenu.underline}
         >
           <Underline size={16} />
         </button>
         <button
           onClick={() => format.toggleStrike()}
-          className={editor.isActive("strike") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+          className={
+            editor.isActive("strike")
+              ? "bubble-menu-btn is-active"
+              : "bubble-menu-btn"
+          }
           title={locale.bubbleMenu.strikethrough}
         >
           <Strikethrough size={16} />
         </button>
         <button
           onClick={() => format.toggleCode()}
-          className={editor.isActive("code") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+          className={
+            editor.isActive("code")
+              ? "bubble-menu-btn is-active"
+              : "bubble-menu-btn"
+          }
           title={locale.bubbleMenu.inlineCode}
         >
           <Code size={16} />
@@ -151,6 +191,7 @@ const BubbleMenu = ({
             }
             if (showColorPicker === "highlight") {
               setShowColorPicker(null);
+              focusEditorAfterColorPopoverClose();
             }
           }}
           onColorSelect={onHighlightColorSelect}
@@ -176,6 +217,7 @@ const BubbleMenu = ({
             }
             if (showColorPicker === "text") {
               setShowColorPicker(null);
+              focusEditorAfterColorPopoverClose();
             }
           }}
           onColorSelect={onTextColorSelect}
@@ -196,7 +238,9 @@ const BubbleMenu = ({
         >
           <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
             <button
-              className={showMoreMenu ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+              className={
+                showMoreMenu ? "bubble-menu-btn is-active" : "bubble-menu-btn"
+              }
               title={locale.bubbleMenu.more}
             >
               <MoreHorizontal size={16} />
@@ -219,7 +263,11 @@ const BubbleMenu = ({
                   format.toggleSuperscript();
                   setShowMoreMenu(false);
                 }}
-                className={editor.isActive("superscript") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+                className={
+                  editor.isActive("superscript")
+                    ? "bubble-menu-btn is-active"
+                    : "bubble-menu-btn"
+                }
                 title={locale.bubbleMenu.superscript}
               >
                 <Superscript size={16} />
@@ -229,7 +277,11 @@ const BubbleMenu = ({
                   format.toggleSubscript();
                   setShowMoreMenu(false);
                 }}
-                className={editor.isActive("subscript") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
+                className={
+                  editor.isActive("subscript")
+                    ? "bubble-menu-btn is-active"
+                    : "bubble-menu-btn"
+                }
                 title={locale.bubbleMenu.subscript}
               >
                 <Subscript size={16} />

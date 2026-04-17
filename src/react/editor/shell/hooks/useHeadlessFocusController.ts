@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import { Selection } from "@tiptap/pm/state";
 import type { Editor } from "@tiptap/react";
 import { HeadlessToolbarMode } from "@/react/editor/types";
 
@@ -48,8 +49,7 @@ export function useHeadlessFocusController({
 
   useEffect(() => {
     isEditorFocusedRef.current = isEditorFocused;
-    console.log(isEditorFocused,'isEditorFocused');
-    
+    console.log("Editor focus state changed:", isEditorFocused);
   }, [isEditorFocused]);
 
   /** 保存代码语言菜单根节点，用于 blur 命中判断。 */
@@ -76,7 +76,19 @@ export function useHeadlessFocusController({
       if (!editor || editorFocused || hasBlurFinalizedRef.current) return;
       if (isInsideLanguageMenu(document.activeElement)) return;
       hasBlurFinalizedRef.current = true;
-      // 清除浏览器可见选区高亮，不改动 TipTap 内部 selection。
+      // 失焦时清空范围选区：将非空选区折叠到原选区起点。
+      const selection = editor.state.selection;
+      if (!selection.empty) {
+        // 以 from 为锚点折叠，保证失焦后再次聚焦不恢复原范围选中。
+        const collapsedSelection = Selection.near(
+          editor.state.doc.resolve(selection.from),
+          1,
+        );
+        // 派发一次事务同步新的折叠选区。
+        const tr = editor.state.tr.setSelection(collapsedSelection);
+        editor.view.dispatch(tr);
+      }
+      // 清除浏览器可见选区高亮，避免原生蓝色选中残留。
       window.getSelection()?.removeAllRanges();
       setIsEditorFocused(false);
       setIsEditorFocusStable(false);

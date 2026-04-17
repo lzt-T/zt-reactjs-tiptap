@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import type { ColorOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import { cn } from "@/shared/utils/utils";
@@ -24,6 +24,16 @@ interface ColorPopoverPickerProps {
   portalContainer?: HTMLElement | null;
   popoverClassName?: string;
   triggerClassName?: string;
+}
+
+/** 判断当前按下目标是否为可交互元素。 */
+function isInteractiveMouseTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  return Boolean(
+    target.closest(
+      'input, textarea, select, button, label, [contenteditable="true"]',
+    ),
+  );
 }
 
 /** 图标触发器 + 颜色面板的一体化组件。 */
@@ -55,6 +65,12 @@ export default function ColorPopoverPicker({
     onOpenChange(false);
   };
 
+  /** 仅在非交互区域阻止默认行为，避免输入控件无法聚焦。 */
+  const handleContentMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (isInteractiveMouseTarget(event.target)) return;
+    event.preventDefault();
+  };
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild onMouseDown={(event) => event.preventDefault()}>
@@ -77,7 +93,7 @@ export default function ColorPopoverPicker({
         align="start"
         sideOffset={8}
         className={popoverClassName}
-        onMouseDown={(event) => event.preventDefault()}
+        onMouseDown={handleContentMouseDown}
         onOpenAutoFocus={(event) => event.preventDefault()}
         // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
         onCloseAutoFocus={(event) => event.preventDefault()}
