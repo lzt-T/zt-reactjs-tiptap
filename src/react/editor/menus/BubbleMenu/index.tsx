@@ -1,7 +1,7 @@
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Bold,
   Italic,
@@ -42,45 +42,14 @@ const BubbleMenu = ({
   portalContainer,
   onPopoverOpenStateChecked,
 }: BubbleMenuProps) => {
-  // 颜色面板关闭保活时长（ms）：覆盖 Popover 关闭动画时间，避免锚点提前卸载。
-  const COLOR_PICKER_CLOSE_ANIMATION_MS = 220;
   const [showColorPicker, setShowColorPicker] = useState<
     "text" | "highlight" | null
   >(null);
-  // 颜色面板关闭过渡态：在关闭动画期间强制保活 BubbleMenu 锚点。
-  const [isColorPickerClosing, setIsColorPickerClosing] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
-  // 颜色面板关闭过渡态定时器 id（仅保留一个，避免旧 timer 干扰）。
-  const closeColorPickerTimerRef = useRef<number | null>(null);
   // 当前 Popover 关闭是否需要触发焦点校验回调。
   const shouldNotifyOnCloseRef = useRef(true);
 
   const { format } = useEditorCommands(editor, {});
-
-  /** 清理颜色面板延迟关闭定时器。 */
-  const clearCloseColorPickerTimer = () => {
-    if (closeColorPickerTimerRef.current === null) return;
-    window.clearTimeout(closeColorPickerTimerRef.current);
-    closeColorPickerTimerRef.current = null;
-  };
-
-  /** 触发颜色面板关闭：先关闭 Popover，再保活锚点直到关闭动画结束。 */
-  const closeColorPickerWithAnimation = () => {
-    clearCloseColorPickerTimer();
-    setShowColorPicker(null);
-    setIsColorPickerClosing(true);
-    closeColorPickerTimerRef.current = window.setTimeout(() => {
-      setIsColorPickerClosing(false);
-      closeColorPickerTimerRef.current = null;
-    }, COLOR_PICKER_CLOSE_ANIMATION_MS);
-  };
-
-  /** 组件卸载时清理定时器，避免卸载后触发状态更新。 */
-  useEffect(() => {
-    return () => {
-      clearCloseColorPickerTimer();
-    };
-  }, []);
 
   const onTextColorSelect = (color: string) => {
     const current = (editor.getAttributes("textStyle").color ?? "").trim().toLowerCase();
@@ -89,7 +58,7 @@ const BubbleMenu = ({
     } else {
       format.setColor(color);
     }
-    closeColorPickerWithAnimation();
+    setShowColorPicker(null);
   };
 
   const onHighlightColorSelect = (color: string) => {
@@ -103,7 +72,7 @@ const BubbleMenu = ({
         format.setHighlight(color);
       }
     }
-    closeColorPickerWithAnimation();
+    setShowColorPicker(null);
   };
 
   /** 判断关闭来源目标是否来自气泡菜单内部。 */
@@ -149,8 +118,8 @@ const BubbleMenu = ({
         className="bubble-menu"
         onMouseDown={(event) => event.preventDefault()}
         shouldShow={({ state }) => {
-          // 颜色 Popover 关闭动画阶段保活锚点，避免浮层回落到左上角。
-          if (showColorPicker !== null || isColorPickerClosing) return true;
+          // 颜色 Popover 打开时保活锚点，关闭后立即回到选区驱动显示逻辑。
+          if (showColorPicker !== null) return true;
           const { selection } = state;
           // NodeSelection（图片、公式、整个表格节点等）不显示
           if (selection instanceof NodeSelection) return false;
@@ -203,14 +172,10 @@ const BubbleMenu = ({
           onOpenChange={(open) => {
             if (open) {
               shouldNotifyOnCloseRef.current = true;
-              clearCloseColorPickerTimer();
-              setIsColorPickerClosing(false);
               setShowMoreMenu(false);
               setShowColorPicker("highlight");
               return;
             }
-            clearCloseColorPickerTimer();
-            setIsColorPickerClosing(false);
             if (showColorPicker === "highlight") {
               setShowColorPicker(null);
             }
@@ -251,14 +216,10 @@ const BubbleMenu = ({
           onOpenChange={(open) => {
             if (open) {
               shouldNotifyOnCloseRef.current = true;
-              clearCloseColorPickerTimer();
-              setIsColorPickerClosing(false);
               setShowMoreMenu(false);
               setShowColorPicker("text");
               return;
             }
-            clearCloseColorPickerTimer();
-            setIsColorPickerClosing(false);
             if (showColorPicker === "text") {
               setShowColorPicker(null);
             }

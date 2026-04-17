@@ -58,19 +58,14 @@ export function useEditorCommands(
   } = options;
 
   /**
-   * 执行行内格式命令（加粗、斜体等）的包装：先执行命令，再在「有选区」时把光标拉回选区末尾，
-   * 避免点击工具栏后选区消失或光标乱跳。
-   * 仅当 from !== to 时才恢复选区；若为纯光标（from === to）则不调 setTextSelection，
-   * 否则会多一次 transaction，把 toggleMark 写入的 storedMarks 冲掉，导致后续输入不带格式。
+   * 执行行内格式命令（加粗、斜体等）的统一入口。
+   * 保留 TipTap/ProseMirror 原生选区，不在命令后额外调用 setTextSelection，
+   * 以支持 BubbleMenu/Toolbar 在同一选区上连续操作。
    */
   const runFormat = useCallback(
     (fn: () => void) => {
       if (!editor) return;
-      const { from, to } = editor.state.selection;
       fn();
-      if (from !== to) {
-        editor.commands.setTextSelection(to);
-      }
     },
     [editor]
   );
