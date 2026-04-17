@@ -150,7 +150,8 @@ export interface TiptapEditorProps {
 
   /**
    * 编辑器主题，仅支持浅色与深色。
-   * @default 'light'
+   * 不传时自动跟随 html.dark；若未命中则回落为 light。
+   * @default 自动跟随 html.dark（无 dark 时为 light）
    */
   theme?: EditorTheme
 

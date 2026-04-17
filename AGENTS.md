@@ -105,7 +105,7 @@ examples/
 - 库输出中不要把编辑器主题变量放到全局 `:root`。
 - 编辑器根节点必须包含 `.zt-tiptap-theme` 与 `text-foreground`。
 - Dialog/Modal 的 Portal 必须挂在编辑器容器内（通过 `portalContainer`），不要挂到 `document.body`。
-- 暗色模式需与 `html.dark` 状态保持同步。
+- 未传 `theme` 时，暗色模式需与 `html.dark` 状态保持同步；显式传入 `theme` 时以传入值为准。
 - 若改动隔离策略，必须同步更新 README 的“样式系统”说明。
 
 ## 7. TipTap 能力说明（维护视角）

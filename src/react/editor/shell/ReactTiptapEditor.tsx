@@ -38,6 +38,23 @@ import { useSlashMenuFocusSync } from "@/react/editor/shell/hooks/useSlashMenuFo
 import EditorSurface from "@/react/editor/shell/components/EditorSurface";
 import EditorDialogs from "@/react/editor/shell/components/EditorDialogs";
 
+/**
+ * 解析编辑器主题。
+ * 规则：优先使用显式 theme；未传时仅看 html.dark，无 dark 时回落为 light。
+ */
+function resolveEditorTheme(theme?: EditorTheme): EditorTheme {
+  // 显式传入主题时直接使用。
+  if (theme) return theme;
+  // 读取宿主 html.dark。
+  const hasHtmlDarkClass =
+    typeof document !== "undefined" &&
+    document.documentElement.classList.contains("dark");
+  // 未传 theme 时，仅跟随 html.dark。
+  if (hasHtmlDarkClass) return EditorTheme.Dark;
+  // 默认回落浅色。
+  return EditorTheme.Light;
+}
+
 /** Headless 模式下斜杠相关回调用空函数，避免传入 SlashCommands */
 const noop = () => {};
 // 空矩形回调。
@@ -78,7 +95,7 @@ const ReactTiptapEditor = ({
   border = true,
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
-  theme = EditorTheme.Light,
+  theme,
   fileUploadTypes,
   codeBlockLanguages,
   defaultCodeBlockLanguage = DEFAULT_CODE_BLOCK_LANGUAGE,
@@ -92,6 +109,8 @@ const ReactTiptapEditor = ({
   extensions,
   editorConfigVersion,
 }: TiptapEditorProps) => {
+  // 解析后的主题：显式 theme > html.dark > light。
+  const resolvedTheme = resolveEditorTheme(theme);
   // 当前语言解析后的文案集合。
   const locale = resolveEditorLocale(language);
   // 配置解析结果：工具栏、斜杠命令、placeholder、上传类型、扩展重建依赖等。
@@ -314,7 +333,7 @@ const ReactTiptapEditor = ({
     "editor-container",
     "zt-tiptap-theme",
     "text-foreground",
-    theme === EditorTheme.Dark && "dark",
+    resolvedTheme === EditorTheme.Dark && "dark",
     disabled && "is-disabled",
     !focusController.isEditorFocused && "is-editor-blurred",
     !focusController.isEditorFocusStable && "is-editor-focus-unstable",

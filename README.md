@@ -214,6 +214,8 @@ function App() {
 }
 ```
 
+未传 `theme` 时，编辑器会自动读取宿主 `html.dark`：存在 `dark` 则为暗色，不存在则固定为 `light`。
+
 ## Props
 
 | 属性 | 类型 | 必填 | 默认值 | 说明 |
@@ -225,7 +227,7 @@ function App() {
 | `onFilePreUpload` | `(file: File) => Promise<{ url: string; name: string }>` | 否 | - | 附件预上传函数（选择/拖拽文件时触发），返回文件 URL 与展示名 |
 | `onFileUpload` | `(payload: { file: File; url: string; name: string }) => void \| Promise<void>` | 否 | - | 附件 Confirm 回调（仅在点击 Confirm/Insert Link 后触发） |
 | `editorMode` | `'notion-like' \| 'headless'` | 否 | `'notion-like'` | 编辑器模式：Notion 风格（斜杠命令、块状编辑等）或无头模式 |
-| `theme` | `'light' \| 'dark'` | 否 | `'light'` | 编辑器主题。仅由组件 `theme` 控制，不再跟随 `html.dark` |
+| `theme` | `'light' \| 'dark'` | 否 | 自动跟随 `html.dark`（无 `dark` 时为 `light`） | 编辑器主题。传入时强制使用传入值；不传时仅根据 `html.dark` 自动解析 |
 | `headlessToolbarMode` | `'always' \| 'on-focus'` | 否 | `'always'` | **仅在 `editorMode='headless'` 时生效**。`always`：工具栏始终显示；`on-focus`：编辑器聚焦或点击工具栏时显示，失焦到编辑器区域外时隐藏 |
 | `commandMenuMaxHeight` | `number` | 否 | `240` | 斜杠命令菜单最大高度（px） |
 | `commandMenuMinHeight` | `number` | 否 | `160` | 斜杠命令菜单最小高度（px） |
