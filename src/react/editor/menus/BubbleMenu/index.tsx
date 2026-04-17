@@ -1,7 +1,7 @@
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Bold,
   Italic,
@@ -40,14 +40,11 @@ const BubbleMenu = ({
   editor,
   locale,
   portalContainer,
-  onPopoverOpenStateChecked,
 }: BubbleMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<
     "text" | "highlight" | null
   >(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
-  // 当前 Popover 关闭是否需要触发焦点校验回调。
-  const shouldNotifyOnCloseRef = useRef(true);
 
   const { format } = useEditorCommands(editor, {});
 
@@ -73,38 +70,6 @@ const BubbleMenu = ({
       }
     }
     setShowColorPicker(null);
-  };
-
-  /** 判断关闭来源目标是否来自气泡菜单内部。 */
-  const isInternalMenuTarget = (target: EventTarget | null) => {
-    if (!(target instanceof Element)) return false;
-    return Boolean(target.closest(".bubble-menu-btn"));
-  };
-
-  /** 提取 Popover 外部交互的真实事件目标。 */
-  const getOutsideInteractionTarget = (event: Event) => {
-    const customEvent = event as CustomEvent<{ originalEvent?: Event }>;
-    const originalTarget = customEvent.detail?.originalEvent?.target;
-    return originalTarget ?? event.target;
-  };
-
-  /** 根据外部交互来源更新关闭通知策略。 */
-  const handlePopoverInteractOutside = (event: Event) => {
-    shouldNotifyOnCloseRef.current = !isInternalMenuTarget(
-      getOutsideInteractionTarget(event),
-    );
-  };
-
-  /** Esc 关闭始终触发关闭通知。 */
-  const handlePopoverEscapeKeyDown = () => {
-    shouldNotifyOnCloseRef.current = true;
-  };
-
-  /** Popover 关闭后延迟校验编辑器聚焦状态，必要时补触发 blur 链路。 */
-  const notifyPopoverClosed = () => {
-    requestAnimationFrame(() => {
-      onPopoverOpenStateChecked?.(editor.isFocused);
-    });
   };
 
   if (!editor) {
@@ -171,7 +136,6 @@ const BubbleMenu = ({
           open={showColorPicker === "highlight"}
           onOpenChange={(open) => {
             if (open) {
-              shouldNotifyOnCloseRef.current = true;
               setShowMoreMenu(false);
               setShowColorPicker("highlight");
               return;
@@ -179,13 +143,9 @@ const BubbleMenu = ({
             if (showColorPicker === "highlight") {
               setShowColorPicker(null);
             }
-            if (shouldNotifyOnCloseRef.current) {
-              notifyPopoverClosed();
-            }
-            shouldNotifyOnCloseRef.current = true;
           }}
         >
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
             <button
               className={editor.isActive("highlight") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
               title={locale.bubbleMenu.highlight}
@@ -199,8 +159,10 @@ const BubbleMenu = ({
             align="start"
             sideOffset={8}
             className="bubble-menu-popover-panel"
-            onInteractOutside={handlePopoverInteractOutside}
-            onEscapeKeyDown={handlePopoverEscapeKeyDown}
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <ColorPicker
               type="highlight"
@@ -215,7 +177,6 @@ const BubbleMenu = ({
           open={showColorPicker === "text"}
           onOpenChange={(open) => {
             if (open) {
-              shouldNotifyOnCloseRef.current = true;
               setShowMoreMenu(false);
               setShowColorPicker("text");
               return;
@@ -223,13 +184,9 @@ const BubbleMenu = ({
             if (showColorPicker === "text") {
               setShowColorPicker(null);
             }
-            if (shouldNotifyOnCloseRef.current) {
-              notifyPopoverClosed();
-            }
-            shouldNotifyOnCloseRef.current = true;
           }}
         >
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
             <button
               className={editor.getAttributes("textStyle").color ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
               title={locale.bubbleMenu.textColor}
@@ -243,8 +200,10 @@ const BubbleMenu = ({
             align="start"
             sideOffset={8}
             className="bubble-menu-popover-panel"
-            onInteractOutside={handlePopoverInteractOutside}
-            onEscapeKeyDown={handlePopoverEscapeKeyDown}
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <ColorPicker
               type="text"
@@ -259,19 +218,12 @@ const BubbleMenu = ({
           open={showMoreMenu}
           onOpenChange={(open) => {
             if (open) {
-              shouldNotifyOnCloseRef.current = true;
               setShowColorPicker(null);
             }
             setShowMoreMenu(open);
-            if (!open) {
-              if (shouldNotifyOnCloseRef.current) {
-                notifyPopoverClosed();
-              }
-              shouldNotifyOnCloseRef.current = true;
-            }
           }}
         >
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
             <button
               className={showMoreMenu ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
               title={locale.bubbleMenu.more}
@@ -285,8 +237,10 @@ const BubbleMenu = ({
             align="start"
             sideOffset={8}
             className="bubble-menu-popover-panel"
-            onInteractOutside={handlePopoverInteractOutside}
-            onEscapeKeyDown={handlePopoverEscapeKeyDown}
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <div className="more-menu">
               <button

@@ -407,6 +407,8 @@ const TableRowActions = ({
         className="table-row-action-menu w-auto p-1"
         onMouseDown={e => e.preventDefault()}
         onOpenAutoFocus={e => e.preventDefault()}
+        // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+        onCloseAutoFocus={e => e.preventDefault()}
       >
         <button
           type="button"

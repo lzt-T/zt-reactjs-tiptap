@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
 import { useEditorCommands } from "@/react/hooks";
@@ -30,12 +30,9 @@ const Toolbar = ({
   onOpenImageDialog,
   onOpenFileUploadDialog,
   portalContainer,
-  onPopoverOpenStateChecked,
 }: ToolbarProps) => {
   /** 选区/内容变化时自增，用于让工具栏根据当前选区重新计算 isActive 并重渲染 */
   const [selectionKey, setSelectionKey] = useState(0);
-  // 当前 Popover 关闭是否需要触发焦点校验回调。
-  const shouldNotifyOnCloseRef = useRef(true);
 
   const {
     showColorPicker,
@@ -207,38 +204,6 @@ const Toolbar = ({
     setShowTableSizePicker(false);
   };
 
-  /** 判断关闭来源目标是否来自工具栏内部。 */
-  const isInternalMenuTarget = (target: EventTarget | null) => {
-    if (!(target instanceof Element)) return false;
-    return Boolean(target.closest(".editor-toolbar-btn"));
-  };
-
-  /** 提取 Popover 外部交互的真实事件目标。 */
-  const getOutsideInteractionTarget = (event: Event) => {
-    const customEvent = event as CustomEvent<{ originalEvent?: Event }>;
-    const originalTarget = customEvent.detail?.originalEvent?.target;
-    return originalTarget ?? event.target;
-  };
-
-  /** 根据外部交互来源更新关闭通知策略。 */
-  const handlePopoverInteractOutside = (event: Event) => {
-    shouldNotifyOnCloseRef.current = !isInternalMenuTarget(
-      getOutsideInteractionTarget(event),
-    );
-  };
-
-  /** Esc 关闭始终触发关闭通知。 */
-  const handlePopoverEscapeKeyDown = () => {
-    shouldNotifyOnCloseRef.current = true;
-  };
-
-  /** Popover 关闭后延迟校验编辑器聚焦状态，必要时补触发 blur 链路。 */
-  const notifyPopoverClosed = () => {
-    requestAnimationFrame(() => {
-      onPopoverOpenStateChecked?.(editor.isFocused);
-    });
-  };
-
   const isHeadingDisabled = isFocusNodeOnly || isInsideCodeBlock;
   const isColorDisabled = isToolbarLocked || isInsideCode;
   const isInsertTableDisabled = isInsideTable || isToolbarLocked;
@@ -276,7 +241,6 @@ const Toolbar = ({
           onOpenChange={(open) => {
             if (open && isColorDisabled) return;
             if (open) {
-              shouldNotifyOnCloseRef.current = true;
               setShowHeadingMenu(false);
               setShowTableSizePicker(false);
               setShowColorPicker("highlight");
@@ -285,21 +249,21 @@ const Toolbar = ({
             if (showColorPicker === "highlight") {
               setShowColorPicker(null);
             }
-            if (shouldNotifyOnCloseRef.current) {
-              notifyPopoverClosed();
-            }
-            shouldNotifyOnCloseRef.current = true;
           }}
         >
-          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
+            {item.element}
+          </PopoverTrigger>
           <PopoverContent
             container={portalContainer ?? undefined}
             side="bottom"
             align="start"
             sideOffset={8}
             className="editor-toolbar-popover-panel"
-            onInteractOutside={handlePopoverInteractOutside}
-            onEscapeKeyDown={handlePopoverEscapeKeyDown}
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <ColorPicker
               type="highlight"
@@ -319,7 +283,6 @@ const Toolbar = ({
           onOpenChange={(open) => {
             if (open && isColorDisabled) return;
             if (open) {
-              shouldNotifyOnCloseRef.current = true;
               setShowHeadingMenu(false);
               setShowTableSizePicker(false);
               setShowColorPicker("text");
@@ -328,21 +291,21 @@ const Toolbar = ({
             if (showColorPicker === "text") {
               setShowColorPicker(null);
             }
-            if (shouldNotifyOnCloseRef.current) {
-              notifyPopoverClosed();
-            }
-            shouldNotifyOnCloseRef.current = true;
           }}
         >
-          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
+            {item.element}
+          </PopoverTrigger>
           <PopoverContent
             container={portalContainer ?? undefined}
             side="bottom"
             align="start"
             sideOffset={8}
             className="editor-toolbar-popover-panel"
-            onInteractOutside={handlePopoverInteractOutside}
-            onEscapeKeyDown={handlePopoverEscapeKeyDown}
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <ColorPicker
               type="text"
@@ -362,28 +325,25 @@ const Toolbar = ({
           onOpenChange={(open) => {
             if (open && isHeadingDisabled) return;
             if (open) {
-              shouldNotifyOnCloseRef.current = true;
               setShowColorPicker(null);
               setShowTableSizePicker(false);
             }
             setShowHeadingMenu(open);
-            if (!open) {
-              if (shouldNotifyOnCloseRef.current) {
-                notifyPopoverClosed();
-              }
-              shouldNotifyOnCloseRef.current = true;
-            }
           }}
         >
-          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
+            {item.element}
+          </PopoverTrigger>
           <PopoverContent
             container={portalContainer ?? undefined}
             side="bottom"
             align="start"
             sideOffset={8}
             className="editor-toolbar-heading-menu"
-            onInteractOutside={handlePopoverInteractOutside}
-            onEscapeKeyDown={handlePopoverEscapeKeyDown}
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             {([1, 2, 3] as const).map((level) => (
               <button
@@ -415,28 +375,25 @@ const Toolbar = ({
           onOpenChange={(open) => {
             if (open && isInsertTableDisabled) return;
             if (open) {
-              shouldNotifyOnCloseRef.current = true;
               setShowColorPicker(null);
               setShowHeadingMenu(false);
             }
             setShowTableSizePicker(open);
-            if (!open) {
-              if (shouldNotifyOnCloseRef.current) {
-                notifyPopoverClosed();
-              }
-              shouldNotifyOnCloseRef.current = true;
-            }
           }}
         >
-          <PopoverTrigger asChild>{item.element}</PopoverTrigger>
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
+            {item.element}
+          </PopoverTrigger>
           <PopoverContent
             container={portalContainer ?? undefined}
             side="bottom"
             align="start"
             sideOffset={8}
             className="editor-toolbar-table-size-popover"
-            onInteractOutside={handlePopoverInteractOutside}
-            onEscapeKeyDown={handlePopoverEscapeKeyDown}
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <TableSizePicker
               onSelect={(rows, cols) => {
