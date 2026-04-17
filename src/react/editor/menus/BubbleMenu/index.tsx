@@ -2,6 +2,7 @@ import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
 import { useState } from "react";
+import { config, type ColorOption } from "@/shared/config";
 import {
   Bold,
   Italic,
@@ -19,7 +20,7 @@ import {
   AlignJustify,
 } from "lucide-react";
 import { useEditorCommands } from "@/react/hooks";
-import ColorPicker from "@/react/editor/toolbar/ColorPicker";
+import ColorPopoverPicker from "@/react/editor/toolbar/ColorPopoverPicker";
 import {
   Popover,
   PopoverContent,
@@ -31,6 +32,8 @@ import "./BubbleMenu.css";
 interface BubbleMenuProps {
   editor: Editor;
   locale: EditorLocale;
+  textColorOptions: ColorOption[];
+  highlightColorOptions: ColorOption[];
   portalContainer?: HTMLElement | null;
   /** BubbleMenu 内 Popover 开关状态校验回调（关闭后用于补齐 blur 链路）。 */
   onPopoverOpenStateChecked?: (editorFocused: boolean) => void;
@@ -39,6 +42,8 @@ interface BubbleMenuProps {
 const BubbleMenu = ({
   editor,
   locale,
+  textColorOptions = config.TEXT_COLORS,
+  highlightColorOptions = config.HIGHLIGHT_COLORS,
   portalContainer,
 }: BubbleMenuProps) => {
   const [showColorPicker, setShowColorPicker] = useState<
@@ -55,7 +60,6 @@ const BubbleMenu = ({
     } else {
       format.setColor(color);
     }
-    setShowColorPicker(null);
   };
 
   const onHighlightColorSelect = (color: string) => {
@@ -69,7 +73,6 @@ const BubbleMenu = ({
         format.setHighlight(color);
       }
     }
-    setShowColorPicker(null);
   };
 
   if (!editor) {
@@ -132,7 +135,13 @@ const BubbleMenu = ({
         </button>
         <span className="separator" />
         {/* 官方是免费的 */}
-        <Popover
+        <ColorPopoverPicker
+          icon={<Highlighter size={16} />}
+          title={locale.bubbleMenu.highlight}
+          type="highlight"
+          options={highlightColorOptions}
+          selectedColor={editor.getAttributes("highlight").color}
+          active={editor.isActive("highlight")}
           open={showColorPicker === "highlight"}
           onOpenChange={(open) => {
             if (open) {
@@ -144,36 +153,20 @@ const BubbleMenu = ({
               setShowColorPicker(null);
             }
           }}
-        >
-          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
-            <button
-              className={editor.isActive("highlight") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
-              title={locale.bubbleMenu.highlight}
-            >
-              <Highlighter size={16} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            container={portalContainer ?? undefined}
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            className="bubble-menu-popover-panel"
-            onMouseDown={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <ColorPicker
-              type="highlight"
-              selectedColor={editor.getAttributes("highlight").color}
-              onColorSelect={onHighlightColorSelect}
-              locale={locale}
-            />
-          </PopoverContent>
-        </Popover>
+          onColorSelect={onHighlightColorSelect}
+          locale={locale}
+          portalContainer={portalContainer}
+          popoverClassName="bubble-menu-popover-panel"
+          triggerClassName="bubble-menu-btn"
+        />
         {/* 官方的需要钱 */}
-        <Popover
+        <ColorPopoverPicker
+          icon={<Palette size={16} />}
+          title={locale.bubbleMenu.textColor}
+          type="text"
+          options={textColorOptions}
+          selectedColor={editor.getAttributes("textStyle").color}
+          active={!!editor.getAttributes("textStyle").color}
           open={showColorPicker === "text"}
           onOpenChange={(open) => {
             if (open) {
@@ -185,34 +178,12 @@ const BubbleMenu = ({
               setShowColorPicker(null);
             }
           }}
-        >
-          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
-            <button
-              className={editor.getAttributes("textStyle").color ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
-              title={locale.bubbleMenu.textColor}
-            >
-              <Palette size={16} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            container={portalContainer ?? undefined}
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            className="bubble-menu-popover-panel"
-            onMouseDown={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <ColorPicker
-              type="text"
-              selectedColor={editor.getAttributes("textStyle").color}
-              onColorSelect={onTextColorSelect}
-              locale={locale}
-            />
-          </PopoverContent>
-        </Popover>
+          onColorSelect={onTextColorSelect}
+          locale={locale}
+          portalContainer={portalContainer}
+          popoverClassName="bubble-menu-popover-panel"
+          triggerClassName="bubble-menu-btn"
+        />
         <span className="separator" />
         <Popover
           open={showMoreMenu}

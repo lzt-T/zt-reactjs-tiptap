@@ -1,5 +1,5 @@
 import type { FormulaPickerCategory } from '@/shared/config/formulaCategories'
-import type { CodeBlockLanguageOption } from "@/shared/config";
+import type { CodeBlockLanguageOption, ColorOption } from "@/shared/config";
 import type {
   EditorExternalExtension,
   SlashCommandConfig,
@@ -185,6 +185,16 @@ export interface TiptapEditorProps {
    * 每项结构：{ value: 语言标识, label: 显示名称 }。
    */
   codeBlockLanguages?: CodeBlockLanguageOption[]
+
+  /**
+   * 文字颜色预设列表。传入后将覆盖默认文字颜色面板选项。
+   */
+  textColorOptions?: ColorOption[]
+
+  /**
+   * 高亮颜色预设列表。传入后将覆盖默认高亮颜色面板选项。
+   */
+  highlightColorOptions?: ColorOption[]
 
   /**
    * 新插入代码块的默认语言（默认 'plaintext'）。

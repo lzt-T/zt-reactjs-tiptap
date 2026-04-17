@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { config } from '@/shared/config'
+import type { ColorOption } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
 import './ColorPicker.css'
 
 interface ColorPickerProps {
   onColorSelect: (color: string) => void
+  options: ColorOption[]
   type: 'text' | 'highlight'
   /** 当前选中的颜色（与预设或自定义色值一致时，对应色块显示蓝色边框） */
   selectedColor?: string
@@ -20,19 +21,20 @@ function normalizeColor(value: string): string {
 
 const ColorPicker = ({
   onColorSelect,
+  options,
   type,
   selectedColor,
   style,
   locale,
 }: ColorPickerProps) => {
-  const colors = type === 'text' ? config.TEXT_COLORS : config.HIGHLIGHT_COLORS
+  void type
   const [showCustomInput, setShowCustomInput] = useState(false)
   const normalizedSelected = normalizeColor(selectedColor ?? '')
 
   return (
     <div className="color-picker" style={style}>
       <div className="color-picker-grid">
-        {colors.map((color) => {
+        {options.map((color) => {
           const isSelected = normalizedSelected
             ? normalizeColor(color.value) === normalizedSelected
             : false

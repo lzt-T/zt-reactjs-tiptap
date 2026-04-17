@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import type { ReactElement } from "react";
+import type { ColorOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import type {
   EditorActionContext,
@@ -26,6 +27,10 @@ export interface ToolbarProps {
   onOpenFileUploadDialog?: (
     callback: (url: string, name: string) => void,
   ) => void;
+  /** 文字颜色预设项。 */
+  textColorOptions: ColorOption[];
+  /** 高亮颜色预设项。 */
+  highlightColorOptions: ColorOption[];
   /** Popover Portal 挂载容器（用于主题作用域隔离）。 */
   portalContainer?: HTMLElement | null;
   /** Toolbar 内 Popover 开关状态校验回调（关闭后用于补齐 blur 链路）。 */

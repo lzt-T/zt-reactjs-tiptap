@@ -240,6 +240,8 @@ function App() {
 | `fileMaxSizeBytes` | `number` | 否 | `10485760`（10MB） | 附件上传最大体积（字节），超过则拒绝并提示 |
 | `fileUploadTypes` | `string[]` | 否 | `['pdf']` | 附件可上传扩展名列表（不区分大小写），如 `['pdf', 'docx']`。会自动去空格、去重、去掉前导 `.`；为空时回落到默认 `['pdf']` |
 | `codeBlockLanguages` | `Array<{ value: string; label: string }>` | 否 | 内置 20 种常用语言 | 代码块语言列表。传入后覆盖内置列表（会自动去重并回落无效语言） |
+| `textColorOptions` | `Array<{ name: string; value: string }>` | 否 | 内置默认文字颜色列表 | 顶部工具栏与气泡菜单共用的文字颜色预设列表。传入后覆盖默认文字颜色面板选项 |
+| `highlightColorOptions` | `Array<{ name: string; value: string }>` | 否 | 内置默认高亮颜色列表 | 顶部工具栏与气泡菜单共用的高亮颜色预设列表。传入后覆盖默认高亮颜色面板选项 |
 | `defaultCodeBlockLanguage` | `string` | 否 | `'plaintext'` | 新增代码块默认语言。传入无效值时自动回落 `plaintext` |
 | `onCodeBlockFormat` | `(payload: { code: string; language: string }) => string \| Promise<string>` | 否 | - | 代码块格式化回调。点击代码块右上角“格式化代码”按钮时触发；返回值会覆盖当前代码块文本内容（保留语言） |
 | `formulaCategories` | `FormulaPickerCategory[]` | 否 | 内置默认分类 | 公式选择器的分类列表。不传则使用内置分类；传入时可完全自定义或在默认基础上扩展（见下方「扩展公式分类」） |

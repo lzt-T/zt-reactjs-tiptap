@@ -2,7 +2,7 @@ import type { CSSProperties, Ref, RefObject } from "react";
 import type { Editor } from "@tiptap/react";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import type { EditorLocale } from "@/shared/locales";
-import type { CodeBlockLanguageOption } from "@/shared/config";
+import type { CodeBlockLanguageOption, ColorOption } from "@/shared/config";
 import { config } from "@/shared/config";
 import type { MenuPlacement } from "@/react/editor/types";
 import type { ToolbarItemConfig } from "@/react/editor/customization";
@@ -37,6 +37,8 @@ interface EditorSurfaceProps {
   portalContainer: HTMLDivElement | null;
   resolvedToolbarItems: ToolbarItemConfig[];
   resolvedCodeBlockLanguages: CodeBlockLanguageOption[];
+  textColorOptions: ColorOption[];
+  highlightColorOptions: ColorOption[];
   resolvedDefaultCodeBlockLanguage: string;
   resolvedPlaceholder: string;
   onCodeBlockFormat?: (payload: {
@@ -84,6 +86,8 @@ export default function EditorSurface({
   portalContainer,
   resolvedToolbarItems,
   resolvedCodeBlockLanguages,
+  textColorOptions,
+  highlightColorOptions,
   resolvedDefaultCodeBlockLanguage,
   resolvedPlaceholder,
   onCodeBlockFormat,
@@ -115,6 +119,8 @@ export default function EditorSurface({
           onOpenImageDialog={onOpenImageDialog}
           locale={locale}
           onOpenFileUploadDialog={onOpenFileUploadDialog}
+          textColorOptions={textColorOptions}
+          highlightColorOptions={highlightColorOptions}
           portalContainer={portalContainer}
           onPopoverOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
         />
@@ -160,6 +166,8 @@ export default function EditorSurface({
           <BubbleMenu
             editor={editor}
             locale={locale}
+            textColorOptions={textColorOptions}
+            highlightColorOptions={highlightColorOptions}
             portalContainer={portalContainer}
             onPopoverOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
           />

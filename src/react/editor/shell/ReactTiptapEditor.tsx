@@ -98,6 +98,8 @@ const ReactTiptapEditor = ({
   theme,
   fileUploadTypes,
   codeBlockLanguages,
+  textColorOptions = config.TEXT_COLORS,
+  highlightColorOptions = config.HIGHLIGHT_COLORS,
   defaultCodeBlockLanguage = DEFAULT_CODE_BLOCK_LANGUAGE,
   onCodeBlockFormat,
   formulaCategories,
@@ -373,6 +375,8 @@ const ReactTiptapEditor = ({
         portalContainer={themePortalState.portalContainer}
         resolvedToolbarItems={resolvedConfig.resolvedToolbarItems}
         resolvedCodeBlockLanguages={resolvedConfig.resolvedCodeBlockLanguages}
+        textColorOptions={textColorOptions}
+        highlightColorOptions={highlightColorOptions}
         resolvedDefaultCodeBlockLanguage={
           resolvedConfig.resolvedDefaultCodeBlockLanguage
         }

@@ -1,10 +1,11 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
+import { Highlighter, Palette } from "lucide-react";
 import { useEditorCommands } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
-import ColorPicker from "@/react/editor/toolbar/ColorPicker";
+import ColorPopoverPicker from "@/react/editor/toolbar/ColorPopoverPicker";
 import TableSizePicker from "@/react/editor/table/TableSizePicker";
 import {
   Popover,
@@ -29,6 +30,8 @@ const Toolbar = ({
   onOpenMathDialog,
   onOpenImageDialog,
   onOpenFileUploadDialog,
+  textColorOptions,
+  highlightColorOptions,
   portalContainer,
 }: ToolbarProps) => {
   /** 选区/内容变化时自增，用于让工具栏根据当前选区重新计算 isActive 并重渲染 */
@@ -173,7 +176,6 @@ const Toolbar = ({
     } else {
       runToolbarAction(() => format.setColor(color));
     }
-    setShowColorPicker(null);
   };
 
   const onHighlightColorSelect = (color: string) => {
@@ -189,7 +191,6 @@ const Toolbar = ({
         runToolbarAction(() => format.setHighlight(color));
       }
     }
-    setShowColorPicker(null);
   };
 
   const onHeadingSelect = (level: 1 | 2 | 3) => {
@@ -236,10 +237,16 @@ const Toolbar = ({
   const renderItemElement = (item: RenderedToolbarItem) => {
     if (item.key === BuiltinToolbarItemKey.Highlight) {
       return (
-        <Popover
+        <ColorPopoverPicker
+          icon={<Highlighter size={16} />}
+          title={locale.toolbar.highlight}
+          type="highlight"
+          options={highlightColorOptions}
+          selectedColor={editor.getAttributes("highlight").color}
+          active={showActiveState && editor.isActive("highlight")}
+          disabled={isColorDisabled}
           open={showColorPicker === "highlight"}
           onOpenChange={(open) => {
-            if (open && isColorDisabled) return;
             if (open) {
               setShowHeadingMenu(false);
               setShowTableSizePicker(false);
@@ -250,38 +257,27 @@ const Toolbar = ({
               setShowColorPicker(null);
             }
           }}
-        >
-          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
-            {item.element}
-          </PopoverTrigger>
-          <PopoverContent
-            container={portalContainer ?? undefined}
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            className="editor-toolbar-popover-panel"
-            onMouseDown={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <ColorPicker
-              type="highlight"
-              selectedColor={editor.getAttributes("highlight").color}
-              onColorSelect={onHighlightColorSelect}
-              locale={locale}
-            />
-          </PopoverContent>
-        </Popover>
+          onColorSelect={onHighlightColorSelect}
+          locale={locale}
+          portalContainer={portalContainer}
+          popoverClassName="editor-toolbar-popover-panel"
+          triggerClassName="editor-toolbar-btn"
+        />
       );
     }
 
     if (item.key === BuiltinToolbarItemKey.TextColor) {
       return (
-        <Popover
+        <ColorPopoverPicker
+          icon={<Palette size={16} />}
+          title={locale.toolbar.textColor}
+          type="text"
+          options={textColorOptions}
+          selectedColor={editor.getAttributes("textStyle").color}
+          active={showActiveState && !!editor.getAttributes("textStyle").color}
+          disabled={isColorDisabled}
           open={showColorPicker === "text"}
           onOpenChange={(open) => {
-            if (open && isColorDisabled) return;
             if (open) {
               setShowHeadingMenu(false);
               setShowTableSizePicker(false);
@@ -292,29 +288,12 @@ const Toolbar = ({
               setShowColorPicker(null);
             }
           }}
-        >
-          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
-            {item.element}
-          </PopoverTrigger>
-          <PopoverContent
-            container={portalContainer ?? undefined}
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            className="editor-toolbar-popover-panel"
-            onMouseDown={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <ColorPicker
-              type="text"
-              selectedColor={editor.getAttributes("textStyle").color}
-              onColorSelect={onTextColorSelect}
-              locale={locale}
-            />
-          </PopoverContent>
-        </Popover>
+          onColorSelect={onTextColorSelect}
+          locale={locale}
+          portalContainer={portalContainer}
+          popoverClassName="editor-toolbar-popover-panel"
+          triggerClassName="editor-toolbar-btn"
+        />
       );
     }
 
