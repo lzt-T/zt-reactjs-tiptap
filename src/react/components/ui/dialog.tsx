@@ -5,32 +5,38 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/shared/utils/utils"
 import { Button } from "@/react/components/ui/button"
 
+/** Dialog Portal 组件属性别名。 */
 type DialogPortalProps = React.ComponentProps<typeof DialogPrimitive.Portal>
 
+/** 渲染对话框根节点。 */
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
+/** 渲染对话框触发器。 */
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
+/** 渲染对话框 Portal 容器。 */
 function DialogPortal({
   ...props
 }: DialogPortalProps) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
+/** 渲染对话框关闭按钮容器。 */
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
+/** 渲染对话框遮罩层，提升深色主题下的背景分离度。 */
 function DialogOverlay({
   className,
   ...props
@@ -39,7 +45,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/56 dark:bg-black/62",
         className
       )}
       {...props}
@@ -47,6 +53,7 @@ function DialogOverlay({
   )
 }
 
+/** 渲染对话框主体内容，统一使用浮层背景与增强阴影。 */
 function DialogContent({
   className,
   children,
@@ -63,7 +70,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg",
+          "bg-popover text-popover-foreground border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-[var(--ui-shadow-popover)] duration-200 outline-none sm:max-w-lg",
           className
         )}
         {...props}
@@ -83,6 +90,7 @@ function DialogContent({
   )
 }
 
+/** 渲染对话框头部容器。 */
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -93,6 +101,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/** 渲染对话框底部容器。 */
 function DialogFooter({
   className,
   showCloseButton = false,
@@ -120,6 +129,7 @@ function DialogFooter({
   )
 }
 
+/** 渲染对话框标题。 */
 function DialogTitle({
   className,
   ...props
@@ -133,6 +143,7 @@ function DialogTitle({
   )
 }
 
+/** 渲染对话框描述文本。 */
 function DialogDescription({
   className,
   ...props

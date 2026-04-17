@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: none;
 }
 
 .image-upload-dialog-content [data-slot="dialog-header"] {
@@ -307,5 +306,4 @@
     padding: 2rem 1rem;
   }
 }
-
 

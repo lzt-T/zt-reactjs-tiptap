@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: none;
 }
 
 .file-upload-dialog-content [data-slot="dialog-header"] {
@@ -173,6 +172,4 @@
   background-color: var(--ui-scrollbar-thumb);
   border-radius: 2px;
 }
-
-
 
