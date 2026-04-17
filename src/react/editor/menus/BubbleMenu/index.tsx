@@ -52,6 +52,8 @@ const BubbleMenu = ({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   // 颜色面板关闭过渡态定时器 id（仅保留一个，避免旧 timer 干扰）。
   const closeColorPickerTimerRef = useRef<number | null>(null);
+  // 当前 Popover 关闭是否需要触发焦点校验回调。
+  const shouldNotifyOnCloseRef = useRef(true);
 
   const { format } = useEditorCommands(editor, {});
 
@@ -104,6 +106,31 @@ const BubbleMenu = ({
     closeColorPickerWithAnimation();
   };
 
+  /** 判断关闭来源目标是否来自气泡菜单内部。 */
+  const isInternalMenuTarget = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    return Boolean(target.closest(".bubble-menu-btn"));
+  };
+
+  /** 提取 Popover 外部交互的真实事件目标。 */
+  const getOutsideInteractionTarget = (event: Event) => {
+    const customEvent = event as CustomEvent<{ originalEvent?: Event }>;
+    const originalTarget = customEvent.detail?.originalEvent?.target;
+    return originalTarget ?? event.target;
+  };
+
+  /** 根据外部交互来源更新关闭通知策略。 */
+  const handlePopoverInteractOutside = (event: Event) => {
+    shouldNotifyOnCloseRef.current = !isInternalMenuTarget(
+      getOutsideInteractionTarget(event),
+    );
+  };
+
+  /** Esc 关闭始终触发关闭通知。 */
+  const handlePopoverEscapeKeyDown = () => {
+    shouldNotifyOnCloseRef.current = true;
+  };
+
   /** Popover 关闭后延迟校验编辑器聚焦状态，必要时补触发 blur 链路。 */
   const notifyPopoverClosed = () => {
     requestAnimationFrame(() => {
@@ -136,35 +163,35 @@ const BubbleMenu = ({
       >
         <button
           onClick={() => format.toggleBold()}
-          className={editor.isActive("bold") ? "is-active" : ""}
+          className={editor.isActive("bold") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
           title={locale.bubbleMenu.bold}
         >
           <Bold size={16} />
         </button>
         <button
           onClick={() => format.toggleItalic()}
-          className={editor.isActive("italic") ? "is-active" : ""}
+          className={editor.isActive("italic") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
           title={locale.bubbleMenu.italic}
         >
           <Italic size={16} />
         </button>
         <button
           onClick={() => format.toggleUnderline()}
-          className={editor.isActive("underline") ? "is-active" : ""}
+          className={editor.isActive("underline") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
           title={locale.bubbleMenu.underline}
         >
           <Underline size={16} />
         </button>
         <button
           onClick={() => format.toggleStrike()}
-          className={editor.isActive("strike") ? "is-active" : ""}
+          className={editor.isActive("strike") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
           title={locale.bubbleMenu.strikethrough}
         >
           <Strikethrough size={16} />
         </button>
         <button
           onClick={() => format.toggleCode()}
-          className={editor.isActive("code") ? "is-active" : ""}
+          className={editor.isActive("code") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
           title={locale.bubbleMenu.inlineCode}
         >
           <Code size={16} />
@@ -175,6 +202,7 @@ const BubbleMenu = ({
           open={showColorPicker === "highlight"}
           onOpenChange={(open) => {
             if (open) {
+              shouldNotifyOnCloseRef.current = true;
               clearCloseColorPickerTimer();
               setIsColorPickerClosing(false);
               setShowMoreMenu(false);
@@ -186,12 +214,15 @@ const BubbleMenu = ({
             if (showColorPicker === "highlight") {
               setShowColorPicker(null);
             }
-            notifyPopoverClosed();
+            if (shouldNotifyOnCloseRef.current) {
+              notifyPopoverClosed();
+            }
+            shouldNotifyOnCloseRef.current = true;
           }}
         >
           <PopoverTrigger asChild>
             <button
-              className={editor.isActive("highlight") ? "is-active" : ""}
+              className={editor.isActive("highlight") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
               title={locale.bubbleMenu.highlight}
             >
               <Highlighter size={16} />
@@ -203,6 +234,8 @@ const BubbleMenu = ({
             align="start"
             sideOffset={8}
             className="bubble-menu-popover-panel"
+            onInteractOutside={handlePopoverInteractOutside}
+            onEscapeKeyDown={handlePopoverEscapeKeyDown}
           >
             <ColorPicker
               type="highlight"
@@ -217,6 +250,7 @@ const BubbleMenu = ({
           open={showColorPicker === "text"}
           onOpenChange={(open) => {
             if (open) {
+              shouldNotifyOnCloseRef.current = true;
               clearCloseColorPickerTimer();
               setIsColorPickerClosing(false);
               setShowMoreMenu(false);
@@ -228,12 +262,15 @@ const BubbleMenu = ({
             if (showColorPicker === "text") {
               setShowColorPicker(null);
             }
-            notifyPopoverClosed();
+            if (shouldNotifyOnCloseRef.current) {
+              notifyPopoverClosed();
+            }
+            shouldNotifyOnCloseRef.current = true;
           }}
         >
           <PopoverTrigger asChild>
             <button
-              className={editor.getAttributes("textStyle").color ? "is-active" : ""}
+              className={editor.getAttributes("textStyle").color ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
               title={locale.bubbleMenu.textColor}
             >
               <Palette size={16} />
@@ -245,6 +282,8 @@ const BubbleMenu = ({
             align="start"
             sideOffset={8}
             className="bubble-menu-popover-panel"
+            onInteractOutside={handlePopoverInteractOutside}
+            onEscapeKeyDown={handlePopoverEscapeKeyDown}
           >
             <ColorPicker
               type="text"
@@ -259,17 +298,21 @@ const BubbleMenu = ({
           open={showMoreMenu}
           onOpenChange={(open) => {
             if (open) {
+              shouldNotifyOnCloseRef.current = true;
               setShowColorPicker(null);
             }
             setShowMoreMenu(open);
             if (!open) {
-              notifyPopoverClosed();
+              if (shouldNotifyOnCloseRef.current) {
+                notifyPopoverClosed();
+              }
+              shouldNotifyOnCloseRef.current = true;
             }
           }}
         >
           <PopoverTrigger asChild>
             <button
-              className={showMoreMenu ? "is-active" : ""}
+              className={showMoreMenu ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
               title={locale.bubbleMenu.more}
             >
               <MoreHorizontal size={16} />
@@ -281,6 +324,8 @@ const BubbleMenu = ({
             align="start"
             sideOffset={8}
             className="bubble-menu-popover-panel"
+            onInteractOutside={handlePopoverInteractOutside}
+            onEscapeKeyDown={handlePopoverEscapeKeyDown}
           >
             <div className="more-menu">
               <button
@@ -288,7 +333,7 @@ const BubbleMenu = ({
                   format.toggleSuperscript();
                   setShowMoreMenu(false);
                 }}
-                className={editor.isActive("superscript") ? "is-active" : ""}
+                className={editor.isActive("superscript") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
                 title={locale.bubbleMenu.superscript}
               >
                 <Superscript size={16} />
@@ -298,7 +343,7 @@ const BubbleMenu = ({
                   format.toggleSubscript();
                   setShowMoreMenu(false);
                 }}
-                className={editor.isActive("subscript") ? "is-active" : ""}
+                className={editor.isActive("subscript") ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
                 title={locale.bubbleMenu.subscript}
               >
                 <Subscript size={16} />
@@ -310,7 +355,9 @@ const BubbleMenu = ({
                   setShowMoreMenu(false);
                 }}
                 className={
-                  editor.isActive({ textAlign: "left" }) ? "is-active" : ""
+                  editor.isActive({ textAlign: "left" })
+                    ? "bubble-menu-btn is-active"
+                    : "bubble-menu-btn"
                 }
                 title={locale.bubbleMenu.alignLeft}
               >
@@ -322,7 +369,9 @@ const BubbleMenu = ({
                   setShowMoreMenu(false);
                 }}
                 className={
-                  editor.isActive({ textAlign: "center" }) ? "is-active" : ""
+                  editor.isActive({ textAlign: "center" })
+                    ? "bubble-menu-btn is-active"
+                    : "bubble-menu-btn"
                 }
                 title={locale.bubbleMenu.alignCenter}
               >
@@ -334,7 +383,9 @@ const BubbleMenu = ({
                   setShowMoreMenu(false);
                 }}
                 className={
-                  editor.isActive({ textAlign: "right" }) ? "is-active" : ""
+                  editor.isActive({ textAlign: "right" })
+                    ? "bubble-menu-btn is-active"
+                    : "bubble-menu-btn"
                 }
                 title={locale.bubbleMenu.alignRight}
               >
@@ -346,7 +397,9 @@ const BubbleMenu = ({
                   setShowMoreMenu(false);
                 }}
                 className={
-                  editor.isActive({ textAlign: "justify" }) ? "is-active" : ""
+                  editor.isActive({ textAlign: "justify" })
+                    ? "bubble-menu-btn is-active"
+                    : "bubble-menu-btn"
                 }
                 title={locale.bubbleMenu.justify}
               >
