@@ -9,7 +9,7 @@
     Liberation Mono,
     Courier New,
     monospace;
-  --code-block-bg: #f8fafc;
+  --code-block-bg: var(--ui-bg-muted);
   --code-block-fg: color-mix(in oklab, var(--foreground) 88%, var(--muted-foreground) 12%);
   --code-block-border: color-mix(in oklab, var(--border) 90%, var(--foreground) 10%);
   --code-token-comment: color-mix(in oklab, var(--muted-foreground) 86%, var(--foreground) 14%);
@@ -102,16 +102,16 @@
 .code-block-control-bar {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--border, #e5e7eb);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: color-mix(in oklab, var(--background) 92%, transparent);
-  box-shadow: var(--shadow-xs, 0 1px 2px rgb(0 0 0 / 0.05));
+  box-shadow: var(--shadow-xs);
   overflow: hidden;
 }
 
 .code-block-control-bar:focus-within {
-  border-color: var(--border, #e5e7eb);
-  box-shadow: var(--shadow-xs, 0 1px 2px rgb(0 0 0 / 0.05));
+  border-color: var(--border);
+  box-shadow: var(--shadow-xs);
 }
 
 .code-block-control-language-trigger {
@@ -143,7 +143,7 @@
 .code-block-control-actions {
   display: inline-flex;
   align-items: center;
-  border-left: 1px solid var(--border, #e5e7eb);
+  border-left: 1px solid var(--border);
 }
 
 .code-block-control-action-btn {
@@ -162,7 +162,7 @@
 }
 
 .code-block-control-action-btn + .code-block-control-action-btn {
-  border-left: 1px solid var(--border, #e5e7eb);
+  border-left: 1px solid var(--border);
 }
 
 .code-block-control-action-btn:hover:not(:disabled) {
@@ -175,7 +175,7 @@
 
 .code-block-control-action-btn:disabled {
   cursor: not-allowed;
-  color: color-mix(in oklab, var(--muted-foreground, #64748b) 65%, transparent);
+  color: color-mix(in oklab, var(--muted-foreground) 65%, transparent);
 }
 
 .code-block-language-select-content {
@@ -192,7 +192,7 @@
 
 .code-block-language-command [data-slot="command-input-wrapper"] {
   height: 2rem;
-  border-bottom: 1px solid var(--border, #e5e7eb);
+  border-bottom: 1px solid var(--border);
   padding: 0 0.5rem;
 }
 
@@ -217,7 +217,7 @@
 .code-block-language-empty {
   padding: 0.5rem 0.625rem;
   font-size: 12px;
-  color: var(--muted-foreground, #64748b);
+  color: var(--muted-foreground);
 }
 
 .editor-wrapper .ProseMirror .code-block-action-spin {
@@ -229,3 +229,6 @@
     transform: rotate(360deg);
   }
 }
+
+
+

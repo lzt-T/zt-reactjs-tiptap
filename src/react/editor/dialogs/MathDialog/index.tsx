@@ -62,7 +62,7 @@ const MathDialog = ({
       const html = katex.renderToString(latex, {
         displayMode: type === "block",
         throwOnError: false,
-        errorColor: "#dc2626",
+        errorColor: "var(--ui-danger)",
       });
       return { html, error: null as string | null };
     } catch (error) {

@@ -1,9 +1,9 @@
 .color-picker {
-  background: white;
+  background: var(--ui-text-inverse);
   border-radius: 8px;
   padding: 12px;
   min-width: 200px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px var(--ui-scrollbar-thumb-hover);
 }
 
 .color-picker-grid {
@@ -17,7 +17,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--ui-border-muted);
   outline: none;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -26,18 +26,18 @@
 
 .color-picker-swatch:hover {
   transform: scale(1.05);
-  border-color: #3b82f6;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  border-color: var(--ui-control-active);
+  box-shadow: 0 2px 8px color-mix(in oklch, var(--ui-control-active) 30%, transparent);
 }
 
 /* 当前选中/使用中的颜色：细蓝色描边 */
 .color-picker-swatch--selected {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6;
+  border-color: var(--ui-control-active);
+  box-shadow: 0 0 0 1px var(--ui-control-active);
 }
 
 .color-picker-swatch--transparent {
-  background: white;
+  background: var(--ui-text-inverse);
   position: relative;
   overflow: hidden;
 }
@@ -49,8 +49,8 @@
   background: linear-gradient(
     to bottom right,
     transparent calc(50% - 1px),
-    #ef4444 calc(50% - 1px),
-    #ef4444 calc(50% + 1px),
+    var(--ui-danger-soft) calc(50% - 1px),
+    var(--ui-danger-soft) calc(50% + 1px),
     transparent calc(50% + 1px)
   );
 }
@@ -58,11 +58,11 @@
 .color-picker-custom-btn {
   width: 100%;
   padding: 6px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--ui-bg-muted);
+  border: 1px solid var(--ui-border-muted);
   outline: none;
   border-radius: 6px;
-  color: #475569;
+  color: var(--ui-text-muted-strong);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -71,8 +71,8 @@
 }
 
 .color-picker-custom-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--ui-bg-subtle);
+  border-color: var(--ui-border-strong);
 }
 
 .color-picker-custom {
@@ -80,14 +80,14 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background: #f8fafc;
+  background: var(--ui-bg-muted);
   border-radius: 6px;
 }
 
 .color-picker-input {
   flex: 1;
   height: 32px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ui-border-muted);
   outline: none;
   border-radius: 4px;
   cursor: pointer;
@@ -97,11 +97,11 @@
   width: 24px;
   height: 24px;
   padding: 0;
-  background: #ef4444;
+  background: var(--ui-danger-soft);
   border: none;
   outline: none;
   border-radius: 4px;
-  color: white;
+  color: var(--ui-text-inverse);
   font-size: 14px;
   cursor: pointer;
   display: flex;
@@ -111,5 +111,7 @@
 }
 
 .color-picker-close-btn:hover {
-  background: #dc2626;
+  background: var(--ui-danger);
 }
+
+

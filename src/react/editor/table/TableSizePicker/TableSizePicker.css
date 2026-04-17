@@ -8,8 +8,8 @@
 
 .table-size-picker-grid {
   display: grid;
-  grid-template-columns: repeat(var(--cols, 10), 1fr);
-  grid-template-rows: repeat(var(--rows, 10), 1fr);
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
   gap: 2px;
   width: min-content;
 }
@@ -22,9 +22,9 @@
   min-width: 14px;
   min-height: 14px;
   padding: 0;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ui-border);
   border-radius: 2px;
-  background: #fff;
+  background: var(--ui-bg-panel);
   cursor: pointer;
   transition: background 0.1s ease, border-color 0.1s ease;
 }
@@ -40,17 +40,19 @@
 }
 
 .table-size-picker-cell:hover {
-  border-color: #d1d5db;
+  border-color: var(--ui-border-soft);
 }
 
 .table-size-picker-cell-selected {
-  background: #111827;
-  border-color: #111827;
+  background: var(--ui-text-strong);
+  border-color: var(--ui-text-strong);
 }
 
 .table-size-picker-label {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--ui-text);
   min-height: 1.25em;
 }
+
+

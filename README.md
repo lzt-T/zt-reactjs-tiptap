@@ -185,6 +185,35 @@ function EditorExample() {
 }
 ```
 
+### 主题切换（light / dark）
+
+```tsx
+import { useState } from 'react'
+import { ReactTiptapEditor, EditorTheme } from 'zt-reactjs-tiptap'
+import 'zt-reactjs-tiptap/style.css'
+
+function App() {
+  const [theme, setTheme] = useState(EditorTheme.Light)
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          setTheme((prev) =>
+            prev === EditorTheme.Dark ? EditorTheme.Light : EditorTheme.Dark
+          )
+        }
+      >
+        切换主题（{theme}）
+      </button>
+
+      <ReactTiptapEditor theme={theme} />
+    </>
+  )
+}
+```
+
 ## Props
 
 | 属性 | 类型 | 必填 | 默认值 | 说明 |
@@ -196,6 +225,7 @@ function EditorExample() {
 | `onFilePreUpload` | `(file: File) => Promise<{ url: string; name: string }>` | 否 | - | 附件预上传函数（选择/拖拽文件时触发），返回文件 URL 与展示名 |
 | `onFileUpload` | `(payload: { file: File; url: string; name: string }) => void \| Promise<void>` | 否 | - | 附件 Confirm 回调（仅在点击 Confirm/Insert Link 后触发） |
 | `editorMode` | `'notion-like' \| 'headless'` | 否 | `'notion-like'` | 编辑器模式：Notion 风格（斜杠命令、块状编辑等）或无头模式 |
+| `theme` | `'light' \| 'dark'` | 否 | `'light'` | 编辑器主题。仅由组件 `theme` 控制，不再跟随 `html.dark` |
 | `headlessToolbarMode` | `'always' \| 'on-focus'` | 否 | `'always'` | **仅在 `editorMode='headless'` 时生效**。`always`：工具栏始终显示；`on-focus`：编辑器聚焦或点击工具栏时显示，失焦到编辑器区域外时隐藏 |
 | `commandMenuMaxHeight` | `number` | 否 | `240` | 斜杠命令菜单最大高度（px） |
 | `commandMenuMinHeight` | `number` | 否 | `160` | 斜杠命令菜单最小高度（px） |
@@ -547,7 +577,9 @@ import 'zt-reactjs-tiptap/style.css'
 }
 ```
 
-5. **弹层/对话框**：图片、公式、附件弹层通过 Portal 挂载到编辑器容器内，继承同一套作用域变量；若样式仍异常，优先检查宿主全局 reset 或高优先级选择器
+5. **UI 主题 Token 化**：编辑器 UI（工具栏、菜单、表格操作、弹窗、输入框、滚动条等）已统一使用主题 token。默认 `light` 视觉与旧版保持一致，切换 `theme="dark"` 时同一套 token 会自动映射为暗色值。
+
+6. **弹层/对话框**：图片、公式、附件弹层通过 Portal 挂载到编辑器容器内，继承同一套作用域变量；若样式仍异常，优先检查宿主全局 reset 或高优先级选择器
 
 ## 开发
 

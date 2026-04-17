@@ -25,7 +25,11 @@ import {
 } from "@/react/hooks";
 import { DEFAULT_CODE_BLOCK_LANGUAGE, config } from "@/shared/config";
 import { cn } from "@/shared/utils/utils";
-import { EditorMode, HeadlessToolbarMode } from "@/react/editor/types";
+import {
+  EditorMode,
+  EditorTheme,
+  HeadlessToolbarMode,
+} from "@/react/editor/types";
 import { resolveEditorLocale } from "@/shared/locales";
 import { useEditorResolvedConfig } from "@/react/editor/shell/hooks/useEditorResolvedConfig";
 import { useEditorThemePortalState } from "@/react/editor/shell/hooks/useEditorThemePortalState";
@@ -74,6 +78,7 @@ const ReactTiptapEditor = ({
   border = true,
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
+  theme = EditorTheme.Light,
   fileUploadTypes,
   codeBlockLanguages,
   defaultCodeBlockLanguage = DEFAULT_CODE_BLOCK_LANGUAGE,
@@ -309,7 +314,7 @@ const ReactTiptapEditor = ({
     "editor-container",
     "zt-tiptap-theme",
     "text-foreground",
-    themePortalState.isDocumentDark && "dark",
+    theme === EditorTheme.Dark && "dark",
     disabled && "is-disabled",
     !focusController.isEditorFocused && "is-editor-blurred",
     !focusController.isEditorFocusStable && "is-editor-focus-unstable",

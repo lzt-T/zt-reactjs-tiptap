@@ -6,7 +6,7 @@
 }
 
 .editor-wrapper .ProseMirror .tiptap-mathematics-render:hover {
-    background-color: #f1f5f9;
+    background-color: var(--ui-bg-subtle);
 }
 
 .editor-wrapper
@@ -15,14 +15,14 @@
     display: inline-block;
     padding: 2px 6px;
     margin: 0 4px;
-    background-color: #f1f5f9;
+    background-color: var(--ui-bg-subtle);
     border-radius: 4px;
     max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     vertical-align: middle;
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: var(--ui-border-strong) transparent;
 }
 
 .editor-wrapper
@@ -40,14 +40,14 @@
 .editor-wrapper
     .ProseMirror
     .tiptap-mathematics-render[data-type="inline-math"]::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--ui-border-strong);
     border-radius: 2px;
 }
 
 .editor-wrapper
     .ProseMirror
     .tiptap-mathematics-render[data-type="inline-math"]::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--ui-text-placeholder);
 }
 
 .editor-wrapper
@@ -55,13 +55,13 @@
     .tiptap-mathematics-render[data-type="block-math"] {
     display: block;
     padding: 1em;
-    background: #f8fafc;
+    background: var(--ui-bg-muted);
     border-radius: 8px;
     overflow-x: auto;
     text-align: center;
     position: relative;
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: var(--ui-border-strong) transparent;
 }
 
 .editor-wrapper
@@ -80,20 +80,20 @@
 .editor-wrapper
     .ProseMirror
     .tiptap-mathematics-render[data-type="block-math"]::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--ui-border-strong);
     border-radius: 2px;
 }
 
 .editor-wrapper
     .ProseMirror
     .tiptap-mathematics-render[data-type="block-math"]::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--ui-text-placeholder);
 }
 
 .editor-wrapper
     .ProseMirror
     .tiptap-mathematics-render[data-type="block-math"]:hover {
-    background-color: #f1f5f9;
+    background-color: var(--ui-bg-subtle);
 }
 
 /* 块级公式 hover 时显示的删除按钮（容器由 useBlockMathDeleteButton 注入） */
@@ -112,8 +112,8 @@
     padding: 0;
     border: none;
     border-radius: 6px;
-    background: #fff;
-    color: #64748b;
+    background: var(--ui-bg-panel);
+    color: var(--ui-text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -123,7 +123,7 @@
         opacity 0.2s ease,
         background-color 0.15s ease,
         color 0.15s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--ui-scrollbar-thumb);
 }
 
 .editor-wrapper
@@ -137,7 +137,7 @@
 .editor-wrapper
     .ProseMirror
     .tiptap-mathematics-render.ProseMirror-selectednode {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--ui-control-active);
     outline-offset: 2px;
 }
 
@@ -166,3 +166,5 @@
     .katex-display {
     margin: 0 auto;
 }
+
+

@@ -7,11 +7,27 @@
 
 .app {
   width: 100%;
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app.app-light {
+  background: #ffffff;
+  color: #213547;
+}
+
+.app.app-dark {
+  background: #0f172a;
+  color: #e2e8f0;
 }
 
 .app h1 {
   margin-bottom: 2rem;
   color: #213547;
+}
+
+.app.app-dark h1 {
+  color: #e2e8f0;
 }
 
 .demo-actions {
@@ -34,4 +50,15 @@
 .demo-actions button:hover {
   background: #f8fafc;
   border-color: #94a3b8;
+}
+
+.app.app-dark .demo-actions button {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.app.app-dark .demo-actions button:hover {
+  background: #334155;
+  border-color: #475569;
 }

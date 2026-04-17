@@ -1,7 +1,7 @@
 .editor-toolbar {
   flex-shrink: 0;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--ui-bg-toolbar);
+  border-bottom: 1px solid var(--ui-border);
   padding: 6px 12px;
 }
 
@@ -20,7 +20,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #374151;
+  color: var(--ui-text);
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -40,13 +40,13 @@
 }
 
 .editor-toolbar-btn:hover {
-  background: #e5e7eb;
-  color: #111827;
+  background: var(--ui-border);
+  color: var(--ui-text-strong);
 }
 
 .editor-toolbar-inner .editor-toolbar-btn.is-active {
-  background: #3b82f6;
-  color: white;
+  background: var(--ui-control-active);
+  color: var(--ui-text-inverse);
 }
 
 .editor-toolbar-btn:disabled,
@@ -69,7 +69,7 @@
 .editor-toolbar-separator {
   width: 1px;
   flex: 0 0 1px;
-  background: #e5e7eb;
+  background: var(--ui-border);
   margin: 4px 4px;
   align-self: stretch;
 }
@@ -78,11 +78,11 @@
   width: max-content;
   height: auto;
   min-height: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--ui-text-inverse);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--ui-shadow-xl);
   display: flex;
   flex-direction: column;
   min-width: 140px;
@@ -103,7 +103,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #374151;
+  color: var(--ui-text);
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -111,13 +111,13 @@
 }
 
 .editor-toolbar-heading-item:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--ui-bg-hover-soft);
+  color: var(--ui-text-strong);
 }
 
 .editor-toolbar-heading-item.is-active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--ui-bg-selected);
+  color: var(--ui-text-link);
 }
 
 .editor-toolbar-heading-num {
@@ -136,8 +136,10 @@
 .editor-toolbar-table-size-popover {
   width: auto;
   padding: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--ui-text-inverse);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--ui-shadow-xl);
 }
+
+

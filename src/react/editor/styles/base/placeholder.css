@@ -2,7 +2,7 @@
 .editor-wrapper.notion-editor .ProseMirror p.is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: #94a3b8;
+  color: var(--ui-text-placeholder);
   pointer-events: none;
   height: 0;
 }
@@ -21,7 +21,9 @@
 .editor-wrapper.headless-editor .ProseMirror.is-editor-empty p.is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: #94a3b8;
+  color: var(--ui-text-placeholder);
   pointer-events: none;
   height: 0;
 }
+
+

@@ -23,7 +23,7 @@
   inset: 0;
   min-height: 120px;
   width: 100%;
-  background: #f1f5f9;
+  background: var(--ui-bg-subtle);
   border-radius: 4px;
   animation: image-loading-pulse 1.5s ease-in-out infinite;
 }
@@ -50,7 +50,7 @@
 .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode img,
 .editor-wrapper .ProseMirror .image-node-wrapper .image-error-placeholder.image-selected,
 .editor-wrapper .ProseMirror .image-node-wrapper.ProseMirror-selectednode .image-error-placeholder {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--ui-control-active);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -75,15 +75,15 @@
   padding: 0;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #64748b;
+  background: var(--ui-image-badge-bg);
+  color: var(--ui-text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--ui-shadow-md);
 }
 
 .editor-wrapper .ProseMirror .image-node-wrapper:hover .image-delete-btn {
@@ -91,8 +91,8 @@
 }
 
 .editor-wrapper .ProseMirror .image-delete-btn:hover {
-  background: rgba(241, 245, 249, 0.98);
-  color: #475569;
+  background: var(--ui-image-badge-hover-bg);
+  color: var(--ui-text-muted-strong);
 }
 
 /* 图片加载失败占位 */
@@ -104,10 +104,10 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #f1f5f9;
-  border: 1px dashed #cbd5e1;
+  background: var(--ui-bg-subtle);
+  border: 1px dashed var(--ui-border-strong);
   border-radius: 8px;
-  color: #64748b;
+  color: var(--ui-text-muted);
   font-size: 13px;
 }
 
@@ -115,3 +115,5 @@
   flex-shrink: 0;
   opacity: 0.7;
 }
+
+

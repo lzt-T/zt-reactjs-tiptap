@@ -43,18 +43,20 @@
   width: 1.125rem;
   height: 1.125rem;
   margin: 0;
-  border: 1.5px solid var(--border, #94a3b8);
+  border: 1.5px solid var(--border);
   border-radius: 0.25rem;
-  background: var(--background, #fff);
+  background: var(--background);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"]:checked {
-  background: var(--primary, #3b82f6);
-  border-color: var(--primary, #3b82f6);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background: var(--primary);
+  border-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='var(--ui-text-inverse)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
   background-size: 0.875rem;
   background-position: center;
   background-repeat: no-repeat;
 }
+
+

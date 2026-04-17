@@ -1,7 +1,7 @@
 /* 弹窗内容区滚动条（仅内容区滚动，弹窗本身不滚动） */
 .math-dialog-body {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+  scrollbar-color: var(--ui-scrollbar-thumb) transparent;
 }
 
 .math-dialog-body::-webkit-scrollbar {
@@ -13,53 +13,53 @@
 }
 
 .math-dialog-body::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--ui-scrollbar-thumb);
   border-radius: 2px;
 }
 
 .math-dialog-body::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--ui-scrollbar-thumb-hover);
 }
 
 .dark .math-dialog-body {
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: var(--ui-scrollbar-thumb) transparent;
 }
 
 .dark .math-dialog-body::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--ui-scrollbar-thumb);
 }
 
 .dark .math-dialog-body::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: var(--ui-scrollbar-thumb-hover);
 }
 
 /* LaTeX 输入框 - 使用 var() 直接引用主题色（支持 oklch/hsl） */
 .math-dialog-input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: calc(var(--radius, 0.5rem) - 2px);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
   font-size: 0.875rem;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   resize: vertical;
   transition: all 0.2s;
-  background: var(--background, #fff);
-  color: var(--foreground, #171717);
+  background: var(--background);
+  color: var(--foreground);
 }
 
 .math-dialog-input:focus {
   outline: none;
-  border-color: var(--ring, #3b82f6);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #3b82f6) 15%, transparent);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 15%, transparent);
 }
 
 /* 预览区域 */
 .math-dialog-preview {
   min-height: 100px;
   padding: 1rem;
-  background: color-mix(in oklch, var(--muted, #f5f5f5) 30%, transparent);
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: calc(var(--radius, 0.5rem) - 2px);
+  background: color-mix(in oklch, var(--muted) 30%, transparent);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,7 +69,7 @@
 }
 
 .math-dialog-preview:hover {
-  border-color: color-mix(in oklch, var(--border, #e5e7eb) 80%, currentColor);
+  border-color: color-mix(in oklch, var(--border) 80%, currentColor);
 }
 
 .math-dialog-preview-content {
@@ -83,41 +83,41 @@
 }
 
 .math-dialog-preview-placeholder {
-  color: var(--muted-foreground, #737373);
+  color: var(--muted-foreground);
   font-size: 0.875rem;
   font-style: italic;
 }
 
 .math-dialog-preview-error {
-  color: var(--destructive, #dc2626);
+  color: var(--destructive);
   font-size: 0.75rem;
   padding: 0.5rem;
-  background: color-mix(in oklch, var(--destructive, #dc2626) 12%, transparent);
-  border-radius: calc(var(--radius, 0.5rem) - 4px);
+  background: color-mix(in oklch, var(--destructive) 12%, transparent);
+  border-radius: calc(var(--radius) - 4px);
   text-align: left;
   width: 100%;
-  border: 1px solid color-mix(in oklch, var(--destructive, #dc2626) 25%, transparent);
+  border: 1px solid color-mix(in oklch, var(--destructive) 25%, transparent);
 }
 
 /* 对话框内按钮样式增强（确保在无 Tailwind 或变量未注入时也有清晰边框与主色） */
 [data-slot="dialog-footer"] [data-slot="button"][data-variant="outline"] {
-  border: 1px solid var(--border, #e5e7eb);
-  background: var(--background, #fff);
-  color: var(--foreground, #171717);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
 }
 
 [data-slot="dialog-footer"] [data-slot="button"][data-variant="outline"]:hover {
-  background: var(--accent, #f5f5f5);
-  color: var(--accent-foreground, #171717);
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 [data-slot="dialog-footer"] [data-slot="button"][data-variant="default"] {
-  background: var(--primary, #171717);
-  color: var(--primary-foreground, #fff);
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 [data-slot="dialog-footer"] [data-slot="button"][data-variant="default"]:hover {
-  background: color-mix(in oklch, var(--primary, #171717) 90%, black);
+  background: color-mix(in oklch, var(--primary) 90%, black);
 }
 
 /* 常用公式 - 使用 shadcn Tabs */
@@ -137,7 +137,7 @@
   flex-wrap: wrap;
   height: auto;
   min-height: 2.25rem;
-  background: var(--muted, #f5f5f5);
+  background: var(--muted);
   border-radius: 0.5rem;
   padding: 3px;
 }
@@ -150,24 +150,24 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--muted-foreground, #737373);
+  color: var(--muted-foreground);
   background: transparent;
   border: 1px solid transparent;
 }
 .math-dialog-tabs-list [data-slot="tabs-trigger"]:hover {
-  color: var(--foreground, #171717);
+  color: var(--foreground);
 }
 .math-dialog-tabs-list [data-slot="tabs-trigger"][data-state="active"] {
-  background: var(--background, #ffffff);
-  color: var(--foreground, #171717);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: var(--ui-shadow-sm);
 }
 
 .math-dialog-tabs-content {
   padding: 0.75rem;
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: calc(var(--radius, 0.5rem) - 2px);
-  background: color-mix(in oklch, var(--muted, #f5f5f5) 18%, transparent);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in oklch, var(--muted) 18%, transparent);
   min-height: 3rem;
   min-width: 0;
   width: 100%;
@@ -192,10 +192,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
-  border: 1px solid var(--border, #e5e7eb);
-  background: var(--background, #fff);
-  color: var(--foreground, #171717);
-  border-radius: calc(var(--radius, 0.5rem) - 2px);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: calc(var(--radius) - 2px);
   padding: 0.5rem 0.65rem;
   min-width: 2.5rem;
   min-height: 2.25rem;
@@ -225,12 +225,12 @@
 .math-dialog-snippet-label {
   font-size: 0.65rem;
   line-height: 1;
-  color: var(--muted-foreground, #737373);
+  color: var(--muted-foreground);
 }
 
 .math-dialog-snippet:hover {
-  background: var(--accent, #f5f5f5);
-  border-color: color-mix(in oklch, var(--border, #e5e7eb) 75%, currentColor);
+  background: var(--accent);
+  border-color: color-mix(in oklch, var(--border) 75%, currentColor);
 }
 
 .math-dialog-snippet:active {
@@ -239,6 +239,9 @@
 
 .math-dialog-snippet:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #3b82f6) 20%, transparent);
-  border-color: var(--ring, #3b82f6);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
+  border-color: var(--ring);
 }
+
+
+

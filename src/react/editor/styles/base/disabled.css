@@ -12,7 +12,7 @@
 }
 
 .editor-container.is-disabled .tiptap-mathematics-render[data-type="block-math"]:hover {
-  background-color: #f8fafc;
+  background-color: var(--ui-bg-muted);
 }
 
 .editor-container.is-disabled .tiptap-mathematics-render.ProseMirror-selectednode {
@@ -42,11 +42,13 @@
 /* disabled 下文件块不显示选中边框，但链接仍可点击 */
 .editor-container.is-disabled .editor-wrapper .ProseMirror .file-attachment-wrapper.file-attachment-selected,
 .editor-container.is-disabled .editor-wrapper .ProseMirror .file-attachment-wrapper.ProseMirror-selectednode {
-  border-color: #e2e8f0;
-  background: #f8fafc;
+  border-color: var(--ui-border-muted);
+  background: var(--ui-bg-muted);
 }
 
 .editor-container.is-disabled .editor-wrapper .ProseMirror .file-attachment-link {
   cursor: pointer;
   pointer-events: auto;
 }
+
+

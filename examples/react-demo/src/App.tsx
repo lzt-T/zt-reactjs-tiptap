@@ -2,11 +2,14 @@ import { useState, useEffect } from "react";
 import {
   ReactTiptapEditor,
   EditorMode,
+  EditorTheme,
   htmlToPlainText,
 } from "../../../src/index";
 import "./App.css";
 
 function App() {
+  // 控制编辑器浅色/深色主题。
+  const [editorTheme, setEditorTheme] = useState(EditorTheme.Light);
   const [content, setContent] = useState("");
   const [count, setCount] = useState(0);
   const [disabled, setDisabled] = useState(false);
@@ -22,6 +25,13 @@ function App() {
 
   const handleToggleDisabled = () => {
     setDisabled((prevDisabled) => !prevDisabled);
+  };
+
+  /** 切换编辑器主题（浅色/深色）。 */
+  const handleToggleTheme = () => {
+    setEditorTheme((prevTheme) =>
+      prevTheme === EditorTheme.Dark ? EditorTheme.Light : EditorTheme.Dark,
+    );
   };
 
   const handleEditorChange = (html: string) => {
@@ -128,7 +138,9 @@ function App() {
   }, []);
 
   return (
-    <div className="app">
+    <div
+      className={`app ${editorTheme === EditorTheme.Dark ? "app-dark" : "app-light"}`}
+    >
       <h1>Tiptap Markdown Editor</h1>
       <div className="demo-actions">
         <button type="button" onClick={handleToggleMode}>
@@ -136,6 +148,9 @@ function App() {
         </button>
         <button type="button" onClick={handleToggleDisabled}>
           切换disabled
+        </button>
+        <button type="button" onClick={handleToggleTheme}>
+          切换主题（{editorTheme}）
         </button>
       </div>
       {/*<div onClick={() => setDisabled(true)}>disabled</div>
@@ -147,6 +162,7 @@ function App() {
         <ReactTiptapEditor
           disabled={disabled}
           editorMode={editorMode}
+          theme={editorTheme}
           value={content}
           onChange={(str: string) => {
             console.log("str", str);

@@ -13,7 +13,7 @@ function renderSnippetPreview(latex: string): string {
     return katex.renderToString(latex, {
       displayMode: false,
       throwOnError: false,
-      errorColor: '#dc2626',
+      errorColor: 'var(--ui-danger)',
     })
   } catch {
     return ''

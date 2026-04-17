@@ -3,11 +3,11 @@
     overflow-x: auto;
     overflow-y: hidden; /* 仅横向滚动，不出现纵向滚动条 */
     /* 为行/列操作按钮留出空间，由 config.TABLE_ACTION_BUTTON_PADDING 注入 */
-    padding-left: var(--table-action-padding, 14px);
-    padding-top: var(--table-action-padding, 14px);
+    padding-left: var(--table-action-padding);
+    padding-top: var(--table-action-padding);
     /* 隐藏水平滚动条但保留滚动功能 */
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: var(--ui-border-strong) transparent;
 }
 
 .editor-wrapper .ProseMirror .tableWrapper::-webkit-scrollbar {
@@ -19,7 +19,7 @@
 }
 
 .editor-wrapper .ProseMirror .tableWrapper::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--ui-border-strong);
     border-radius: 2px;
 }
 
@@ -33,16 +33,18 @@
 
 .editor-wrapper .ProseMirror td,
 .editor-wrapper .ProseMirror th {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--ui-border-muted);
     padding: 8px 12px;
     min-width: 100px;
 }
 
 .editor-wrapper .ProseMirror th {
-    background: #f8fafc;
+    background: var(--ui-bg-muted);
     font-weight: 600;
 }
 
 .editor-wrapper .ProseMirror .selectedCell {
-    background: #e0f2fe;
+    background: var(--ui-bg-table-highlight);
 }
+
+

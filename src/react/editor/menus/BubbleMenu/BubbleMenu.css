@@ -1,11 +1,11 @@
 .bubble-menu {
   display: flex;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--ui-text-inverse);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 4px;
   gap: 2px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--ui-shadow-xl);
   animation: fadeIn 0.15s ease;
   position: relative;
 }
@@ -25,7 +25,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #374151;
+  color: var(--ui-text);
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -50,13 +50,13 @@
 }
 
 .bubble-menu button:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--ui-bg-hover-soft);
+  color: var(--ui-text-strong);
 }
 
 .bubble-menu button.is-active {
-  background: #3b82f6;
-  color: white;
+  background: var(--ui-control-active);
+  color: var(--ui-text-inverse);
 }
 
 .bubble-menu button strong,
@@ -81,18 +81,18 @@
 
 .bubble-menu .separator {
   width: 1px;
-  background: #e5e7eb;
+  background: var(--ui-border);
   margin: 4px 4px;
   align-self: stretch;
 }
 
 /* 更多菜单样式 */
 .more-menu {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--ui-text-inverse);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--ui-shadow-xl);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -108,7 +108,7 @@
   border: none;
   outline: none;
   background: transparent;
-  color: #374151;
+  color: var(--ui-text);
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
@@ -117,13 +117,13 @@
 }
 
 .more-menu button:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--ui-bg-hover-soft);
+  color: var(--ui-text-strong);
 }
 
 .more-menu button.is-active {
-  background: #eff6ff;
-  color: #3b82f6;
+  background: var(--ui-bg-selected);
+  color: var(--ui-control-active);
 }
 
 .more-menu button svg {
@@ -136,7 +136,7 @@
   width: 1px;
   height: auto;
   align-self: stretch;
-  background: #e5e7eb;
+  background: var(--ui-border);
   margin: 4px 0;
 }
 
@@ -147,3 +147,5 @@
   background: transparent;
   box-shadow: none;
 }
+
+

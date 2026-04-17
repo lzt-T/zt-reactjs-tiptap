@@ -1,7 +1,7 @@
 .editor-container {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ui-border-muted);
   border-radius: 8px;
-  background: white;
+  background: var(--ui-text-inverse);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -37,17 +37,17 @@
 }
 
 .editor-wrapper::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--ui-bg-subtle);
   border-radius: 4px;
 }
 
 .editor-wrapper::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--ui-border-strong);
   border-radius: 4px;
 }
 
 .editor-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--ui-text-placeholder);
 }
 
 .editor-wrapper .ProseMirror {
@@ -56,3 +56,5 @@
   /* 允许浏览器合成斜体：中文等无 italic 变体的字体也能显示倾斜 */
   font-synthesis: style;
 }
+
+

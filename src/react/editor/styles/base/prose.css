@@ -62,14 +62,14 @@
 }
 
 .editor-wrapper .ProseMirror blockquote {
-    border-left: 3px solid #e2e8f0;
+    border-left: 3px solid var(--ui-border-muted);
     padding-left: 1em;
     margin-left: 0;
-    color: #64748b;
+    color: var(--ui-text-muted);
 }
 
 .editor-wrapper .ProseMirror code {
-    background: #f1f5f9;
+    background: var(--ui-bg-subtle);
     padding: 0.2em 0.4em;
     border-radius: 4px;
     font-family: var(
@@ -137,7 +137,7 @@
     left: 0.5em;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--ui-text-placeholder);
     pointer-events: none;
     user-select: none;
     white-space: pre-wrap;
@@ -160,7 +160,7 @@
 /* Horizontal rule */
 .editor-wrapper .ProseMirror hr {
     border: none;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--ui-border-muted);
     margin: 2em 0;
 }
 
@@ -181,3 +181,6 @@
 .editor-wrapper .ProseMirror [data-node-view-wrapper] {
     outline: none;
 }
+
+
+

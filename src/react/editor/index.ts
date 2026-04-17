@@ -2,10 +2,15 @@
 export { default as ReactTiptapEditor } from "./shell/ReactTiptapEditor";
 
 // 组件运行时模式常量导出（供调用方在运行时使用）。
-export { EditorMode, HeadlessToolbarMode, EditorLanguage } from "./types";
+export {
+  EditorMode,
+  HeadlessToolbarMode,
+  EditorLanguage,
+  EditorTheme,
+} from "./types";
 
 // 组件类型导出。
-export type { TiptapEditorProps } from "./types";
+export type { TiptapEditorProps, EditorTheme } from "./types";
 
 // 工具栏/斜杠配置导出。
 export {

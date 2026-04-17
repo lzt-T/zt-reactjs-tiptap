@@ -4,6 +4,7 @@ export {
   EditorMode,
   HeadlessToolbarMode,
   EditorLanguage,
+  EditorTheme,
   BuiltinToolbarItemKey,
   BuiltinSlashCommandKey,
   createDefaultToolbarItems,
@@ -13,6 +14,7 @@ export {
 // 导出 React 层类型。
 export type {
   TiptapEditorProps,
+  EditorTheme,
   ToolbarItemConfig,
   SlashCommandConfig,
   EditorActionContext,

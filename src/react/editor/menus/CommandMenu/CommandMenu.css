@@ -4,14 +4,14 @@
 
 /* 命令菜单边框：使用主题变量，无主题时回退到浅灰，避免打包到其他项目后出现黑边 */
 [data-slot="command"] {
-  border-color: var(--border, #e5e7eb);
+  border-color: var(--border);
 }
 
 /* CommandMenu 滚动条样式 */
 [data-slot="command-list"] {
   /* 标准滚动条样式（Firefox） */
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+  scrollbar-color: var(--ui-scrollbar-thumb) transparent;
 }
 
 /* Webkit 滚动条样式（Chrome, Safari, Edge） */
@@ -24,23 +24,25 @@
 }
 
 [data-slot="command-list"]::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--ui-scrollbar-thumb);
   border-radius: 2px;
 }
 
 [data-slot="command-list"]::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--ui-scrollbar-thumb-hover);
 }
 
 /* 深色模式滚动条 */
 .dark [data-slot="command-list"] {
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: var(--ui-scrollbar-thumb) transparent;
 }
 
 .dark [data-slot="command-list"]::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--ui-scrollbar-thumb);
 }
 
 .dark [data-slot="command-list"]::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: var(--ui-scrollbar-thumb-hover);
 }
+
+

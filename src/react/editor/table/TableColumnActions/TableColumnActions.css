@@ -6,20 +6,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--ui-bg-subtle);
+  border: 1px solid var(--ui-border-muted);
   border-radius: 4px;
   cursor: pointer;
   z-index: 41;
   transition: background 0.15s ease, border-color 0.15s ease;
-  color: #64748b;
+  color: var(--ui-text-muted);
   box-sizing: border-box;
 }
 
 .table-column-action-trigger:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
-  color: #475569;
+  background: var(--ui-border-muted);
+  border-color: var(--ui-border-strong);
+  color: var(--ui-text-muted-strong);
 }
 
 .table-column-action-icon {
@@ -29,35 +29,35 @@
 
 /* 列操作弹出菜单：与 TableRowActions 菜单一致 */
 .table-column-action-menu {
-  background: white;
-  border: 1px solid #cbd5e1;
+  background: var(--ui-text-inverse);
+  border: 1px solid var(--ui-border-strong);
   border-radius: 6px;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--ui-shadow-lg);
 }
 
 .table-column-action-menu button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--ui-bg-muted);
+  border: 1px solid var(--ui-border-muted);
   border-radius: 4px;
   padding: 0;
   width: 28px;
   height: 28px;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: #475569;
+  color: var(--ui-text-muted-strong);
 }
 
 .table-column-action-menu button:hover:not(:disabled) {
-  background: #e0e7ff;
-  border-color: #818cf8;
-  color: #4338ca;
+  background: var(--ui-bg-selected-strong);
+  border-color: var(--ui-border-selected);
+  color: var(--ui-text-selected);
 }
 
 .table-column-action-menu button:disabled {
@@ -68,6 +68,8 @@
 .table-column-action-menu .separator {
   width: 1px;
   height: 20px;
-  background: #e2e8f0;
+  background: var(--ui-border-muted);
   margin: 0 2px;
 }
+
+

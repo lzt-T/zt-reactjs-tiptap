@@ -13,6 +13,9 @@
   - `DEFAULT_CODE_BLOCK_LANGUAGE`
   - `DEFAULT_CODE_BLOCK_LANGUAGES`
   - `CodeBlockLanguageOption`
+  - `EditorTheme`
+- Added new prop:
+  - `theme?: 'light' | 'dark'` (default: `light`)
 
 ### Changed
 - Unified editor runtime schema and `htmlToPlainText` schema for code block handling via `StarterKit.configure({ codeBlock: false }) + CodeBlockLowlight`.
@@ -21,3 +24,5 @@
   - `slashCommands.codeBlock`
   - `codeBlock.languageButton`
   - `codeBlock.plainText`
+- Updated editor theme behavior: no longer follows `html.dark`; theme is controlled by `ReactTiptapEditor` `theme` prop.
+- Refactored editor UI styles to theme tokens in `src/react/editor/**` (toolbar, menus, table actions, dialogs, base styles). Light mode keeps previous visuals while dark mode now maps through the same token set.

@@ -29,6 +29,16 @@ export const EditorLanguage = {
 
 export type EditorLanguage = (typeof EditorLanguage)[keyof typeof EditorLanguage]
 
+/** 编辑器主题 */
+export const EditorTheme = {
+  // 浅色主题。
+  Light: 'light',
+  // 深色主题。
+  Dark: 'dark',
+} as const
+
+export type EditorTheme = (typeof EditorTheme)[keyof typeof EditorTheme]
+
 /** Headless 模式下 Toolbar 的显示模式 */
 export const HeadlessToolbarMode = {
   /** 一直显示 */
@@ -137,6 +147,12 @@ export interface TiptapEditorProps {
    * @default 'notion-like'
    */
   editorMode?: EditorMode
+
+  /**
+   * 编辑器主题，仅支持浅色与深色。
+   * @default 'light'
+   */
+  theme?: EditorTheme
 
   /**
    * Headless 模式下 Toolbar 的显示模式：'always' 一直显示，'on-focus' 仅在编辑器聚焦时显示

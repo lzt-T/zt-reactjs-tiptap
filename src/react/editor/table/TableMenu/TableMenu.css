@@ -1,38 +1,38 @@
 .table-menu {
   position: absolute;
-  background: white;
-  border: 1px solid #cbd5e1;
+  background: var(--ui-text-inverse);
+  border: 1px solid var(--ui-border-strong);
   border-radius: 6px;
   padding: 4px;
   display: flex;
   align-items: center;
   gap: 4px;
   z-index: 40;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--ui-shadow-lg);
 }
 
 .table-menu button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--ui-bg-muted);
+  border: 1px solid var(--ui-border-muted);
   border-radius: 4px;
   padding: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: #475569;
+  color: var(--ui-text-muted-strong);
   width: 28px;
   height: 28px;
 }
 
 .table-menu button:hover:not(:disabled) {
-  background: #e0e7ff;
-  border-color: #818cf8;
+  background: var(--ui-bg-selected-strong);
+  border-color: var(--ui-border-selected);
 }
 
 .table-menu button:active:not(:disabled) {
-  background: #c7d2fe;
+  background: var(--ui-bg-selected-pressed);
   transform: scale(0.95);
 }
 
@@ -42,7 +42,9 @@
 }
 
 .table-menu .separator {
-  color: #cbd5e1;
+  color: var(--ui-border-strong);
   margin: 0 2px;
   font-size: 14px;
 }
+
+

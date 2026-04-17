@@ -6,24 +6,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--ui-bg-subtle);
+  border: 1px solid var(--ui-border-muted);
   border-radius: 4px;
   cursor: pointer;
   z-index: 41;
   transition: background 0.15s ease, border-color 0.15s ease;
-  color: #64748b;
+  color: var(--ui-text-muted);
   box-sizing: border-box;
 }
 
 .table-add-row-below-trigger:hover,
 .table-add-column-right-trigger:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
-  color: #475569;
+  background: var(--ui-border-muted);
+  border-color: var(--ui-border-strong);
+  color: var(--ui-text-muted-strong);
 }
 
 .table-add-trigger-icon {
   flex-shrink: 0;
   color: inherit;
 }
+
+
