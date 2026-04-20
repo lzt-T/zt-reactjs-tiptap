@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Check } from 'lucide-react'
 import type { ColorOption } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
 import './ColorPicker.css'
@@ -40,8 +41,12 @@ const ColorPicker = ({
   // 标记输入框是否已触发校验，用于展示可见错误状态。
   const [hexTouched, setHexTouched] = useState(false)
   const normalizedSelected = normalizeColor(selectedColor ?? '')
+  // 规范化后的自定义输入值，用于统一校验与提交判断。
+  const normalizedCustomHex = normalizeColor(customHex)
+  // 当前自定义输入是否为合法 HEX。
+  const isCustomHexValid = isValidHexColor(normalizedCustomHex)
   // 仅当输入值不合法且已触发校验时展示错误态。
-  const hasHexError = hexTouched && customHex.trim() !== '' && !isValidHexColor(customHex)
+  const hasHexError = hexTouched && normalizedCustomHex !== '' && !isCustomHexValid
 
   /** 打开自定义颜色输入区，并预填当前选中颜色（若为 HEX）。 */
   const handleOpenCustomInput = () => {
@@ -53,7 +58,7 @@ const ColorPicker = ({
 
   /** 尝试提交自定义颜色；仅合法 HEX 才调用 onColorSelect。 */
   const trySubmitCustomHex = () => {
-    const nextColor = customHex.trim()
+    const nextColor = normalizedCustomHex
     setHexTouched(true)
     if (!isValidHexColor(nextColor)) return
     onColorSelect(normalizeColor(nextColor))
@@ -91,7 +96,7 @@ const ColorPicker = ({
           <div className="color-picker-custom">
             <span
               className="color-picker-custom-preview"
-              style={isValidHexColor(customHex) ? { backgroundColor: normalizeColor(customHex) } : undefined}
+              style={isCustomHexValid ? { background: normalizedCustomHex } : undefined}
               aria-hidden="true"
             />
             <input
@@ -101,7 +106,6 @@ const ColorPicker = ({
                 setCustomHex(event.target.value)
                 if (hexTouched) setHexTouched(false)
               }}
-              onBlur={trySubmitCustomHex}
               onKeyDown={(event) => {
                 if (event.key !== 'Enter') return
                 event.preventDefault()
@@ -112,6 +116,16 @@ const ColorPicker = ({
               aria-invalid={hasHexError}
               spellCheck={false}
             />
+            <button
+              type="button"
+              className="color-picker-confirm-btn"
+              onClick={trySubmitCustomHex}
+              disabled={!isCustomHexValid}
+              aria-label={locale.colorPicker.confirm}
+              title={locale.colorPicker.confirm}
+            >
+              <Check size={14} strokeWidth={2.25} aria-hidden="true" />
+            </button>
           </div>
         )}
       </div>

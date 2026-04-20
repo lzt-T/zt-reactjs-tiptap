@@ -66,6 +66,7 @@ export interface EditorLocale {
   };
   colorPicker: {
     customColor: string;
+    confirm: string;
   };
   codeBlock: {
     languageButton: string;

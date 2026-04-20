@@ -64,6 +64,7 @@ const zhCN: EditorLocale = {
   },
   colorPicker: {
     customColor: '+ 自定义颜色',
+    confirm: '确认',
   },
   codeBlock: {
     languageButton: '代码语言',

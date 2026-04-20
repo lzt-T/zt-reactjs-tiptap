@@ -67,6 +67,7 @@ const enUS: EditorLocale = {
   },
   colorPicker: {
     customColor: '+ Custom color',
+    confirm: 'Confirm',
   },
   codeBlock: {
     languageButton: 'Code language',
