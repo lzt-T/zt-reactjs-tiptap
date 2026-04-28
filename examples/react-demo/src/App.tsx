@@ -9,11 +9,13 @@ import "./App.css";
 
 function App() {
   // 控制编辑器浅色/深色主题。
-  const [editorTheme, setEditorTheme] = useState(EditorTheme.Light);
+  const [editorTheme, setEditorTheme] = useState<EditorTheme>(
+    EditorTheme.Light,
+  );
   const [content, setContent] = useState("");
   const [count, setCount] = useState(0);
   const [disabled, setDisabled] = useState(false);
-  const [editorMode, setEditorMode] = useState(EditorMode.Headless);
+  const [editorMode, setEditorMode] = useState<EditorMode>(EditorMode.Headless);
 
   const handleToggleMode = () => {
     setEditorMode((prevMode) =>
@@ -114,17 +116,6 @@ function App() {
   const onFileDelete = (params: { url: string; name: string }) => {
     console.log("count", count);
     console.log("🗑️ 删除附件:", params);
-  };
-
-  const onCodeBlockFormat = async ({
-    code,
-    language,
-  }: {
-    code: string;
-    language: string;
-  }) => {
-    console.log("🧹 格式化代码:", { language });
-    return code;
   };
 
   useEffect(() => {
