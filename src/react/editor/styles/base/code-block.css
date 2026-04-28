@@ -212,6 +212,7 @@
   font-size: 13px;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
+  cursor: pointer;
 }
 
 .code-block-language-empty {

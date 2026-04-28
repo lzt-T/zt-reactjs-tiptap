@@ -79,6 +79,7 @@ const ReactTiptapEditor = ({
   headlessToolbarMode = HeadlessToolbarMode.Always,
   value,
   onChange,
+  onError,
   onImageUpload,
   onImagePreUpload,
   onImageDelete,
@@ -186,6 +187,7 @@ const ReactTiptapEditor = ({
     editorRef,
     onChangeDebounceMs,
     onChange,
+    onError,
     onImageDelete,
     onFileDelete,
     onStart: resolvedConfig.isNotionLike ? commandMenu.handleStart : noop,
@@ -286,11 +288,21 @@ const ReactTiptapEditor = ({
     (payload: { file: File; url: string; alt?: string }) => {
       runAfterOnChange(() => {
         if (onImageUpload) {
-          void Promise.resolve(onImageUpload(payload));
+          void Promise.resolve(onImageUpload(payload)).catch((error: unknown) => {
+            onError?.({
+              source: "image-upload",
+              stage: "confirm",
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "Image confirm callback failed",
+              error,
+            });
+          });
         }
       });
     },
-    [onImageUpload, runAfterOnChange],
+    [onError, onImageUpload, runAfterOnChange],
   );
 
   /** 在 onChange 之后再回调外部附件上传事件，避免时序竞争。 */
@@ -298,11 +310,21 @@ const ReactTiptapEditor = ({
     (payload: { file: File; url: string; name: string }) => {
       runAfterOnChange(() => {
         if (onFileUpload) {
-          void Promise.resolve(onFileUpload(payload));
+          void Promise.resolve(onFileUpload(payload)).catch((error: unknown) => {
+            onError?.({
+              source: "file-upload",
+              stage: "confirm",
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "File confirm callback failed",
+              error,
+            });
+          });
         }
       });
     },
-    [onFileUpload, runAfterOnChange],
+    [onError, onFileUpload, runAfterOnChange],
   );
 
   /** 斜杠命令选中后执行：先删除 "/" 及后续输入，再执行对应命令。 */
@@ -403,6 +425,7 @@ const ReactTiptapEditor = ({
         fileUploadTypes={resolvedConfig.resolvedFileUploadTypes}
         onImagePreUpload={onImagePreUpload}
         onFilePreUpload={onFilePreUpload}
+        onError={onError}
         onImageUploadAfterChange={handleImageUploadAfterChange}
         onFileUploadAfterChange={handleFileUploadAfterChange}
         mathDialog={mathDialog}

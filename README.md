@@ -222,6 +222,7 @@ function App() {
 |------|------|------|--------|------|
 | `value` | `string` | 否 | - | 编辑器的 HTML 内容 |
 | `onChange` | `(html: string) => void` | 否 | - | 内容变化时的回调函数，参数为 HTML 字符串 |
+| `onError` | `(event: { source: 'image-upload' \| 'file-upload' \| 'paste'; stage: 'pre-upload' \| 'confirm' \| 'transform'; message: string; error?: unknown }) => void` | 否 | - | 统一错误上报：上传预处理失败、Confirm 回调失败、HTML 粘贴清洗失败等 |
 | `onImagePreUpload` | `(file: File) => Promise<string>` | 否 | - | 图片预上传函数（选择/拖拽文件时触发），返回图片 URL。不提供时图片将以 Base64 插入 |
 | `onImageUpload` | `(payload: { file: File; url: string; alt?: string }) => void \| Promise<void>` | 否 | - | 图片 Confirm 回调（仅在点击 Confirm 后触发） |
 | `onFilePreUpload` | `(file: File) => Promise<{ url: string; name: string }>` | 否 | - | 附件预上传函数（选择/拖拽文件时触发），返回文件 URL 与展示名 |
@@ -339,6 +340,13 @@ const customLanguages: CodeBlockLanguageOption[] = [
 - 使用 ↑ ↓ 方向键选择
 - 按 Enter 确认插入
 - 按 Escape 关闭菜单
+
+### HTML 粘贴清洗（默认开启）
+
+- 仅对剪贴板中的 `text/html` 内容进行清洗，纯文本粘贴行为保持不变
+- 会移除高风险/无效标签（如 `script`、`style`、`iframe` 等）、内联事件属性（`on*`）、内联 `style`
+- 会清理 Office 常见污染 class（如 `Mso*`）并解包无意义 `span/font` 包裹
+- 清洗异常时会回退到原生粘贴流程；若传入 `onError`，会收到 `source: 'paste'` 且 `stage: 'transform'` 的错误事件
 
 ### 工具栏自定义（重排内置项 + 新增自定义按钮）
 

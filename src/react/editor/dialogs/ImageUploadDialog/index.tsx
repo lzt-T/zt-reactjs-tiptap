@@ -12,6 +12,7 @@ import { Loader2, ImagePlus, AlertCircle, ImageOff } from 'lucide-react'
 import { config } from '@/shared/config'
 import { formatFileSize } from '@/shared/utils/utils'
 import type { EditorLocale } from '@/shared/locales'
+import type { EditorErrorEvent } from '@/react/editor/types'
 import './ImageUploadDialog.css'
 
 interface ImageUploadDialogProps {
@@ -20,6 +21,7 @@ interface ImageUploadDialogProps {
   onCancel: () => void
   onPreUpload?: (file: File) => Promise<string>
   onUpload?: (payload: { file: File; url: string; alt?: string }) => void | Promise<void>
+  onError?: (event: EditorErrorEvent) => void
   /** 图片最大体积（字节），超过则拒绝 */
   imageMaxSizeBytes?: number
   locale: EditorLocale
@@ -33,6 +35,7 @@ const ImageUploadDialog = ({
   onCancel,
   onPreUpload,
   onUpload,
+  onError,
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
   locale,
   portalContainer,
@@ -93,6 +96,12 @@ const ImageUploadDialog = ({
       } catch (err) {
         setIsUploading(false)
         setImageUrl('')
+        onError?.({
+          source: 'image-upload',
+          stage: 'pre-upload',
+          message: err instanceof Error ? err.message : locale.imageDialog.uploadFailed,
+          error: err,
+        })
         setError(
           err instanceof Error ? err.message : locale.imageDialog.uploadFailed
         )
@@ -175,7 +184,14 @@ const ImageUploadDialog = ({
 
     onConfirm(imageUrl)
     if (uploadType === 'file' && selectedFile && onUpload) {
-      void Promise.resolve(onUpload({ file: selectedFile, url: imageUrl }))
+      void Promise.resolve(onUpload({ file: selectedFile, url: imageUrl })).catch((err: unknown) => {
+        onError?.({
+          source: 'image-upload',
+          stage: 'confirm',
+          message: err instanceof Error ? err.message : locale.imageDialog.uploadFailed,
+          error: err,
+        })
+      })
     }
     resetStates()
   }, [
@@ -184,6 +200,7 @@ const ImageUploadDialog = ({
     locale,
     onConfirm,
     onUpload,
+    onError,
     resetStates,
     selectedFile,
     uploadType,

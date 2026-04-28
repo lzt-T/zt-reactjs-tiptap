@@ -1,5 +1,6 @@
 import type { FormulaPickerCategory } from "@/shared/config/formulaCategories";
 import type { EditorLocale } from "@/shared/locales";
+import type { EditorErrorEvent } from "@/react/editor/types";
 import MathDialog from "@/react/editor/dialogs/MathDialog";
 import ImageUploadDialog from "@/react/editor/dialogs/ImageUploadDialog";
 import FileUploadDialog from "@/react/editor/dialogs/FileUploadDialog";
@@ -13,6 +14,7 @@ interface EditorDialogsProps {
   fileUploadTypes: string[];
   onImagePreUpload: ((file: File) => Promise<string>) | undefined;
   onFilePreUpload: ((file: File) => Promise<{ url: string; name: string }>) | undefined;
+  onError: ((event: EditorErrorEvent) => void) | undefined;
   onImageUploadAfterChange: (payload: { file: File; url: string; alt?: string }) => void;
   onFileUploadAfterChange: (payload: { file: File; url: string; name: string }) => void;
   mathDialog: {
@@ -45,6 +47,7 @@ export default function EditorDialogs({
   fileUploadTypes,
   onImagePreUpload,
   onFilePreUpload,
+  onError,
   onImageUploadAfterChange,
   onFileUploadAfterChange,
   mathDialog,
@@ -70,6 +73,7 @@ export default function EditorDialogs({
         onCancel={imageDialog.handleImageCancel}
         onPreUpload={onImagePreUpload}
         onUpload={onImageUploadAfterChange}
+        onError={onError}
         imageMaxSizeBytes={imageMaxSizeBytes}
         locale={locale}
         portalContainer={portalContainer}
@@ -81,6 +85,7 @@ export default function EditorDialogs({
           onCancel={fileUploadDialog.handleFileUploadCancel}
           onPreUpload={onFilePreUpload}
           onUpload={onFileUploadAfterChange}
+          onError={onError}
           fileMaxSizeBytes={fileMaxSizeBytes}
           fileUploadTypes={fileUploadTypes}
           locale={locale}

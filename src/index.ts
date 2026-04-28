@@ -5,6 +5,8 @@ export {
   HeadlessToolbarMode,
   EditorLanguage,
   EditorTheme,
+  EditorErrorSource,
+  EditorErrorStage,
   BuiltinToolbarItemKey,
   BuiltinSlashCommandKey,
   createDefaultToolbarItems,
@@ -19,6 +21,7 @@ export type {
   EditorActionContext,
   EditorExternalExtension,
   FormulaSnippetItem,
+  EditorErrorEvent,
 } from "./react";
 
 // 导出 shared 与 core 能力。

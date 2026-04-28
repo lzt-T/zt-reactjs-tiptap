@@ -11,6 +11,7 @@ import { Loader2, FileUp, AlertCircle } from "lucide-react";
 import { config } from "@/shared/config";
 import { formatFileSize } from "@/shared/utils/utils";
 import type { EditorLocale } from "@/shared/locales";
+import type { EditorErrorEvent } from "@/react/editor/types";
 import "./FileUploadDialog.css";
 
 const EXTENSION_MIME_MAP: Record<string, string[]> = {
@@ -72,6 +73,7 @@ export interface FileUploadDialogProps {
   onCancel: () => void;
   onPreUpload: (file: File) => Promise<{ url: string; name: string }>;
   onUpload?: (payload: { file: File; url: string; name: string }) => void | Promise<void>;
+  onError?: (event: EditorErrorEvent) => void;
   fileMaxSizeBytes?: number;
   fileUploadTypes?: string[];
   locale: EditorLocale;
@@ -85,6 +87,7 @@ const FileUploadDialog = ({
   onCancel,
   onPreUpload,
   onUpload,
+  onError,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
   fileUploadTypes,
   locale,
@@ -155,6 +158,12 @@ const FileUploadDialog = ({
         setResult(res);
       } catch (err) {
         setResult(null);
+        onError?.({
+          source: "file-upload",
+          stage: "pre-upload",
+          message: err instanceof Error ? err.message : locale.fileDialog.uploadFailed,
+          error: err,
+        });
         setError(
           err instanceof Error ? err.message : locale.fileDialog.uploadFailed
         );
@@ -225,10 +234,17 @@ const FileUploadDialog = ({
     if (onUpload) {
       void Promise.resolve(
         onUpload({ file: selectedFile, url: result.url, name: result.name })
-      );
+      ).catch((err: unknown) => {
+        onError?.({
+          source: "file-upload",
+          stage: "confirm",
+          message: err instanceof Error ? err.message : locale.fileDialog.uploadFailed,
+          error: err,
+        });
+      });
     }
     resetStates();
-  }, [selectedFile, result, isUploading, locale, onConfirm, onUpload, resetStates]);
+  }, [selectedFile, result, isUploading, locale, onConfirm, onError, onUpload, resetStates]);
 
   const handleCancel = useCallback(() => {
     onCancel();

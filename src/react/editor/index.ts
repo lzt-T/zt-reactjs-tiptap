@@ -7,10 +7,12 @@ export {
   HeadlessToolbarMode,
   EditorLanguage,
   EditorTheme,
+  EditorErrorSource,
+  EditorErrorStage,
 } from "./types";
 
 // 组件类型导出。
-export type { TiptapEditorProps } from "./types";
+export type { TiptapEditorProps, EditorErrorEvent } from "./types";
 
 // 工具栏/斜杠配置导出。
 export {

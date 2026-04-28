@@ -40,6 +40,7 @@ function ImageView({ node, deleteNode, editor, selected }: NodeViewProps) {
             : "image-node-wrapper is-loading"
       }
       contentEditable={false}
+      data-drag-handle
     >
       {loadError ? (
         <div
@@ -58,6 +59,8 @@ function ImageView({ node, deleteNode, editor, selected }: NodeViewProps) {
             alt={alt ?? ""}
             title={title ?? ""}
             className={selected ? "image-selected" : ""}
+            // 禁用原生 img 拖拽，避免浏览器按“复制资源”语义处理。
+            draggable={false}
             onLoad={handleLoad}
             onError={handleError}
             style={{ opacity: loaded ? 1 : 0 }}

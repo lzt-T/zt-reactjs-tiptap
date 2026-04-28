@@ -27,12 +27,14 @@ import { SelectionMirror } from "@/core/extensions/SelectionMirror";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import { TableBackspaceHandler } from "@/core/extensions/TableBackspaceHandler";
 import { CodeBlockKeyboardHandler } from "@/core/extensions/CodeBlockKeyboardHandler";
+import { HtmlPasteSanitizer } from "@/core/extensions/HtmlPasteSanitizer";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import type { Node } from "@tiptap/pm/model";
 import debounce from "lodash/debounce";
 import type { AnyExtension } from "@tiptap/core";
 import type { EditorLocale } from "@/shared/locales";
 import { DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
+import type { EditorErrorEvent } from "@/react/editor/types";
 
 type MathClickHandler = (node: Node, pos: number) => void;
 
@@ -43,6 +45,7 @@ interface UseTiptapEditorOptions {
   disabled: boolean;
   editorRef: React.MutableRefObject<ReturnType<typeof useEditor> | null>;
   onChange: ((html: string) => void) | undefined;
+  onError?: (event: EditorErrorEvent) => void;
   onImageDelete?: (params: { src: string; alt?: string; title?: string }) => void;
   onFileDelete?: (params: { url: string; name: string }) => void;
   onStart: () => void;
@@ -76,6 +79,7 @@ export function useTiptapEditor({
   disabled,
   editorRef,
   onChange,
+  onError,
   onImageDelete,
   onFileDelete,
   onStart,
@@ -208,6 +212,11 @@ export function useTiptapEditor({
         commands: [],
         getCommands,
       }),
+      HtmlPasteSanitizer.configure({
+        onError: (event) => {
+          onError?.(event);
+        },
+      }),
     ],
     [
       getCommands,
@@ -224,6 +233,7 @@ export function useTiptapEditor({
       locale,
       defaultCodeBlockLanguage,
       placeholder,
+      onError,
     ]
   );
 

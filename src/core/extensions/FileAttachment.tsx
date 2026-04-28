@@ -51,12 +51,15 @@ function FileAttachmentView({
           : "file-attachment-wrapper"
       }
       contentEditable={false}
+      data-drag-handle
     >
       {getEditorCallbacks(editor).onFileAttachmentClick ? (
         <span
           role="button"
           tabIndex={0}
           className="file-attachment-link cursor-pointer"
+          // 禁用原生拖拽，避免浏览器按按钮/链接拖拽语义处理。
+          draggable={false}
           onClick={handleClick}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -73,6 +76,8 @@ function FileAttachmentView({
           target="_blank"
           rel="noopener noreferrer"
           className="file-attachment-link"
+          // 禁用原生链接拖拽，统一走 ProseMirror 节点拖拽移动。
+          draggable={false}
           onClick={handleClick}
         >
           {linkContent}
@@ -105,6 +110,8 @@ export const FileAttachment = Node.create({
 
   group: "block",
   atom: true,
+  // 启用节点级拖拽，配合 data-drag-handle 实现编辑器内“移动”语义。
+  draggable: true,
 
   addOptions() {
     return {};

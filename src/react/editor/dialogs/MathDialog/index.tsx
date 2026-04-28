@@ -70,7 +70,11 @@ const MathDialog = ({
     }
   }, [latex, type]);
 
+  // 仅当存在非空白内容时允许确认，避免提交空公式。
+  const canConfirm = latex.trim().length > 0;
+
   const handleConfirm = () => {
+    if (!canConfirm) return;
     onConfirm(latex);
     setLatex("");
   };
@@ -175,7 +179,9 @@ const MathDialog = ({
           <Button variant="outline" onClick={handleCancel}>
             {locale.mathDialog.cancel}
           </Button>
-          <Button onClick={handleConfirm}>{locale.mathDialog.confirm}</Button>
+          <Button onClick={handleConfirm} disabled={!canConfirm}>
+            {locale.mathDialog.confirm}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

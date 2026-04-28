@@ -2,6 +2,10 @@
   z-index: 48;
 }
 
+.command-menu-overlay [data-slot="command-item"] {
+  cursor: pointer;
+}
+
 /* 命令菜单边框：使用主题变量，无主题时回退到浅灰，避免打包到其他项目后出现黑边 */
 [data-slot="command"] {
   border-color: var(--border);

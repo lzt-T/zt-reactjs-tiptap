@@ -49,6 +49,34 @@ export const HeadlessToolbarMode = {
 
 export type HeadlessToolbarMode = (typeof HeadlessToolbarMode)[keyof typeof HeadlessToolbarMode]
 
+/** 错误来源：图片上传、附件上传或粘贴处理。 */
+export const EditorErrorSource = {
+  ImageUpload: "image-upload",
+  FileUpload: "file-upload",
+  Paste: "paste",
+} as const;
+
+export type EditorErrorSource =
+  (typeof EditorErrorSource)[keyof typeof EditorErrorSource];
+
+/** 错误阶段：预上传、确认回调或粘贴转换。 */
+export const EditorErrorStage = {
+  PreUpload: "pre-upload",
+  Confirm: "confirm",
+  Transform: "transform",
+} as const;
+
+export type EditorErrorStage =
+  (typeof EditorErrorStage)[keyof typeof EditorErrorStage];
+
+/** 统一错误事件结构。 */
+export interface EditorErrorEvent {
+  source: EditorErrorSource;
+  stage: EditorErrorStage;
+  message: string;
+  error?: unknown;
+}
+
 export interface TiptapEditorProps {
   /**
    * 编辑器的 HTML 内容
@@ -60,6 +88,11 @@ export interface TiptapEditorProps {
    * @param html - 编辑器的 HTML 内容
    */
   onChange?: (html: string) => void
+
+  /**
+   * 编辑器内部错误回调（上传与粘贴清洗等）。
+   */
+  onError?: (event: EditorErrorEvent) => void
   
   /**
    * 图片确认插入后触发（仅在点击 Confirm 后触发）

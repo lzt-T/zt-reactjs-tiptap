@@ -10,3 +10,4 @@ export * from "./extensions/codeBlockLowlight";
 export * from "./extensions/SlashCommands";
 export * from "./extensions/TableBackspaceHandler";
 export * from "./extensions/editorCallbackRegistry";
+export * from "./extensions/HtmlPasteSanitizer";
