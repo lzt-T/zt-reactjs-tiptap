@@ -118,14 +118,19 @@ export const HtmlPasteSanitizer = Extension.create<HtmlPasteSanitizerOptions>({
           handlePaste: (_view, event) => {
             const clipboardData = event.clipboardData;
             if (!clipboardData) return false;
+            // 代码块内仅按纯文本粘贴，避免 HTML 结构插入失败导致粘贴被吞。
+            if (this.editor.isActive("codeBlock")) {
+              const text = clipboardData.getData("text/plain");
+              if (!text) return false;
+              return this.editor.commands.insertContent(text);
+            }
             const html = clipboardData.getData("text/html");
             if (!html) return false;
 
             try {
               const sanitizedHtml = sanitizeHtml(html);
               if (!sanitizedHtml) return false;
-              this.editor.commands.insertContent(sanitizedHtml);
-              return true;
+              return this.editor.commands.insertContent(sanitizedHtml);
             } catch (error) {
               this.options.onError?.({
                 source: "paste",

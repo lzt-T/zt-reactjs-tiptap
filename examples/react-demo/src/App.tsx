@@ -148,7 +148,7 @@ function App() {
       <div onClick={() => setDisabled(false)}> not disabled</div>*/}
       <div
         className="flex-1"
-        style={{ height: "calc(100vh - 200px)", width: "500px" }}
+        style={{ height: "calc(100vh - 200px)", width: "800px" }}
       >
         <ReactTiptapEditor
           disabled={disabled}
