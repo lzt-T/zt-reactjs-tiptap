@@ -66,6 +66,7 @@ const ImageUploadDialog = ({
     setIsDragOver(false)
   }, [])
 
+  /** 校验并处理图片文件，生成可预览地址或上报上传错误。 */
   const processFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
       setSelectedFile(null)
@@ -118,7 +119,7 @@ const ImageUploadDialog = ({
       }
       reader.readAsDataURL(file)
     }
-  }, [onPreUpload, imageMaxSizeBytes, locale])
+  }, [onPreUpload, onError, imageMaxSizeBytes, locale])
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

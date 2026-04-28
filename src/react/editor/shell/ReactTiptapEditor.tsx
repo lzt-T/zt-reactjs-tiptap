@@ -223,7 +223,6 @@ const ReactTiptapEditor = ({
 
   useEffect(() => {
     if (!editor) {
-      setIsStructuredBlockSelected(false);
       return;
     }
 
