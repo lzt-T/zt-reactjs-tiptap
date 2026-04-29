@@ -140,18 +140,31 @@
 
 .editor-wrapper .ProseMirror .image-align-menu {
   position: absolute;
-  top: -46px;
-  left: 50%;
-  z-index: 2;
+  z-index: 42;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   padding: 4px;
   border: 1px solid var(--ui-border);
   border-radius: 8px;
   background: var(--ui-text-inverse);
   box-shadow: var(--ui-shadow-xl);
+}
+
+.editor-wrapper .ProseMirror .image-align-menu.is-above {
+  top: -46px;
+  left: 50%;
   transform: translateX(-50%);
+}
+
+.editor-wrapper .ProseMirror .image-align-menu.is-inside {
+  top: 8px;
+  right: 42px;
+  left: 8px;
+  width: max-content;
+  max-width: calc(100% - 50px);
+  margin: 0 auto;
 }
 
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .image-align-menu,

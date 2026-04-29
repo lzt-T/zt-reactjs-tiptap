@@ -1,7 +1,7 @@
 import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
 import { AlignCenter, AlignLeft, AlignRight, ImageOff, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
 import type { ImageAlign, ImageAttrs } from "./imageAttributes";
 import {
@@ -11,6 +11,11 @@ import {
 } from "./imageAttributes";
 
 type ImageResizeSide = "left" | "right";
+
+type ImageAlignMenuPlacement = "above" | "inside" | null;
+
+// 图片操作栏外置显示时需要的顶部空间。
+const IMAGE_ALIGN_MENU_TOP_SPACE = 46;
 
 interface ImageResizeState {
   startX: number;
@@ -43,6 +48,9 @@ export function ImageNodeView({
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
   /** 拖拽中的临时宽度百分比，用于即时反馈。 */
   const [dragWidthPercent, setDragWidthPercent] = useState<number | null>(null);
+  /** 图片操作栏的位置，null 表示等待测量后再显示。 */
+  const [alignMenuPlacement, setAlignMenuPlacement] =
+    useState<ImageAlignMenuPlacement>(null);
   // 当前节点保存的百分比宽度。
   const nodeWidthPercent = parseImageWidthPercent(width);
   // 实际渲染用的百分比宽度。
@@ -64,6 +72,48 @@ export function ImageNodeView({
     opacity: loaded ? 1 : 0,
     ...(imageWidthPercent == null ? {} : { width: "100%" }),
   };
+
+  useLayoutEffect(() => {
+    if (!selected) {
+      setAlignMenuPlacement(null);
+      return;
+    }
+
+    /** 根据图片到编辑器滚动容器顶部的距离更新操作栏位置。 */
+    const updateAlignMenuPlacement = () => {
+      // 图片外层节点。
+      const wrapper = wrapperRef.current;
+      // 编辑器滚动容器。
+      const editorWrapper = wrapper?.closest(".editor-wrapper");
+      if (!wrapper || !editorWrapper) {
+        setAlignMenuPlacement("inside");
+        return;
+      }
+
+      // 图片与编辑器滚动容器的视口位置。
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const editorWrapperRect = editorWrapper.getBoundingClientRect();
+      // 图片上方可用于外置操作栏的空间。
+      const topSpace = wrapperRect.top - editorWrapperRect.top;
+      // 下一次操作栏显示位置。
+      const nextPlacement =
+        topSpace < IMAGE_ALIGN_MENU_TOP_SPACE ? "inside" : "above";
+
+      setAlignMenuPlacement(nextPlacement);
+    };
+
+    updateAlignMenuPlacement();
+
+    // 编辑器滚动容器。
+    const editorWrapper = wrapperRef.current?.closest(".editor-wrapper");
+    editorWrapper?.addEventListener("scroll", updateAlignMenuPlacement);
+    window.addEventListener("resize", updateAlignMenuPlacement);
+
+    return () => {
+      editorWrapper?.removeEventListener("scroll", updateAlignMenuPlacement);
+      window.removeEventListener("resize", updateAlignMenuPlacement);
+    };
+  }, [selected]);
 
   /** 图片成功加载后更新当前 src 的完成状态。 */
   const handleLoad = () => {
@@ -215,8 +265,11 @@ export function ImageNodeView({
           />
         </>
       )}
-      {editor.isEditable && selected && (
-        <div className="image-align-menu" aria-label="图片对齐操作栏">
+      {editor.isEditable && selected && alignMenuPlacement != null && (
+        <div
+          className={`image-align-menu is-${alignMenuPlacement}`}
+          aria-label="图片对齐操作栏"
+        >
           <button
             type="button"
             className={
