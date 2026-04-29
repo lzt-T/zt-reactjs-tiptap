@@ -178,7 +178,7 @@ export default function EditorSurface({
             onCodeBlockFormat={onCodeBlockFormat}
           />
         )}
-        {editor && !disabled && isNotionLike && isEditorFocused&& (
+        {editor && !disabled && isNotionLike && isEditorFocused && (
           <BubbleMenu
             editor={editor}
             locale={locale}

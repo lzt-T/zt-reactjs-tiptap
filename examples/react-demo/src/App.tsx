@@ -56,7 +56,7 @@ function App() {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (Math.random() > 0.2) {
-          const mockUrl = `https://picsum.photos/seed/${Date.now()}/800/600`;
+          const mockUrl = `https://picsum.photos/seed/${Date.now()}/300/200`;
           console.log("✅ 上传成功:", mockUrl);
           resolve(mockUrl);
         } else {

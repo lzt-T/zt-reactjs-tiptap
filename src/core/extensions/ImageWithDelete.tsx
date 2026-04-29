@@ -2,7 +2,13 @@ import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
 import { mergeAttributes } from "@tiptap/core";
 import Image from "@tiptap/extension-image";
-import { Trash2, ImageOff } from "lucide-react";
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  ImageOff,
+  Trash2,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
 
@@ -26,7 +32,10 @@ interface ImageAttrs {
   alt?: string;
   title?: string;
   width?: number | string | null;
+  align?: ImageAlign | null;
 }
+
+type ImageAlign = "left" | "center" | "right";
 
 /** 将图片宽度限制在可编辑的百分比范围内。 */
 function clampImageWidthPercent(width: number) {
@@ -43,9 +52,39 @@ function parseImageWidthPercent(width: ImageAttrs["width"]) {
   return clampImageWidthPercent(parsedWidth);
 }
 
+/** 从 HTML 属性和样式中解析图片对齐方式。 */
+function parseImageAlign(element: HTMLElement): ImageAlign {
+  // data-align 是编辑器导出的明确语义。
+  const dataAlign = element.getAttribute("data-align");
+  if (dataAlign === "center" || dataAlign === "right" || dataAlign === "left") {
+    return dataAlign;
+  }
+
+  // margin 样式用于兼容外部 HTML 或旧内容。
+  const marginLeft = element.style.marginLeft;
+  const marginRight = element.style.marginRight;
+  if (marginLeft === "auto" && marginRight === "auto") return "center";
+  if (marginLeft === "auto") return "right";
+
+  return "left";
+}
+
+/** 生成图片对齐需要写入 HTML 的样式。 */
+function getImageAlignStyle(align: ImageAlign) {
+  if (align === "center") {
+    return "display: block; margin-left: auto; margin-right: auto;";
+  }
+  if (align === "right") {
+    return "display: block; margin-left: auto; margin-right: 0;";
+  }
+  return "display: block; margin-left: 0; margin-right: auto;";
+}
+
 /** 渲染带删除按钮的图片节点视图，并处理加载态与失败态。 */
 function ImageView({ node, deleteNode, editor, selected, updateAttributes }: NodeViewProps) {
-  const { src, alt, title, width } = node.attrs as ImageAttrs;
+  const { src, alt, title, width, align = "left" } = node.attrs as ImageAttrs;
+  // 当前图片节点实际使用的对齐方式。
+  const imageAlign = align === "center" || align === "right" ? align : "left";
   // 图片节点外层容器引用，用于按编辑区域宽度计算百分比。
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   // 拖拽过程中的瞬时数据，不需要每次变化触发渲染。
@@ -69,8 +108,11 @@ function ImageView({ node, deleteNode, editor, selected, updateAttributes }: Nod
   // 图片加载成功且编辑器可编辑时才允许拖拽缩放。
   const canResize = editor.isEditable && loaded && !loadError;
   // 百分比宽度只挂在 wrapper 上，保证手柄贴合图片边界。
-  const wrapperStyle: CSSProperties | undefined =
-    loaded && imageWidthPercent != null ? { width: `${imageWidthPercent}%` } : undefined;
+  const wrapperStyle: CSSProperties = {
+    marginLeft: imageAlign === "center" || imageAlign === "right" ? "auto" : 0,
+    marginRight: imageAlign === "center" || imageAlign === "left" ? "auto" : 0,
+    ...(loaded && imageWidthPercent != null ? { width: `${imageWidthPercent}%` } : {}),
+  };
   // 有百分比宽度时图片铺满 wrapper，无宽度时保持原有自适应行为。
   const imageStyle: CSSProperties = {
     opacity: loaded ? 1 : 0,
@@ -159,6 +201,16 @@ function ImageView({ node, deleteNode, editor, selected, updateAttributes }: Nod
     window.addEventListener("mouseup", handleResizeEnd);
   };
 
+  /** 更新图片水平对齐方式，并保持当前图片选中态。 */
+  const handleAlignChange = (
+    nextAlign: ImageAlign,
+    event: ReactMouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    updateAttributes({ align: nextAlign });
+  };
+
   return (
     <NodeViewWrapper
       ref={wrapperRef}
@@ -173,6 +225,7 @@ function ImageView({ node, deleteNode, editor, selected, updateAttributes }: Nod
       }
       style={wrapperStyle}
       contentEditable={false}
+      data-align={imageAlign}
       data-drag-handle
     >
       {loadError ? (
@@ -215,6 +268,49 @@ function ImageView({ node, deleteNode, editor, selected, updateAttributes }: Nod
             onMouseDown={(event) => handleResizeStart("right", event)}
           />
         </>
+      )}
+      {editor.isEditable && selected && (
+        <div className="image-align-menu" aria-label="图片对齐操作栏">
+          <button
+            type="button"
+            className={
+              imageAlign === "left"
+                ? "image-align-menu-btn is-active"
+                : "image-align-menu-btn"
+            }
+            aria-label="图片左对齐"
+            title="图片左对齐"
+            onMouseDown={(event) => handleAlignChange("left", event)}
+          >
+            <AlignLeft size={16} />
+          </button>
+          <button
+            type="button"
+            className={
+              imageAlign === "center"
+                ? "image-align-menu-btn is-active"
+                : "image-align-menu-btn"
+            }
+            aria-label="图片居中对齐"
+            title="图片居中对齐"
+            onMouseDown={(event) => handleAlignChange("center", event)}
+          >
+            <AlignCenter size={16} />
+          </button>
+          <button
+            type="button"
+            className={
+              imageAlign === "right"
+                ? "image-align-menu-btn is-active"
+                : "image-align-menu-btn"
+            }
+            aria-label="图片右对齐"
+            title="图片右对齐"
+            onMouseDown={(event) => handleAlignChange("right", event)}
+          >
+            <AlignRight size={16} />
+          </button>
+        </div>
       )}
       {editor.isEditable && (
         <button
@@ -265,6 +361,22 @@ export const ImageWithDelete = Image.extend({
 
           return {
             style: `width: ${widthPercent}%; height: auto;`,
+          };
+        },
+      },
+      align: {
+        default: "left",
+        parseHTML: parseImageAlign,
+        renderHTML: (attributes: Record<string, unknown>) => {
+          // 图片节点的水平对齐方式。
+          const align =
+            attributes.align === "center" || attributes.align === "right"
+              ? attributes.align
+              : "left";
+
+          return {
+            "data-align": align,
+            style: getImageAlignStyle(align),
           };
         },
       },

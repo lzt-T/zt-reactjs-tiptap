@@ -525,7 +525,7 @@ const custom = htmlToPlainText(html, { blockSeparator: '\n\n' })
 - `onImageUpload` 仅在点击 Confirm 后触发，不负责执行上传
 - 支持 JPG、PNG、GIF 等常见格式
 - 建议图片大小不超过 5MB
-- 图片悬浮后可拖动左右手柄按百分比调整宽度，适配不同设备显示
+- 图片悬浮后可拖动左右手柄按百分比调整宽度，选中后可通过图片操作栏设置左对齐、居中、右对齐
 
 ### 附件上传
 
