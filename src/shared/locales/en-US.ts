@@ -74,6 +74,8 @@ const enUS: EditorLocale = {
     plainText: 'Plain text',
     searchPlaceholder: 'Search language',
     noMatch: 'No matching language',
+    copyCode: 'Copy code',
+    copiedCode: 'Copied',
     delete: 'Delete',
     formatCode: 'Format code',
   },

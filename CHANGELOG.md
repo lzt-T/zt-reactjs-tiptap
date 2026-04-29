@@ -21,6 +21,7 @@
   - `highlightColorOptions?: Array<{ name: string; value: string }>`
 - Added `ColorPopoverPicker` to unify icon + popover color picking in toolbar and bubble menu.
 - Added table row/column alignment menus for horizontal and vertical cell alignment.
+- Added a hover action bar for code blocks with copy, format, and delete actions.
 
 ### Changed
 - Unified editor runtime schema and `htmlToPlainText` schema for code block handling via `StarterKit.configure({ codeBlock: false }) + CodeBlockLowlight`.
@@ -32,3 +33,4 @@
 - Updated editor theme behavior: no longer follows `html.dark`; theme is controlled by `ReactTiptapEditor` `theme` prop.
 - Refactored editor UI styles to theme tokens in `src/react/editor/**` (toolbar, menus, table actions, dialogs, base styles). Light mode keeps previous visuals while dark mode now maps through the same token set.
 - Refactored `ColorPicker` as a pure panel component; preset color options are now fully passed from outside.
+- Kept the code block language selector in its original position and moved format/delete into the hover action bar.

@@ -15,7 +15,10 @@ export type EditorOverlayAnchor = DOMRect | HTMLElement;
 export type EditorOverlayHorizontalAlign = "start" | "end";
 
 /** 浮层的垂直定位模式。 */
-export type EditorOverlayVerticalMode = "outside" | "inside-bottom";
+export type EditorOverlayVerticalMode =
+  | "outside"
+  | "inside-top"
+  | "inside-bottom";
 
 /** 创建编辑器内浮层定位 Hook 时的默认配置。 */
 export interface UseEditorOverlayPositionOptions {
@@ -199,11 +202,13 @@ export function useEditorOverlayPosition({
 
       // 计算未裁切前的纵向位置。
       const nextTop =
-        resolvedVerticalMode === "inside-bottom"
-          ? anchorBottom - overlayHeight - resolvedVerticalOffset
-          : placement === MenuPlacement.Top
-            ? anchorTop - resolvedVerticalOffset
-            : anchorBottom + resolvedVerticalOffset;
+        resolvedVerticalMode === "inside-top"
+          ? anchorTop + resolvedVerticalOffset
+          : resolvedVerticalMode === "inside-bottom"
+            ? anchorBottom - overlayHeight - resolvedVerticalOffset
+            : placement === MenuPlacement.Top
+              ? anchorTop - resolvedVerticalOffset
+              : anchorBottom + resolvedVerticalOffset;
       // 计算未裁切前的横向位置。
       const nextLeft =
         resolvedHorizontalAlign === "end"

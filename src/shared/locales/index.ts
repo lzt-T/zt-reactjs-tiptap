@@ -73,6 +73,8 @@ export interface EditorLocale {
     plainText: string;
     searchPlaceholder: string;
     noMatch: string;
+    copyCode: string;
+    copiedCode: string;
     delete: string;
     formatCode: string;
   };

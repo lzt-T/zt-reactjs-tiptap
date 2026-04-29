@@ -71,6 +71,8 @@ const zhCN: EditorLocale = {
     plainText: '纯文本',
     searchPlaceholder: '搜索语言',
     noMatch: '没有匹配的语言',
+    copyCode: '复制代码',
+    copiedCode: '已复制',
     delete: '删除',
     formatCode: '格式化代码',
   },

@@ -140,10 +140,14 @@
   white-space: nowrap;
 }
 
-.code-block-control-actions {
+.code-block-action-bar {
   display: inline-flex;
   align-items: center;
-  border-left: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
 }
 
 .code-block-control-action-btn {
@@ -221,7 +225,7 @@
   color: var(--muted-foreground);
 }
 
-.editor-wrapper .ProseMirror .code-block-action-spin {
+.editor-wrapper .code-block-action-spin {
   animation: code-block-action-spin 1s linear infinite;
 }
 

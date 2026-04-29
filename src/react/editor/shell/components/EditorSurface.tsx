@@ -10,6 +10,7 @@ import Toolbar from "@/react/editor/toolbar/Toolbar";
 import TableRowActions from "@/react/editor/table/TableRowActions";
 import TableColumnActions from "@/react/editor/table/TableColumnActions";
 import CodeBlockLanguageMenu from "@/react/editor/codeblock/CodeBlockLanguageMenu";
+import CodeBlockActionBar from "@/react/editor/codeblock/CodeBlockActionBar";
 import BubbleMenu from "@/react/editor/menus/BubbleMenu";
 import CommandMenu from "@/react/editor/menus/CommandMenu";
 import { EditorContent } from "@tiptap/react";
@@ -163,10 +164,18 @@ export default function EditorSurface({
             editorWrapperRef={editorWrapperRef}
             languages={resolvedCodeBlockLanguages}
             defaultLanguage={resolvedDefaultCodeBlockLanguage}
-            onCodeBlockFormat={onCodeBlockFormat}
             enabled={showCodeBlockLanguageMenu}
             onMenuRootChange={onMenuRootChange}
             onMenuOpenStateChecked={onCodeBlockLanguageMenuOpenChecked}
+          />
+        )}
+        {editor && !disabled && (
+          <CodeBlockActionBar
+            editor={editor}
+            locale={locale}
+            editorWrapperRef={editorWrapperRef}
+            defaultLanguage={resolvedDefaultCodeBlockLanguage}
+            onCodeBlockFormat={onCodeBlockFormat}
           />
         )}
         {editor && !disabled && isNotionLike && isEditorFocused&& (
