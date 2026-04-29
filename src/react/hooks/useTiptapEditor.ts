@@ -9,8 +9,10 @@ import {
 } from "@/core/extensions/editorCallbackRegistry";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
+import {
+  TableCellWithAlignment,
+  TableHeaderWithAlignment,
+} from "@/core/extensions/TableCellAlignment";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import Color from "@tiptap/extension-color";
@@ -170,8 +172,8 @@ export function useTiptapEditor({
         cellMinWidth: config.MIN_TABLE_CELL_WIDTH,
       }),
       TableRow,
-      TableCell,
-      TableHeader,
+      TableCellWithAlignment,
+      TableHeaderWithAlignment,
       Subscript,
       Superscript,
       TextStyle,

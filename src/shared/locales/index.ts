@@ -139,6 +139,13 @@ export interface EditorLocale {
     mergeCells: string;
     splitCell: string;
     toggleHeaderRow: string;
+    alignment: string;
+    alignLeft: string;
+    alignCenter: string;
+    alignRight: string;
+    alignTop: string;
+    alignMiddle: string;
+    alignBottom: string;
   };
   tableSizePicker: {
     dialogAriaLabel: string;

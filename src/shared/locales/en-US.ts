@@ -140,6 +140,13 @@ const enUS: EditorLocale = {
     mergeCells: 'Merge cells (select multiple cells first)',
     splitCell: 'Split cell',
     toggleHeaderRow: 'Toggle header row',
+    alignment: 'Alignment',
+    alignLeft: 'Align left',
+    alignCenter: 'Align center',
+    alignRight: 'Align right',
+    alignTop: 'Align top',
+    alignMiddle: 'Align middle',
+    alignBottom: 'Align bottom',
   },
   tableSizePicker: {
     dialogAriaLabel: 'Select table size',

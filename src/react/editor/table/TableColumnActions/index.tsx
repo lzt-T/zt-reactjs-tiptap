@@ -15,6 +15,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/react/components/ui/p
 import { useTableInsertColumnRunAndClose } from '@/react/hooks'
 import { config } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
+import TableAlignmentMenu from '../TableAlignmentMenu'
+import { applyTableCellAlignment, getTableCellAlignmentState } from '../tableAlignment'
+import type {
+  TableCellTextAlign,
+  TableCellVerticalAlign,
+} from '@/core/extensions/TableCellAlignment'
 import './TableColumnActions.css'
 
 export interface ColumnActionItem {
@@ -332,6 +338,58 @@ const TableColumnActions = ({
     closeMenu
   )
 
+  /**
+   * 设置当前列/选中列的水平对齐。
+   */
+  const handleTextAlign = useCallback(
+    (align: TableCellTextAlign) => {
+      // 当前菜单记录的列目标。
+      const target = menuTargetRef.current ?? currentColumn
+      applyTableCellAlignment(
+        editor,
+        editorWrapperRef.current,
+        target
+          ? {
+              type: 'column',
+              tableIndex: target.tableIndex,
+              columnIndex: target.columnIndex,
+              lastColumnIndex: target.lastColumnIndex,
+            }
+          : null,
+        'textAlign',
+        align
+      )
+      closeMenu()
+    },
+    [closeMenu, currentColumn, editor, editorWrapperRef]
+  )
+
+  /**
+   * 设置当前列/选中列的垂直对齐。
+   */
+  const handleVerticalAlign = useCallback(
+    (align: TableCellVerticalAlign) => {
+      // 当前菜单记录的列目标。
+      const target = menuTargetRef.current ?? currentColumn
+      applyTableCellAlignment(
+        editor,
+        editorWrapperRef.current,
+        target
+          ? {
+              type: 'column',
+              tableIndex: target.tableIndex,
+              columnIndex: target.columnIndex,
+              lastColumnIndex: target.lastColumnIndex,
+            }
+          : null,
+        'verticalAlign',
+        align
+      )
+      closeMenu()
+    },
+    [closeMenu, currentColumn, editor, editorWrapperRef]
+  )
+
   if (!editor.isActive('table') || currentColumn == null) {
     return null
   }
@@ -339,6 +397,21 @@ const TableColumnActions = ({
   // Popover 挂到编辑器容器内，避免挂到 document.body 破坏主题隔离。
   const popoverContainer = editorWrapperRef.current
   const usePortal = Boolean(portalTarget && portalButtonPosition)
+  // 当前对齐回显目标。
+  const alignmentTarget = menuTargetRef.current ?? currentColumn
+  // 当前列/选中列的对齐状态。
+  const alignmentState = getTableCellAlignmentState(
+    editor,
+    editorWrapperRef.current,
+    alignmentTarget
+      ? {
+          type: 'column',
+          tableIndex: alignmentTarget.tableIndex,
+          columnIndex: alignmentTarget.columnIndex,
+          lastColumnIndex: alignmentTarget.lastColumnIndex,
+        }
+      : null
+  )
 
   // 操作按钮视觉与定位保持不变，仅将菜单实现替换为 Popover。
   const singleButton = (
@@ -438,6 +511,15 @@ const TableColumnActions = ({
         >
           <IconTableDeleteColumn size={16} />
         </button>
+        <span className="separator" />
+        <TableAlignmentMenu
+          locale={locale}
+          container={popoverContainer}
+          activeTextAlign={alignmentState.textAlign}
+          activeVerticalAlign={alignmentState.verticalAlign}
+          onTextAlign={handleTextAlign}
+          onVerticalAlign={handleVerticalAlign}
+        />
         <span className="separator" />
         <button
           type="button"

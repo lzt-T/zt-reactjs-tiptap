@@ -137,6 +137,13 @@ const zhCN: EditorLocale = {
     mergeCells: '合并单元格（需先选中多个单元格）',
     splitCell: '拆分单元格',
     toggleHeaderRow: '切换表头行',
+    alignment: '对齐',
+    alignLeft: '左对齐',
+    alignCenter: '居中对齐',
+    alignRight: '右对齐',
+    alignTop: '顶部对齐',
+    alignMiddle: '垂直居中',
+    alignBottom: '底部对齐',
   },
   tableSizePicker: {
     dialogAriaLabel: '选择表格尺寸',

@@ -16,6 +16,12 @@ import { useTableInsertRowRunAndClose } from '@/react/hooks'
 import { config } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
 import TableAddRowColumnButtons, { TABLE_ADD_BAR_SIZE } from '../TableAddRowColumnButtons'
+import TableAlignmentMenu from '../TableAlignmentMenu'
+import { applyTableCellAlignment, getTableCellAlignmentState } from '../tableAlignment'
+import type {
+  TableCellTextAlign,
+  TableCellVerticalAlign,
+} from '@/core/extensions/TableCellAlignment'
 import './TableRowActions.css'
 
 export interface RowActionItem {
@@ -363,6 +369,58 @@ const TableRowActions = ({
     closeMenu
   )
 
+  /**
+   * 设置当前行/选中行的水平对齐。
+   */
+  const handleTextAlign = useCallback(
+    (align: TableCellTextAlign) => {
+      // 当前菜单记录的行目标。
+      const target = menuTargetRef.current ?? currentRow
+      applyTableCellAlignment(
+        editor,
+        editorWrapperRef.current,
+        target
+          ? {
+              type: 'row',
+              tableIndex: target.tableIndex,
+              rowIndex: target.rowIndex,
+              lastRowIndex: target.lastRowIndex,
+            }
+          : null,
+        'textAlign',
+        align
+      )
+      closeMenu()
+    },
+    [closeMenu, currentRow, editor, editorWrapperRef]
+  )
+
+  /**
+   * 设置当前行/选中行的垂直对齐。
+   */
+  const handleVerticalAlign = useCallback(
+    (align: TableCellVerticalAlign) => {
+      // 当前菜单记录的行目标。
+      const target = menuTargetRef.current ?? currentRow
+      applyTableCellAlignment(
+        editor,
+        editorWrapperRef.current,
+        target
+          ? {
+              type: 'row',
+              tableIndex: target.tableIndex,
+              rowIndex: target.rowIndex,
+              lastRowIndex: target.lastRowIndex,
+            }
+          : null,
+        'verticalAlign',
+        align
+      )
+      closeMenu()
+    },
+    [closeMenu, currentRow, editor, editorWrapperRef]
+  )
+
   if (!editor.isActive('table') || currentRow == null) {
     return null
   }
@@ -371,6 +429,21 @@ const TableRowActions = ({
   const popoverContainer = editorWrapperRef.current
   const usePortal = Boolean(portalTarget && portalButtonPosition)
   const showPlusButtons = Boolean(portalTarget && tableSize)
+  // 当前对齐回显目标。
+  const alignmentTarget = menuTargetRef.current ?? currentRow
+  // 当前行/选中行的对齐状态。
+  const alignmentState = getTableCellAlignmentState(
+    editor,
+    editorWrapperRef.current,
+    alignmentTarget
+      ? {
+          type: 'row',
+          tableIndex: alignmentTarget.tableIndex,
+          rowIndex: alignmentTarget.rowIndex,
+          lastRowIndex: alignmentTarget.lastRowIndex,
+        }
+      : null
+  )
 
   // 操作按钮视觉与定位保持不变，仅将菜单实现替换为 Popover。
   const singleButton = (
@@ -470,6 +543,15 @@ const TableRowActions = ({
         >
           <IconTableDeleteRow size={16} />
         </button>
+        <span className="separator" />
+        <TableAlignmentMenu
+          locale={locale}
+          container={popoverContainer}
+          activeTextAlign={alignmentState.textAlign}
+          activeVerticalAlign={alignmentState.verticalAlign}
+          onTextAlign={handleTextAlign}
+          onVerticalAlign={handleVerticalAlign}
+        />
         <span className="separator" />
         <button
           type="button"

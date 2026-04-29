@@ -20,6 +20,7 @@
   - `textColorOptions?: Array<{ name: string; value: string }>`
   - `highlightColorOptions?: Array<{ name: string; value: string }>`
 - Added `ColorPopoverPicker` to unify icon + popover color picking in toolbar and bubble menu.
+- Added table row/column alignment menus for horizontal and vertical cell alignment.
 
 ### Changed
 - Unified editor runtime schema and `htmlToPlainText` schema for code block handling via `StarterKit.configure({ codeBlock: false }) + CodeBlockLowlight`.
