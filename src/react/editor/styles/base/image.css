@@ -95,6 +95,47 @@
   color: var(--ui-text-muted-strong);
 }
 
+.editor-wrapper .ProseMirror .image-resize-handle {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 72px;
+  max-height: calc(100% - 16px);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: ew-resize;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.15s ease;
+}
+
+.editor-wrapper .ProseMirror .image-resize-handle::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 46px;
+  max-height: 80%;
+  border-radius: 999px;
+  background: var(--ui-control-active);
+  transform: translate(-50%, -50%);
+}
+
+.editor-wrapper .ProseMirror .image-resize-handle-left {
+  left: 6px;
+}
+
+.editor-wrapper .ProseMirror .image-resize-handle-right {
+  right: 6px;
+}
+
+.editor-wrapper .ProseMirror .image-node-wrapper:hover .image-resize-handle,
+.editor-wrapper .ProseMirror .image-node-wrapper.is-resizing .image-resize-handle {
+  opacity: 1;
+}
+
 /* 图片加载失败占位 */
 .editor-wrapper .ProseMirror .image-error-placeholder {
   min-height: 120px;

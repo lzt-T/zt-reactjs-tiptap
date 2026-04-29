@@ -23,6 +23,7 @@
 - Added `ColorPopoverPicker` to unify icon + popover color picking in toolbar and bubble menu.
 - Added table row/column alignment menus for horizontal and vertical cell alignment.
 - Added a hover action bar for code blocks with copy, format, and delete actions.
+- Added hover resize handles for images, storing width as a responsive percentage.
 
 ### Changed
 - Unified editor runtime schema and `htmlToPlainText` schema for code block handling via `StarterKit.configure({ codeBlock: false }) + CodeBlockLowlight`.
