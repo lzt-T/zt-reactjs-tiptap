@@ -2,7 +2,7 @@ import type { MouseEvent, ReactNode } from "react";
 import type { ColorOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import { cn } from "@/shared/utils/utils";
-import ColorPicker from "@/react/editor/toolbar/ColorPicker";
+import ColorPicker from "@/react/editor/color/ColorPicker";
 import {
   Popover,
   PopoverContent,

@@ -22,7 +22,7 @@ import {
   ListIndentIncrease,
 } from "lucide-react";
 import { useEditorCommands, useOverlayCloseDispatcher } from "@/react/hooks";
-import ColorPopoverPicker from "@/react/editor/toolbar/ColorPopoverPicker";
+import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import {
   Popover,
   PopoverContent,

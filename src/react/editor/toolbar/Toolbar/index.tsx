@@ -11,7 +11,7 @@ import { Highlighter, Palette } from "lucide-react";
 import { useEditorCommands, useOverlayCloseDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
-import ColorPopoverPicker from "@/react/editor/toolbar/ColorPopoverPicker";
+import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import TableSizePicker from "@/react/editor/table/TableSizePicker";
 import {
   Popover,
