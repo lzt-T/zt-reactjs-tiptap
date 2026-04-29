@@ -110,6 +110,54 @@ export function toggleTaskList(editor: Editor): void {
   editor.chain().focus().toggleTaskList().run();
 }
 
+/** 判断当前块是否可以增加缩进。 */
+export function canIncreaseIndent(editor: Editor): boolean {
+  if (editor.isActive("taskItem")) {
+    return editor.can().sinkListItem("taskItem");
+  }
+  if (editor.isActive("listItem")) {
+    return editor.can().sinkListItem("listItem");
+  }
+  return editor.can().increaseIndent();
+}
+
+/** 判断当前块是否可以减少缩进。 */
+export function canDecreaseIndent(editor: Editor): boolean {
+  if (editor.isActive("taskItem")) {
+    return editor.can().liftListItem("taskItem");
+  }
+  if (editor.isActive("listItem")) {
+    return editor.can().liftListItem("listItem");
+  }
+  return editor.can().decreaseIndent();
+}
+
+/** 增加当前块缩进：列表项优先嵌套，否则增加段落/标题缩进。 */
+export function increaseIndent(editor: Editor): void {
+  if (editor.isActive("taskItem")) {
+    editor.chain().focus().sinkListItem("taskItem").run();
+    return;
+  }
+  if (editor.isActive("listItem")) {
+    editor.chain().focus().sinkListItem("listItem").run();
+    return;
+  }
+  editor.chain().focus().increaseIndent().run();
+}
+
+/** 减少当前块缩进：列表项优先提升，否则减少段落/标题缩进。 */
+export function decreaseIndent(editor: Editor): void {
+  if (editor.isActive("taskItem")) {
+    editor.chain().focus().liftListItem("taskItem").run();
+    return;
+  }
+  if (editor.isActive("listItem")) {
+    editor.chain().focus().liftListItem("listItem").run();
+    return;
+  }
+  editor.chain().focus().decreaseIndent().run();
+}
+
 export interface InsertTableOptions {
   rows?: number;
   cols?: number;

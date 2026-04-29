@@ -26,6 +26,7 @@ import Mathematics from "@tiptap/extension-mathematics";
 import { createCodeBlockLowlightExtension } from "@/core/extensions/codeBlockLowlight";
 import { SlashCommands } from "@/core/extensions/SlashCommands";
 import { SelectionMirror } from "@/core/extensions/SelectionMirror";
+import { Indent } from "@/core/extensions/Indent";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import { TableBackspaceHandler } from "@/core/extensions/TableBackspaceHandler";
 import { CodeBlockKeyboardHandler } from "@/core/extensions/CodeBlockKeyboardHandler";
@@ -182,6 +183,7 @@ export function useTiptapEditor({
         multicolor: true,
       }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Indent,
       TaskList,
       TaskItem.configure({
         nested: true,

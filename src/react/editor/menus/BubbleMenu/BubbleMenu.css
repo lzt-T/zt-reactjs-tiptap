@@ -54,6 +54,22 @@
   color: var(--ui-text-strong);
 }
 
+.bubble-menu button:disabled,
+.bubble-menu button.is-disabled,
+.more-menu button:disabled,
+.more-menu button.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bubble-menu button:disabled:hover,
+.bubble-menu button.is-disabled:hover,
+.more-menu button:disabled:hover,
+.more-menu button.is-disabled:hover {
+  background: transparent;
+  color: var(--ui-text);
+}
+
 .bubble-menu button.is-active {
   background: var(--ui-control-active);
   color: var(--ui-text-inverse);

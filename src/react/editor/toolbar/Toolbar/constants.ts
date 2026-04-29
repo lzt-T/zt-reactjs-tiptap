@@ -26,4 +26,6 @@ export const BUILTIN_GROUP_MAP: Record<string, string> = {
   [BuiltinToolbarItemKey.AlignCenter]: "align",
   [BuiltinToolbarItemKey.AlignRight]: "align",
   [BuiltinToolbarItemKey.AlignJustify]: "align",
+  [BuiltinToolbarItemKey.DecreaseIndent]: "align",
+  [BuiltinToolbarItemKey.IncreaseIndent]: "align",
 };

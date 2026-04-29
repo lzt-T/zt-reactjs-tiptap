@@ -18,6 +18,8 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  ListIndentDecrease,
+  ListIndentIncrease,
 } from "lucide-react";
 import { useEditorCommands, useOverlayCloseDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/toolbar/ColorPopoverPicker";
@@ -59,7 +61,11 @@ const BubbleMenu = ({
   >(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
-  const { format } = useEditorCommands(editor, {});
+  const { format, block } = useEditorCommands(editor, {});
+  // 减少缩进按钮是否不可用。
+  const isDecreaseIndentDisabled = !block.canDecreaseIndent();
+  // 增加缩进按钮是否不可用。
+  const isIncreaseIndentDisabled = !block.canIncreaseIndent();
 
   /** 颜色弹层关闭后回焦编辑器，避免关闭后焦点丢失。 */
   const focusEditorAfterColorPopoverClose = () => {
@@ -366,6 +372,41 @@ const BubbleMenu = ({
                 title={locale.bubbleMenu.justify}
               >
                 <AlignJustify size={16} />
+              </button>
+              <div className="more-menu-separator" />
+              <button
+                onClick={() => {
+                  if (isDecreaseIndentDisabled) return;
+                  block.decreaseIndent();
+                  setShowMoreMenu(false);
+                }}
+                className={
+                  isDecreaseIndentDisabled
+                    ? "bubble-menu-btn is-disabled"
+                    : "bubble-menu-btn"
+                }
+                title={locale.bubbleMenu.decreaseIndent}
+                disabled={isDecreaseIndentDisabled}
+                aria-disabled={isDecreaseIndentDisabled}
+              >
+                <ListIndentDecrease size={16} />
+              </button>
+              <button
+                onClick={() => {
+                  if (isIncreaseIndentDisabled) return;
+                  block.increaseIndent();
+                  setShowMoreMenu(false);
+                }}
+                className={
+                  isIncreaseIndentDisabled
+                    ? "bubble-menu-btn is-disabled"
+                    : "bubble-menu-btn"
+                }
+                title={locale.bubbleMenu.increaseIndent}
+                disabled={isIncreaseIndentDisabled}
+                aria-disabled={isIncreaseIndentDisabled}
+              >
+                <ListIndentIncrease size={16} />
               </button>
             </div>
           </PopoverContent>

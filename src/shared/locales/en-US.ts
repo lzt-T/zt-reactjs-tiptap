@@ -49,6 +49,8 @@ const enUS: EditorLocale = {
     alignCenter: 'Align center',
     alignRight: 'Align right',
     justify: 'Justify',
+    decreaseIndent: 'Decrease indent',
+    increaseIndent: 'Increase indent',
     headingLevel: (level) => `Heading ${level}`,
   },
   bubbleMenu: {
@@ -66,6 +68,8 @@ const enUS: EditorLocale = {
     alignCenter: 'Align center',
     alignRight: 'Align right',
     justify: 'Justify',
+    decreaseIndent: 'Decrease indent',
+    increaseIndent: 'Increase indent',
   },
   colorPicker: {
     customColor: '+ Custom color',

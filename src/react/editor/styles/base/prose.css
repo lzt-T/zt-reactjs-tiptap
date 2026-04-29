@@ -42,23 +42,41 @@
 }
 
 /* 明确设置列表符号，避免被全局 li { list-style: none } 等覆盖 */
-.editor-wrapper .ProseMirror ul li {
+.editor-wrapper .ProseMirror ul > li,
+.editor-wrapper .ProseMirror ul ul ul ul > li {
     list-style-type: disc;
 }
 
-.editor-wrapper .ProseMirror ol li {
+.editor-wrapper .ProseMirror ul ul > li,
+.editor-wrapper .ProseMirror ul ul ul ul ul > li {
+    list-style-type: circle;
+}
+
+.editor-wrapper .ProseMirror ul ul ul > li,
+.editor-wrapper .ProseMirror ul ul ul ul ul ul > li {
+    list-style-type: square;
+}
+
+.editor-wrapper .ProseMirror ol > li,
+.editor-wrapper .ProseMirror ol ol ol ol > li {
     list-style-type: decimal;
 }
 
-.editor-wrapper .ProseMirror ul ul,
-.editor-wrapper .ProseMirror ol ul {
-    list-style-type: circle;
-    margin-top: 0.25em;
+.editor-wrapper .ProseMirror ol ol > li,
+.editor-wrapper .ProseMirror ol ol ol ol ol > li {
+    list-style-type: lower-alpha;
 }
 
-.editor-wrapper .ProseMirror ul ul ul,
-.editor-wrapper .ProseMirror ol ul ul {
-    list-style-type: square;
+.editor-wrapper .ProseMirror ol ol ol > li,
+.editor-wrapper .ProseMirror ol ol ol ol ol ol > li {
+    list-style-type: lower-roman;
+}
+
+.editor-wrapper .ProseMirror ul ul,
+.editor-wrapper .ProseMirror ol ul,
+.editor-wrapper .ProseMirror ul ol,
+.editor-wrapper .ProseMirror ol ol {
+    margin-top: 0.25em;
 }
 
 .editor-wrapper .ProseMirror blockquote {

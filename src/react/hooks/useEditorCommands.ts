@@ -22,6 +22,8 @@ export interface UseEditorCommandsOptions {
 const noop = () => {};
 const noopStr = noop as (s: string) => void;
 const noopAlign = noop as (a: TextAlignValue) => void;
+// 空编辑器状态下的禁用判断。
+const noopFalse = () => false;
 
 interface FileAttachmentChain {
   chain: () => {
@@ -123,6 +125,10 @@ export function useEditorCommands(
             toggleBulletList: noop,
             toggleOrderedList: noop,
             toggleTaskList: noop,
+            increaseIndent: noop,
+            decreaseIndent: noop,
+            canIncreaseIndent: noopFalse,
+            canDecreaseIndent: noopFalse,
             insertTable: noop as (options?: InsertTableOptions) => void,
           }
         : {
@@ -135,6 +141,10 @@ export function useEditorCommands(
             toggleBulletList: () => cmd.toggleBulletList(editor),
             toggleOrderedList: () => cmd.toggleOrderedList(editor),
             toggleTaskList: () => cmd.toggleTaskList(editor),
+            increaseIndent: () => cmd.increaseIndent(editor),
+            decreaseIndent: () => cmd.decreaseIndent(editor),
+            canIncreaseIndent: () => cmd.canIncreaseIndent(editor),
+            canDecreaseIndent: () => cmd.canDecreaseIndent(editor),
             insertTable: (options?: InsertTableOptions) =>
               cmd.insertTable(editor, options),
           },

@@ -30,6 +30,8 @@ export const BuiltinToolbarItemKey = {
   AlignCenter: "alignCenter",
   AlignRight: "alignRight",
   AlignJustify: "alignJustify",
+  DecreaseIndent: "decreaseIndent",
+  IncreaseIndent: "increaseIndent",
 } as const;
 
 /** 斜杠命令内置项 Key。 */
@@ -85,6 +87,10 @@ export interface EditorActionContext {
     toggleBulletList: () => void;
     toggleOrderedList: () => void;
     toggleTaskList: () => void;
+    decreaseIndent: () => void;
+    increaseIndent: () => void;
+    canDecreaseIndent: () => boolean;
+    canIncreaseIndent: () => boolean;
     insertTable: (options?: { rows?: number; cols?: number; withHeaderRow?: boolean }) => void;
   };
   dialogs: {
@@ -170,6 +176,8 @@ export function createDefaultToolbarItems(locale: EditorLocale): ToolbarItemConf
     { type: "builtin", key: BuiltinToolbarItemKey.AlignCenter, group: "align" },
     { type: "builtin", key: BuiltinToolbarItemKey.AlignRight, group: "align" },
     { type: "builtin", key: BuiltinToolbarItemKey.AlignJustify, group: "align" },
+    { type: "builtin", key: BuiltinToolbarItemKey.DecreaseIndent, group: "align" },
+    { type: "builtin", key: BuiltinToolbarItemKey.IncreaseIndent, group: "align" },
   ];
 }
 

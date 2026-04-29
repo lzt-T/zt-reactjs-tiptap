@@ -46,6 +46,8 @@ const zhCN: EditorLocale = {
     alignCenter: '居中对齐',
     alignRight: '右对齐',
     justify: '两端对齐',
+    decreaseIndent: '减少缩进',
+    increaseIndent: '增加缩进',
     headingLevel: (level) => `标题 ${level}`,
   },
   bubbleMenu: {
@@ -63,6 +65,8 @@ const zhCN: EditorLocale = {
     alignCenter: '居中对齐',
     alignRight: '右对齐',
     justify: '两端对齐',
+    decreaseIndent: '减少缩进',
+    increaseIndent: '增加缩进',
   },
   colorPicker: {
     customColor: '+ 自定义颜色',

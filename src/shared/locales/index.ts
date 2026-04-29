@@ -48,6 +48,8 @@ export interface EditorLocale {
     alignCenter: string;
     alignRight: string;
     justify: string;
+    decreaseIndent: string;
+    increaseIndent: string;
     headingLevel: (level: 1 | 2 | 3) => string;
   };
   bubbleMenu: {
@@ -65,6 +67,8 @@ export interface EditorLocale {
     alignCenter: string;
     alignRight: string;
     justify: string;
+    decreaseIndent: string;
+    increaseIndent: string;
   };
   colorPicker: {
     customColor: string;

@@ -12,6 +12,8 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  ListIndentDecrease,
+  ListIndentIncrease,
   ChevronDown,
   List,
   ListOrdered,
@@ -626,6 +628,56 @@ export function renderToolbarItem(
           </button>
         ),
       };
+    case BuiltinToolbarItemKey.DecreaseIndent:
+      {
+        // 减少缩进按钮是否不可用。
+        const disabled =
+          ctx.isToolbarLocked || !ctx.actionContext.block.canDecreaseIndent();
+        return {
+          key: item.key,
+          group,
+          element: (
+            <button
+              type="button"
+              className={cn("editor-toolbar-btn", disabled && "is-disabled")}
+              onClick={() => {
+                if (disabled) return;
+                ctx.runToolbarAction(() => ctx.actionContext.block.decreaseIndent());
+              }}
+              title={ctx.locale.toolbar.decreaseIndent}
+              disabled={disabled}
+              aria-disabled={disabled}
+            >
+              <ListIndentDecrease size={16} />
+            </button>
+          ),
+        };
+      }
+    case BuiltinToolbarItemKey.IncreaseIndent:
+      {
+        // 增加缩进按钮是否不可用。
+        const disabled =
+          ctx.isToolbarLocked || !ctx.actionContext.block.canIncreaseIndent();
+        return {
+          key: item.key,
+          group,
+          element: (
+            <button
+              type="button"
+              className={cn("editor-toolbar-btn", disabled && "is-disabled")}
+              onClick={() => {
+                if (disabled) return;
+                ctx.runToolbarAction(() => ctx.actionContext.block.increaseIndent());
+              }}
+              title={ctx.locale.toolbar.increaseIndent}
+              disabled={disabled}
+              aria-disabled={disabled}
+            >
+              <ListIndentIncrease size={16} />
+            </button>
+          ),
+        };
+      }
     default:
       return null;
   }
