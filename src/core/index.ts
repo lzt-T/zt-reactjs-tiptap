@@ -4,7 +4,7 @@ export * from "./commands/editorCommands";
 // 导出核心扩展。
 export * from "./extensions/DeletionCallbacks";
 export * from "./extensions/FileAttachment";
-export * from "./extensions/ImageWithDelete";
+export * from "./extensions/ResizableImage";
 export * from "./extensions/CodeBlockKeyboardHandler";
 export * from "./extensions/codeBlockLowlight";
 export * from "./extensions/SlashCommands";

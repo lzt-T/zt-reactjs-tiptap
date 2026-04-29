@@ -1,22 +1,14 @@
-import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
+import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
-import { mergeAttributes } from "@tiptap/core";
-import Image from "@tiptap/extension-image";
-import {
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  ImageOff,
-  Trash2,
-} from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, ImageOff, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
-
-// 图片最小宽度百分比，避免拖到难以再次操作。
-const MIN_IMAGE_WIDTH_PERCENT = 10;
-
-// 图片最大宽度百分比，避免超出编辑区域。
-const MAX_IMAGE_WIDTH_PERCENT = 100;
+import type { ImageAlign, ImageAttrs } from "./imageAttributes";
+import {
+  clampImageWidthPercent,
+  normalizeImageAlign,
+  parseImageWidthPercent,
+} from "./imageAttributes";
 
 type ImageResizeSide = "left" | "right";
 
@@ -27,64 +19,18 @@ interface ImageResizeState {
   side: ImageResizeSide;
 }
 
-interface ImageAttrs {
-  src: string;
-  alt?: string;
-  title?: string;
-  width?: number | string | null;
-  align?: ImageAlign | null;
-}
-
-type ImageAlign = "left" | "center" | "right";
-
-/** 将图片宽度限制在可编辑的百分比范围内。 */
-function clampImageWidthPercent(width: number) {
-  return Math.min(MAX_IMAGE_WIDTH_PERCENT, Math.max(MIN_IMAGE_WIDTH_PERCENT, width));
-}
-
-/** 从节点属性中解析百分比宽度。 */
-function parseImageWidthPercent(width: ImageAttrs["width"]) {
-  if (width == null || width === "") return null;
-
-  const parsedWidth = typeof width === "number" ? width : Number.parseFloat(width);
-  if (!Number.isFinite(parsedWidth)) return null;
-
-  return clampImageWidthPercent(parsedWidth);
-}
-
-/** 从 HTML 属性和样式中解析图片对齐方式。 */
-function parseImageAlign(element: HTMLElement): ImageAlign {
-  // data-align 是编辑器导出的明确语义。
-  const dataAlign = element.getAttribute("data-align");
-  if (dataAlign === "center" || dataAlign === "right" || dataAlign === "left") {
-    return dataAlign;
-  }
-
-  // margin 样式用于兼容外部 HTML 或旧内容。
-  const marginLeft = element.style.marginLeft;
-  const marginRight = element.style.marginRight;
-  if (marginLeft === "auto" && marginRight === "auto") return "center";
-  if (marginLeft === "auto") return "right";
-
-  return "left";
-}
-
-/** 生成图片对齐需要写入 HTML 的样式。 */
-function getImageAlignStyle(align: ImageAlign) {
-  if (align === "center") {
-    return "display: block; margin-left: auto; margin-right: auto;";
-  }
-  if (align === "right") {
-    return "display: block; margin-left: auto; margin-right: 0;";
-  }
-  return "display: block; margin-left: 0; margin-right: auto;";
-}
-
-/** 渲染带删除按钮的图片节点视图，并处理加载态与失败态。 */
-function ImageView({ node, deleteNode, editor, selected, updateAttributes }: NodeViewProps) {
+/** 渲染带操作控件的图片节点视图，并处理加载态与失败态。 */
+export function ImageNodeView({
+  node,
+  deleteNode,
+  editor,
+  selected,
+  updateAttributes,
+}: NodeViewProps) {
+  // 当前图片节点属性。
   const { src, alt, title, width, align = "left" } = node.attrs as ImageAttrs;
   // 当前图片节点实际使用的对齐方式。
-  const imageAlign = align === "center" || align === "right" ? align : "left";
+  const imageAlign = normalizeImageAlign(align);
   // 图片节点外层容器引用，用于按编辑区域宽度计算百分比。
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   // 拖拽过程中的瞬时数据，不需要每次变化触发渲染。
@@ -333,61 +279,3 @@ function ImageView({ node, deleteNode, editor, selected, updateAttributes }: Nod
     </NodeViewWrapper>
   );
 }
-
-export const ImageWithDelete = Image.extend({
-  /** 扩展图片宽度属性，按百分比解析和输出。 */
-  addAttributes() {
-    // 保留 TipTap Image 原有属性，仅覆盖 width 的百分比语义。
-    const parentAttributes = this.parent?.() ?? {};
-
-    return {
-      ...parentAttributes,
-      width: {
-        default: null,
-        parseHTML: (element: HTMLElement) => {
-          // HTML style 中声明的百分比宽度优先级最高。
-          const styleWidth = element.style.width;
-          // 兼容直接写在 width 属性上的历史值。
-          const widthAttr = element.getAttribute("width");
-          // 统一交给百分比解析函数处理。
-          const rawWidth = styleWidth.endsWith("%") ? styleWidth : widthAttr;
-
-          return parseImageWidthPercent(rawWidth);
-        },
-        renderHTML: (attributes: Record<string, unknown>) => {
-          // 当前图片节点保存的百分比宽度。
-          const widthPercent = parseImageWidthPercent(attributes.width as ImageAttrs["width"]);
-          if (widthPercent == null) return {};
-
-          return {
-            style: `width: ${widthPercent}%; height: auto;`,
-          };
-        },
-      },
-      align: {
-        default: "left",
-        parseHTML: parseImageAlign,
-        renderHTML: (attributes: Record<string, unknown>) => {
-          // 图片节点的水平对齐方式。
-          const align =
-            attributes.align === "center" || attributes.align === "right"
-              ? attributes.align
-              : "left";
-
-          return {
-            "data-align": align,
-            style: getImageAlignStyle(align),
-          };
-        },
-      },
-    };
-  },
-  /** 输出图片 HTML，保留扩展属性合并能力。 */
-  renderHTML({ HTMLAttributes }) {
-    return ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
-  },
-  /** 使用自定义 React NodeView 渲染图片操作控件。 */
-  addNodeView() {
-    return ReactNodeViewRenderer(ImageView);
-  },
-});

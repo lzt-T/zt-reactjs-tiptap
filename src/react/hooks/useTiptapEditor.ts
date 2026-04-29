@@ -1,6 +1,6 @@
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { ImageWithDelete } from "@/core/extensions/ImageWithDelete";
+import { ResizableImage } from "@/core/extensions/ResizableImage";
 import { FileAttachment } from "@/core/extensions/FileAttachment";
 import { DeletionCallbacks } from "@/core/extensions/DeletionCallbacks";
 import {
@@ -165,7 +165,7 @@ export function useTiptapEditor({
         codeBlock: false,
       }),
       createCodeBlockLowlightExtension(defaultCodeBlockLanguage),
-      ImageWithDelete,
+      ResizableImage,
       FileAttachment,
       DeletionCallbacks,
       Table.configure({

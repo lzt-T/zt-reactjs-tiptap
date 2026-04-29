@@ -1,7 +1,7 @@
 import { generateJSON, generateText } from "@tiptap/core";
 import type { Extensions, TextSerializer } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
-import { ImageWithDelete } from "@/core/extensions/ImageWithDelete";
+import { ResizableImage } from "@/core/extensions/ResizableImage";
 import { FileAttachment } from "@/core/extensions/FileAttachment";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
@@ -31,7 +31,7 @@ const schemaExtensions: Extensions = [
     codeBlock: false,
   }),
   createCodeBlockLowlightExtension(DEFAULT_CODE_BLOCK_LANGUAGE),
-  ImageWithDelete,
+  ResizableImage,
   FileAttachment,
   Table.configure({ resizable: true }),
   TableRow,

@@ -27,6 +27,7 @@
 - Added an image alignment bubble menu with left, center, and right actions.
 
 ### Changed
+- Renamed the public image extension export from `ImageWithDelete` to `ResizableImage`; the old export is no longer provided.
 - Unified editor runtime schema and `htmlToPlainText` schema for code block handling via `StarterKit.configure({ codeBlock: false }) + CodeBlockLowlight`.
 - Added i18n keys for code block labels:
   - `toolbar.codeBlock`
