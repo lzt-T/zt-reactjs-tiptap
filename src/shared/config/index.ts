@@ -34,6 +34,10 @@ export const config = {
   TABLE_ACTION_BUTTON_PADDING: 14,
   /* 表格下方/右侧加号条与表格边缘的间距（px），默认 4 */
   TABLE_ADD_BAR_GAP: 4,
+  /* 表格单元格默认宽度（px），默认 160 */
+  DEFAULT_TABLE_CELL_WIDTH: 160,
+  /* 表格单元格最小拖拽宽度（px），默认 60 */
+  MIN_TABLE_CELL_WIDTH: 60,
   /* 文字颜色预设（ColorPicker type="text"） */
   TEXT_COLORS: [
     { name: "Default", value: "#000000" },

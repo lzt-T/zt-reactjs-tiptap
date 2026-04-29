@@ -33,7 +33,7 @@ import type { Node } from "@tiptap/pm/model";
 import debounce from "lodash/debounce";
 import type { AnyExtension } from "@tiptap/core";
 import type { EditorLocale } from "@/shared/locales";
-import { DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
+import { config, DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
 import type { EditorErrorEvent } from "@/react/editor/types";
 
 type MathClickHandler = (node: Node, pos: number) => void;
@@ -165,7 +165,10 @@ export function useTiptapEditor({
       ImageWithDelete,
       FileAttachment,
       DeletionCallbacks,
-      Table.configure({ resizable: true }),
+      Table.configure({
+        resizable: true,
+        cellMinWidth: config.MIN_TABLE_CELL_WIDTH,
+      }),
       TableRow,
       TableCell,
       TableHeader,

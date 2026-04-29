@@ -108,6 +108,8 @@ export default function EditorSurface({
   // 编辑器容器 CSS 变量样式。
   const wrapperStyle = {
     "--table-action-padding": `${config.TABLE_ACTION_BUTTON_PADDING}px`,
+    "--table-cell-default-width": `${config.DEFAULT_TABLE_CELL_WIDTH}px`,
+    "--table-cell-min-width": `${config.MIN_TABLE_CELL_WIDTH}px`,
     "--zt-gap-placeholder-content": toCssContentString(resolvedPlaceholder),
   } as CSSProperties;
 

@@ -246,12 +246,16 @@ const TableRowActions = ({
         if (scrollWrapper?.getAttribute('data-table-actions-wrapper') !== 'true') {
           scrollWrapper = document.createElement('div')
           scrollWrapper.setAttribute('data-table-actions-wrapper', 'true')
-          scrollWrapper.style.position = 'relative'
           tableWrapper.insertBefore(scrollWrapper, table)
           scrollWrapper.appendChild(table)
         }
-        scrollWrapper.style.width = `${table.offsetWidth + TABLE_ADD_BAR_SIZE + config.TABLE_ADD_BAR_GAP}px`
-        scrollWrapper.style.minHeight = `${table.offsetHeight + TABLE_ADD_BAR_SIZE + config.TABLE_ADD_BAR_GAP}px`
+        scrollWrapper.style.position = 'relative'
+        scrollWrapper.style.display = 'inline-block'
+        scrollWrapper.style.minWidth = '100%'
+        scrollWrapper.style.width = ''
+        scrollWrapper.style.paddingRight = `${TABLE_ADD_BAR_SIZE + config.TABLE_ADD_BAR_GAP}px`
+        scrollWrapper.style.paddingBottom = `${TABLE_ADD_BAR_SIZE + config.TABLE_ADD_BAR_GAP}px`
+        scrollWrapper.style.minHeight = `${table.offsetHeight}px`
         target = scrollWrapper
       }
       setPortalTarget(target)
