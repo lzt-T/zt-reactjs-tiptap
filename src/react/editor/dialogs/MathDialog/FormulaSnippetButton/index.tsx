@@ -1,12 +1,6 @@
 import { useMemo } from 'react'
 import katex from 'katex'
-
-export interface FormulaSnippetItem {
-  id: string
-  label: string
-  latex: string
-  previewLatex?: string
-}
+import type { FormulaSnippetItem } from '@/shared/config/formulaCategories'
 
 function renderSnippetPreview(latex: string): string {
   try {

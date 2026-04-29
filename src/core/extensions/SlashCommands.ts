@@ -30,13 +30,46 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { EditorLocale } from '@/shared/locales'
-import {
-  BuiltinSlashCommandKey as BuiltinSlashKey,
-} from '@/react/editor/customization'
 import { DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
 import { resolveCodeBlockLanguage } from "./codeBlockLowlight";
 
-export const SlashCommandKey = BuiltinSlashKey
+// 斜杠命令内置项 Key。
+export const BuiltinSlashCommandKey = {
+  // 一级标题。
+  Heading1: "heading1",
+  // 二级标题。
+  Heading2: "heading2",
+  // 三级标题。
+  Heading3: "heading3",
+  // 无序列表。
+  BulletList: "bulletList",
+  // 有序列表。
+  NumberedList: "numberedList",
+  // 任务列表。
+  TaskList: "taskList",
+  // 引用块。
+  Blockquote: "blockquote",
+  // 行内代码。
+  InlineCode: "inlineCode",
+  // 代码块。
+  CodeBlock: "codeBlock",
+  // 表格。
+  Table: "table",
+  // 行内数学公式。
+  InlineMath: "inlineMath",
+  // 块级数学公式。
+  BlockMath: "blockMath",
+  // 图片。
+  Image: "image",
+  // 附件上传。
+  UploadAttachment: "uploadAttachment",
+} as const
+
+export type BuiltinSlashCommandKey =
+  (typeof BuiltinSlashCommandKey)[keyof typeof BuiltinSlashCommandKey]
+
+// 兼容旧的斜杠命令 Key 导出。
+export const SlashCommandKey = BuiltinSlashCommandKey
 export type SlashCommandKey = (typeof SlashCommandKey)[keyof typeof SlashCommandKey]
 
 export interface CommandItem {

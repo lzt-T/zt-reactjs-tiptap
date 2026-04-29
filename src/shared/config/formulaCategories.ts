@@ -1,11 +1,19 @@
-import type { FormulaSnippetItem } from '@/react/editor/dialogs/MathDialog/FormulaSnippetButton'
+/** 数学公式片段项。 */
+export interface FormulaSnippetItem {
+  id: string
+  label: string
+  latex: string
+  previewLatex?: string
+}
 
+/** 数学公式分类。 */
 export type FormulaPickerCategory = {
   id: string
   title: string
   items: FormulaSnippetItem[]
 }
 
+// 默认数学公式分类列表。
 export const FORMULA_CATEGORIES: FormulaPickerCategory[] = [
   {
     id: 'common',

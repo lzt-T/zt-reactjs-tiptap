@@ -1,5 +1,7 @@
 import type { FormulaPickerCategory } from '@/shared/config/formulaCategories'
 import type { CodeBlockLanguageOption, ColorOption } from "@/shared/config";
+import { EditorLanguage as SharedEditorLanguageValue } from "@/shared/locales";
+import type { EditorLanguage as SharedEditorLanguage } from "@/shared/locales";
 import type {
   EditorExternalExtension,
   SlashCommandConfig,
@@ -21,13 +23,9 @@ export const EditorMode = {
 
 export type EditorMode = (typeof EditorMode)[keyof typeof EditorMode]
 
-/** 编辑器语言 */
-export const EditorLanguage = {
-  ZhCN: 'zh-CN',
-  EnUS: 'en-US',
-} as const
-
-export type EditorLanguage = (typeof EditorLanguage)[keyof typeof EditorLanguage]
+// 编辑器语言，转接自 shared 以保持 React 层公开 API。
+export const EditorLanguage = SharedEditorLanguageValue;
+export type EditorLanguage = SharedEditorLanguage;
 
 /** 编辑器主题 */
 export const EditorTheme = {
@@ -152,7 +150,7 @@ export interface TiptapEditorProps {
    * 编辑器语言，控制工具栏、菜单、弹窗、默认 placeholder 等文案
    * 不传时默认跟随浏览器语言：zh* -> zh-CN，其余 -> en-US
    */
-  language?: EditorLanguage
+  language?: SharedEditorLanguage
 
   /**
    * 编辑器为空时显示的占位文本。

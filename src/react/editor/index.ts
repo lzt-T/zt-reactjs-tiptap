@@ -29,5 +29,5 @@ export type {
 } from "./customization";
 
 // 数学片段类型。
-export type { FormulaSnippetItem } from "./dialogs/MathDialog/FormulaSnippetButton";
+export type { FormulaSnippetItem } from "@/shared/config/formulaCategories";
 export type { CodeBlockLanguageOption } from "@/shared/config";

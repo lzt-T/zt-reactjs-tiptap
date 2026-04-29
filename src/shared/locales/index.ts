@@ -1,6 +1,15 @@
 import enUS from "./en-US";
 import zhCN from "./zh-CN";
-import type { EditorLanguage } from "@/react/editor/types";
+
+// 编辑器语言。
+export const EditorLanguage = {
+  // 简体中文。
+  ZhCN: "zh-CN",
+  // 英文。
+  EnUS: "en-US",
+} as const;
+
+export type EditorLanguage = (typeof EditorLanguage)[keyof typeof EditorLanguage];
 
 export interface EditorLocale {
   placeholders: {
@@ -161,7 +170,7 @@ export interface EditorLocale {
   };
 }
 
-/** 语言表。 */
+// 语言表。
 const localeMap: Record<EditorLanguage, EditorLocale> = {
   "en-US": enUS,
   "zh-CN": zhCN,

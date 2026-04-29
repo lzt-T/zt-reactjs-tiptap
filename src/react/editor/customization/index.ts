@@ -3,6 +3,8 @@ import type { AnyExtension } from "@tiptap/core";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { EditorLocale } from "@/shared/locales";
+import { BuiltinSlashCommandKey as CoreBuiltinSlashCommandKeyValue } from "@/core/extensions/SlashCommands";
+import type { BuiltinSlashCommandKey as CoreBuiltinSlashCommandKey } from "@/core/extensions/SlashCommands";
 
 /** 工具栏内置项 Key。 */
 export const BuiltinToolbarItemKey = {
@@ -34,28 +36,12 @@ export const BuiltinToolbarItemKey = {
   IncreaseIndent: "increaseIndent",
 } as const;
 
-/** 斜杠命令内置项 Key。 */
-export const BuiltinSlashCommandKey = {
-  Heading1: "heading1",
-  Heading2: "heading2",
-  Heading3: "heading3",
-  BulletList: "bulletList",
-  NumberedList: "numberedList",
-  TaskList: "taskList",
-  Blockquote: "blockquote",
-  InlineCode: "inlineCode",
-  CodeBlock: "codeBlock",
-  Table: "table",
-  InlineMath: "inlineMath",
-  BlockMath: "blockMath",
-  Image: "image",
-  UploadAttachment: "uploadAttachment",
-} as const;
-
 export type BuiltinToolbarItemKey =
   (typeof BuiltinToolbarItemKey)[keyof typeof BuiltinToolbarItemKey];
-export type BuiltinSlashCommandKey =
-  (typeof BuiltinSlashCommandKey)[keyof typeof BuiltinSlashCommandKey];
+
+// 斜杠命令内置项 Key，转接自 core 以保持 React 层公开 API。
+export const BuiltinSlashCommandKey = CoreBuiltinSlashCommandKeyValue;
+export type BuiltinSlashCommandKey = CoreBuiltinSlashCommandKey;
 
 /** 工具栏/斜杠项分组，渲染时用于自动插入分隔符。 */
 export type EditorItemGroup = string;
@@ -126,7 +112,7 @@ export type ToolbarItemConfig = ToolbarBuiltinItemConfig | ToolbarCustomItemConf
 /** 斜杠内置项配置。 */
 export interface SlashBuiltinCommandConfig {
   type: "builtin";
-  key: BuiltinSlashCommandKey;
+  key: CoreBuiltinSlashCommandKey;
   group?: EditorItemGroup;
 }
 
@@ -185,20 +171,20 @@ export function createDefaultToolbarItems(locale: EditorLocale): ToolbarItemConf
 export function createDefaultSlashCommands(locale: EditorLocale): SlashCommandConfig[] {
   void locale;
   return [
-    { type: "builtin", key: BuiltinSlashCommandKey.Heading1, group: "heading" },
-    { type: "builtin", key: BuiltinSlashCommandKey.Heading2, group: "heading" },
-    { type: "builtin", key: BuiltinSlashCommandKey.Heading3, group: "heading" },
-    { type: "builtin", key: BuiltinSlashCommandKey.BulletList, group: "list" },
-    { type: "builtin", key: BuiltinSlashCommandKey.NumberedList, group: "list" },
-    { type: "builtin", key: BuiltinSlashCommandKey.TaskList, group: "list" },
-    { type: "builtin", key: BuiltinSlashCommandKey.Blockquote, group: "insert" },
-    { type: "builtin", key: BuiltinSlashCommandKey.InlineCode, group: "insert" },
-    { type: "builtin", key: BuiltinSlashCommandKey.CodeBlock, group: "insert" },
-    { type: "builtin", key: BuiltinSlashCommandKey.Table, group: "insert" },
-    { type: "builtin", key: BuiltinSlashCommandKey.InlineMath, group: "math" },
-    { type: "builtin", key: BuiltinSlashCommandKey.BlockMath, group: "math" },
-    { type: "builtin", key: BuiltinSlashCommandKey.Image, group: "media" },
-    { type: "builtin", key: BuiltinSlashCommandKey.UploadAttachment, group: "media" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading1, group: "heading" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading2, group: "heading" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading3, group: "heading" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.BulletList, group: "list" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.NumberedList, group: "list" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.TaskList, group: "list" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Blockquote, group: "insert" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.InlineCode, group: "insert" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.CodeBlock, group: "insert" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Table, group: "insert" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.InlineMath, group: "math" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.BlockMath, group: "math" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Image, group: "media" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.UploadAttachment, group: "media" },
   ];
 }
 
@@ -208,8 +194,8 @@ export function isBuiltinToolbarItemKey(key: string): key is BuiltinToolbarItemK
 }
 
 /** 斜杠 key 校验。 */
-export function isBuiltinSlashCommandKey(key: string): key is BuiltinSlashCommandKey {
-  return Object.values(BuiltinSlashCommandKey).includes(key as BuiltinSlashCommandKey);
+export function isBuiltinSlashCommandKey(key: string): key is CoreBuiltinSlashCommandKey {
+  return Object.values(CoreBuiltinSlashCommandKeyValue).includes(key as CoreBuiltinSlashCommandKey);
 }
 
 /**
