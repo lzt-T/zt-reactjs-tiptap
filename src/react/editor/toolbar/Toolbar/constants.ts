@@ -6,6 +6,7 @@ export const BUILTIN_GROUP_MAP: Record<string, string> = {
   [BuiltinToolbarItemKey.BulletList]: "block",
   [BuiltinToolbarItemKey.OrderedList]: "block",
   [BuiltinToolbarItemKey.TaskList]: "block",
+  [BuiltinToolbarItemKey.Blockquote]: "block",
   [BuiltinToolbarItemKey.InsertTable]: "block",
   [BuiltinToolbarItemKey.CodeBlock]: "block",
   [BuiltinToolbarItemKey.InlineMath]: "insert",

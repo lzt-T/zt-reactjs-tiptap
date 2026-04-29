@@ -8,6 +8,7 @@ import {
   toggleOrderedList,
   toggleTaskList,
   toggleCode,
+  toggleBlockquote,
   setCodeBlockLanguage,
   insertTable,
 } from '@/core/commands/editorCommands'
@@ -19,6 +20,7 @@ import {
   ListOrdered,
   ListTodo,
   Code,
+  MessageSquareQuote,
   SquareCode,
   Table,
   Sigma,
@@ -117,6 +119,13 @@ export function createDefaultCommands(
       description: locale.slashCommands.taskList.description,
       icon: ListTodo,
       command: ({ editor }) => toggleTaskList(editor),
+    },
+    {
+      key: SlashCommandKey.Blockquote,
+      title: locale.slashCommands.blockquote.title,
+      description: locale.slashCommands.blockquote.description,
+      icon: MessageSquareQuote,
+      command: ({ editor }) => toggleBlockquote(editor),
     },
     {
       key: SlashCommandKey.InlineCode,

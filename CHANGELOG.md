@@ -6,6 +6,7 @@
 - Added code block language support with `CodeBlockLowlight` + `lowlight` syntax highlighting.
 - Added in-block language selector menu (`Code language`) shown when cursor is inside a code block.
 - Added default code block insertion entry to toolbar and slash commands.
+- Added default blockquote entry to toolbar and slash commands.
 - Added new props:
   - `codeBlockLanguages?: Array<{ value: string; label: string }>`
   - `defaultCodeBlockLanguage?: string`

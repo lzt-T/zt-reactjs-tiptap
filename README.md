@@ -361,6 +361,7 @@ import 'zt-reactjs-tiptap/style.css'
 
 const toolbarItems: ToolbarItemConfig[] = [
   { type: 'builtin', key: BuiltinToolbarItemKey.Heading, group: 'block' },
+  { type: 'builtin', key: BuiltinToolbarItemKey.Blockquote, group: 'block' },
   { type: 'builtin', key: BuiltinToolbarItemKey.Bold, group: 'format' },
   { type: 'builtin', key: BuiltinToolbarItemKey.Italic, group: 'format' },
   {
@@ -381,7 +382,7 @@ const toolbarItems: ToolbarItemConfig[] = [
 ### Slash 命令自定义（保留默认 + 追加自定义命令）
 
 ```tsx
-import { MessageSquareQuote } from 'lucide-react'
+import { Lightbulb } from 'lucide-react'
 import {
   ReactTiptapEditor,
   type SlashCommandConfig,
@@ -394,7 +395,7 @@ const slashCommands: SlashCommandConfig[] = [
     key: 'callout',
     title: 'Callout',
     description: '插入提示块',
-    icon: MessageSquareQuote,
+    icon: Lightbulb,
     command: ({ editor }) => {
       editor
         .chain()

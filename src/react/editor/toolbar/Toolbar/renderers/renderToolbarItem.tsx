@@ -16,6 +16,7 @@ import {
   List,
   ListOrdered,
   ListTodo,
+  MessageSquareQuote,
   Table,
   SquareCode,
   Sigma,
@@ -165,6 +166,32 @@ export function renderToolbarItem(
             title={ctx.locale.toolbar.taskList}
           >
             <ListTodo size={16} />
+          </button>
+        ),
+      };
+    case BuiltinToolbarItemKey.Blockquote:
+      return {
+        key: item.key,
+        group,
+        element: (
+          <button
+            type="button"
+            className={cn(
+              "editor-toolbar-btn",
+              ctx.showActiveState &&
+                ctx.editor.isActive("blockquote") &&
+                "is-active",
+              ctx.isToolbarLocked && "is-disabled",
+            )}
+            onClick={() => {
+              if (ctx.isToolbarLocked) return;
+              ctx.runToolbarAction(() =>
+                ctx.actionContext.block.toggleBlockquote(),
+              );
+            }}
+            title={ctx.locale.toolbar.blockquote}
+          >
+            <MessageSquareQuote size={16} />
           </button>
         ),
       };

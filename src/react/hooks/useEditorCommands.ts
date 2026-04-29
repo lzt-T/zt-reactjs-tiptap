@@ -118,6 +118,7 @@ export function useEditorCommands(
             setHeading: noop as (level: 1 | 2 | 3) => void,
             toggleHeading: noop as (level: 1 | 2 | 3) => void,
             toggleCodeBlock: noop,
+            toggleBlockquote: noop,
             setCodeBlockLanguage: noopStr,
             toggleBulletList: noop,
             toggleOrderedList: noop,
@@ -128,6 +129,7 @@ export function useEditorCommands(
             setHeading: (level: 1 | 2 | 3) => cmd.setHeading(editor, level),
             toggleHeading: (level: 1 | 2 | 3) => cmd.toggleHeading(editor, level),
             toggleCodeBlock: () => cmd.toggleCodeBlock(editor),
+            toggleBlockquote: () => cmd.toggleBlockquote(editor),
             setCodeBlockLanguage: (language: string) =>
               cmd.setCodeBlockLanguage(editor, language),
             toggleBulletList: () => cmd.toggleBulletList(editor),

@@ -14,6 +14,7 @@ export interface EditorLocale {
     bulletList: { title: string; description: string };
     numberedList: { title: string; description: string };
     taskList: { title: string; description: string };
+    blockquote: { title: string; description: string };
     inlineCode: { title: string; description: string };
     codeBlock: { title: string; description: string };
     table: { title: string; description: string };
@@ -27,6 +28,7 @@ export interface EditorLocale {
     bulletList: string;
     orderedList: string;
     taskList: string;
+    blockquote: string;
     insertTable: string;
     codeBlock: string;
     inlineMath: string;

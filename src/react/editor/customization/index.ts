@@ -10,6 +10,7 @@ export const BuiltinToolbarItemKey = {
   BulletList: "bulletList",
   OrderedList: "orderedList",
   TaskList: "taskList",
+  Blockquote: "blockquote",
   InsertTable: "insertTable",
   CodeBlock: "codeBlock",
   InlineMath: "inlineMath",
@@ -39,6 +40,7 @@ export const BuiltinSlashCommandKey = {
   BulletList: "bulletList",
   NumberedList: "numberedList",
   TaskList: "taskList",
+  Blockquote: "blockquote",
   InlineCode: "inlineCode",
   CodeBlock: "codeBlock",
   Table: "table",
@@ -78,6 +80,7 @@ export interface EditorActionContext {
     setHeading: (level: 1 | 2 | 3) => void;
     toggleHeading: (level: 1 | 2 | 3) => void;
     toggleCodeBlock: () => void;
+    toggleBlockquote: () => void;
     setCodeBlockLanguage: (language: string) => void;
     toggleBulletList: () => void;
     toggleOrderedList: () => void;
@@ -147,6 +150,7 @@ export function createDefaultToolbarItems(locale: EditorLocale): ToolbarItemConf
     { type: "builtin", key: BuiltinToolbarItemKey.BulletList, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.OrderedList, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.TaskList, group: "block" },
+    { type: "builtin", key: BuiltinToolbarItemKey.Blockquote, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.InsertTable, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.CodeBlock, group: "block" },
     { type: "builtin", key: BuiltinToolbarItemKey.InlineMath, group: "insert" },
@@ -179,6 +183,7 @@ export function createDefaultSlashCommands(locale: EditorLocale): SlashCommandCo
     { type: "builtin", key: BuiltinSlashCommandKey.BulletList, group: "list" },
     { type: "builtin", key: BuiltinSlashCommandKey.NumberedList, group: "list" },
     { type: "builtin", key: BuiltinSlashCommandKey.TaskList, group: "list" },
+    { type: "builtin", key: BuiltinSlashCommandKey.Blockquote, group: "insert" },
     { type: "builtin", key: BuiltinSlashCommandKey.InlineCode, group: "insert" },
     { type: "builtin", key: BuiltinSlashCommandKey.CodeBlock, group: "insert" },
     { type: "builtin", key: BuiltinSlashCommandKey.Table, group: "insert" },

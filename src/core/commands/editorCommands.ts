@@ -27,6 +27,11 @@ export function toggleCodeBlock(editor: Editor): void {
   editor.chain().focus().toggleCodeBlock().run();
 }
 
+/** 切换当前块的引用块状态。 */
+export function toggleBlockquote(editor: Editor): void {
+  editor.chain().focus().toggleBlockquote().run();
+}
+
 export function setCodeBlockLanguage(editor: Editor, language: string): void {
   const resolvedLanguage = resolveCodeBlockLanguage(language);
   if (editor.isActive("codeBlock")) {
