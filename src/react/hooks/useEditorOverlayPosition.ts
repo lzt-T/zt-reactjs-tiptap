@@ -186,10 +186,16 @@ export function useEditorOverlayPosition({
       const anchorLeft = rect.left - wrapperRect.left + scrollLeft;
       // 锚点右侧在编辑器内容坐标系中的位置。
       const anchorRight = rect.right - wrapperRect.left + scrollLeft;
-      // 锚点上方在可视区域中的可用空间。
-      const spaceAbove = rect.top - wrapperRect.top;
-      // 锚点下方在可视区域中的可用空间。
-      const spaceBelow = wrapperRect.bottom - rect.bottom;
+      // 视口高度：浏览器环境优先使用真实视口，非浏览器环境回退编辑器容器。
+      const viewportHeight =
+        typeof window === "undefined" ? wrapperRect.bottom : window.innerHeight;
+      // 锚点上方在浏览器视口中的可用空间。
+      const spaceAbove = rect.top;
+      // 锚点下方在浏览器视口中的可用空间。
+      const spaceBelow = viewportHeight - rect.bottom;
+      // 方向判断阈值：已挂载时使用真实高度，首帧回退到调用方传入阈值。
+      const placementThresholdForOverlay =
+        overlayHeight > 0 ? overlayHeight : resolvedThreshold;
       // 根据上下可用空间决定最终展开方向。
       const placement = resolvedLockPlacement
         ? resolvedPlacement
@@ -197,7 +203,7 @@ export function useEditorOverlayPosition({
             resolvedPlacement,
             spaceAbove,
             spaceBelow,
-            resolvedThreshold,
+            placementThresholdForOverlay,
           );
 
       // 计算未裁切前的纵向位置。
