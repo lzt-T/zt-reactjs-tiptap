@@ -7,6 +7,8 @@
 
 **GitHub:** [https://github.com/lzt-T/md-tiptap](https://github.com/lzt-T/md-tiptap)
 
+**演示地址**：https://tiptap.xjoker.top/
+
 ## 特性
 
 - 🧩 双模式编辑体验：Notion 风格与 Headless 顶部工具栏模式
