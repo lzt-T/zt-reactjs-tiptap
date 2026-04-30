@@ -235,7 +235,11 @@ const CommandMenu = ({
     return createPortal(menuContent, portalContainer);
   }
 
-  // Portal 挂载点未就绪时回退原地渲染，避免首帧菜单丢失。
+  if (portalContainer) {
+    return null;
+  }
+
+  // 无 Portal 挂载点时回退原地渲染。
   return menuContent;
 };
 
