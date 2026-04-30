@@ -76,6 +76,8 @@ export interface CommandItem {
   key: string
   title: string
   description?: string
+  /** 菜单分组，用于渲染分类标题。 */
+  group?: string
   icon?: LucideIcon
   command: ({ editor }: { editor: Editor }) => void
   mathType?: 'inline' | 'block'

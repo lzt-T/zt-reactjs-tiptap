@@ -198,6 +198,7 @@ export default function EditorSurface({
             <CommandMenu
               items={commandMenu.filteredCommands}
               command={onHandleCommand}
+              locale={locale}
               selectedIndex={commandMenu.selectedIndex}
               position={commandMenu.menuPosition}
               maxHeight={commandMenuMaxHeight}

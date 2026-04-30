@@ -24,6 +24,13 @@ const enUS: EditorLocale = {
       description: 'Upload attachment as file link',
     },
   },
+  slashCommandGroups: {
+    heading: 'Headings',
+    list: 'Lists',
+    insert: 'Insert',
+    math: 'Math',
+    media: 'Media',
+  },
   toolbar: {
     heading: 'Heading',
     bulletList: 'Bullet list',

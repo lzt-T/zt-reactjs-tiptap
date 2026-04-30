@@ -21,6 +21,13 @@ const zhCN: EditorLocale = {
     image: { title: '图片', description: '上传或插入图片' },
     uploadAttachment: { title: '上传附件', description: '上传附件并插入文件链接' },
   },
+  slashCommandGroups: {
+    heading: '标题',
+    list: '列表',
+    insert: '插入',
+    math: '公式',
+    media: '媒体',
+  },
   toolbar: {
     heading: '标题',
     bulletList: '无序列表',

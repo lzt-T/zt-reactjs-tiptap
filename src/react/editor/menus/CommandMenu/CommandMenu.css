@@ -2,51 +2,92 @@
   z-index: 48;
 }
 
-.command-menu-overlay [data-slot="command-item"] {
-  cursor: pointer;
+.command-menu-overlay .command-menu-shell {
+  width: 100%;
+  min-width: 172px;
+  overflow: hidden;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-bg-panel);
+  color: var(--ui-text-strong);
+  box-shadow: var(--ui-shadow-popover);
 }
 
-/* 命令菜单边框：使用主题变量，无主题时回退到浅灰，避免打包到其他项目后出现黑边 */
-[data-slot="command"] {
-  border-color: var(--border);
-}
-
-/* CommandMenu 滚动条样式 */
-[data-slot="command-list"] {
-  /* 标准滚动条样式（Firefox） */
+.command-menu-overlay [data-slot="command-list"] {
+  padding: 5px;
   scrollbar-width: thin;
   scrollbar-color: var(--ui-scrollbar-thumb) transparent;
 }
 
+.command-menu-overlay [data-slot="command-item"] {
+  cursor: pointer;
+  min-height: 32px;
+  gap: 8px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--ui-text-strong);
+  line-height: 20px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.command-menu-overlay [data-slot="command-item"]:hover,
+.command-menu-overlay [data-slot="command-item"][data-selected="true"] {
+  background: var(--ui-bg-hover-soft);
+  color: var(--ui-text-strong);
+}
+
+.command-menu-overlay [data-slot="command-item"].command-menu-item-selected {
+  background: var(--ui-bg-selected);
+  color: var(--ui-control-active);
+}
+
+.command-menu-overlay [data-slot="command-item"] svg {
+  color: var(--ui-text-muted);
+  transition: color 0.15s ease;
+}
+
+.command-menu-overlay
+  [data-slot="command-item"].command-menu-item-selected
+  svg {
+  color: var(--ui-control-active);
+}
+
+.command-menu-group {
+  padding: 2px 0 3px;
+}
+
+.command-menu-group + .command-menu-group {
+  margin-top: 3px;
+  padding-top: 5px;
+  border-top: 1px solid var(--ui-border-muted);
+}
+
+.command-menu-group [cmdk-group-heading] {
+  color: var(--ui-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  padding: 2px 8px 5px;
+}
+
+/* CommandMenu 滚动条样式 */
 /* Webkit 滚动条样式（Chrome, Safari, Edge） */
-[data-slot="command-list"]::-webkit-scrollbar {
+.command-menu-overlay [data-slot="command-list"]::-webkit-scrollbar {
   width: 4px;
 }
 
-[data-slot="command-list"]::-webkit-scrollbar-track {
+.command-menu-overlay [data-slot="command-list"]::-webkit-scrollbar-track {
   background: transparent;
 }
 
-[data-slot="command-list"]::-webkit-scrollbar-thumb {
+.command-menu-overlay [data-slot="command-list"]::-webkit-scrollbar-thumb {
   background-color: var(--ui-scrollbar-thumb);
   border-radius: 2px;
 }
 
-[data-slot="command-list"]::-webkit-scrollbar-thumb:hover {
+.command-menu-overlay [data-slot="command-list"]::-webkit-scrollbar-thumb:hover {
   background-color: var(--ui-scrollbar-thumb-hover);
 }
-
-/* 深色模式滚动条 */
-.dark [data-slot="command-list"] {
-  scrollbar-color: var(--ui-scrollbar-thumb) transparent;
-}
-
-.dark [data-slot="command-list"]::-webkit-scrollbar-thumb {
-  background-color: var(--ui-scrollbar-thumb);
-}
-
-.dark [data-slot="command-list"]::-webkit-scrollbar-thumb:hover {
-  background-color: var(--ui-scrollbar-thumb-hover);
-}
-
 

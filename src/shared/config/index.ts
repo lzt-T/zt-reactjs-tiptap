@@ -12,8 +12,8 @@ export {
 
 /* 配置项 */
 export const config = {
-  /* 斜杠命令菜单的最大高度（px），默认 240 */
-  COMMAND_MENU_DEFAULT_MAX_HEIGHT: 240,
+  /* 斜杠命令菜单的最大高度（px），默认 320 */
+  COMMAND_MENU_DEFAULT_MAX_HEIGHT: 320,
   /* 斜杠命令菜单的最小高度（px），默认 160 */
   COMMAND_MENU_DEFAULT_MIN_HEIGHT: 160,
   /* onChange 防抖延迟（毫秒），默认 300ms */

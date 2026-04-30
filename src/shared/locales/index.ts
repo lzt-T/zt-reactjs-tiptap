@@ -32,6 +32,13 @@ export interface EditorLocale {
     image: { title: string; description: string };
     uploadAttachment: { title: string; description: string };
   };
+  slashCommandGroups: {
+    heading: string;
+    list: string;
+    insert: string;
+    math: string;
+    media: string;
+  };
   toolbar: {
     heading: string;
     bulletList: string;

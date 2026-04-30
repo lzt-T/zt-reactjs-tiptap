@@ -214,7 +214,10 @@ export function useEditorResolvedConfig({
           );
           continue;
         }
-        result.push(matched);
+        result.push({
+          ...matched,
+          group: item.group,
+        });
         continue;
       }
 
@@ -222,6 +225,7 @@ export function useEditorResolvedConfig({
         key: item.key,
         title: item.title,
         description: item.description,
+        group: item.group,
         icon: item.icon,
         command: item.command,
         disabled: item.disabled,
