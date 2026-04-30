@@ -25,6 +25,8 @@
 - Added a hover action bar for code blocks with copy, format, and delete actions.
 - Added hover resize handles for images, storing width as a responsive percentage.
 - Added an image alignment bubble menu with left, center, and right actions.
+- Added editable multi-line captions for images, exported as `figure` + `figcaption`.
+- Added an image caption toggle button to show or clear captions per image.
 
 ### Changed
 - Renamed the public image extension export from `ImageWithDelete` to `ResizableImage`; the old export is no longer provided.

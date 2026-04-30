@@ -1,8 +1,10 @@
 import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
-import { AlignCenter, AlignLeft, AlignRight, ImageOff, Trash2 } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, Captions, ImageOff, Trash2 } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
+import type { EditorLocale } from "@/shared/locales";
+import { ImageCaptionInput } from "./ImageCaptionInput";
 import type { ImageAlign, ImageAttrs } from "./imageAttributes";
 import {
   clampImageWidthPercent,
@@ -29,11 +31,15 @@ export function ImageNodeView({
   node,
   deleteNode,
   editor,
+  extension,
+  getPos,
   selected,
   updateAttributes,
 }: NodeViewProps) {
   // 当前图片节点属性。
-  const { src, alt, title, width, align = "left" } = node.attrs as ImageAttrs;
+  const { src, alt, title, caption, width, align = "left" } = node.attrs as ImageAttrs;
+  // 图片节点文案。
+  const imageNodeLocale = (extension.options as { locale: EditorLocale }).locale.imageNode;
   // 当前图片节点实际使用的对齐方式。
   const imageAlign = normalizeImageAlign(align);
   // 图片节点外层容器引用，用于按编辑区域宽度计算百分比。
@@ -51,6 +57,8 @@ export function ImageNodeView({
   /** 图片操作栏的位置，null 表示等待测量后再显示。 */
   const [alignMenuPlacement, setAlignMenuPlacement] =
     useState<ImageAlignMenuPlacement>(null);
+  /** caption 刚开启后需要自动聚焦一次。 */
+  const [shouldFocusCaption, setShouldFocusCaption] = useState(false);
   // 当前节点保存的百分比宽度。
   const nodeWidthPercent = parseImageWidthPercent(width);
   // 实际渲染用的百分比宽度。
@@ -61,6 +69,8 @@ export function ImageNodeView({
   const loaded = loadedSrc === src;
   // 图片加载成功且编辑器可编辑时才允许拖拽缩放。
   const canResize = editor.isEditable && loaded && !loadError;
+  // caption 属性存在时才显示图片描述输入框。
+  const hasCaptionEnabled = typeof caption === "string";
   // 百分比宽度只挂在 wrapper 上，保证手柄贴合图片边界。
   const wrapperStyle: CSSProperties = {
     marginLeft: imageAlign === "center" || imageAlign === "right" ? "auto" : 0,
@@ -207,6 +217,39 @@ export function ImageNodeView({
     updateAttributes({ align: nextAlign });
   };
 
+  /** 更新图片描述文本。 */
+  const handleCaptionChange = (nextCaption: string) => {
+    updateAttributes({ caption: nextCaption });
+  };
+
+  /** 切换图片描述输入框，关闭时同步清空描述内容。 */
+  const handleCaptionToggle = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (hasCaptionEnabled) {
+      setShouldFocusCaption(false);
+      updateAttributes({ caption: null });
+      return;
+    }
+
+    setShouldFocusCaption(true);
+    updateAttributes({ caption: "" });
+  };
+
+  /** 清除 caption 输入框的一次性聚焦标记。 */
+  const handleCaptionFocused = () => {
+    setShouldFocusCaption(false);
+  };
+
+  /** 回车确认描述后重新选中当前图片节点。 */
+  const handleCaptionEnter = () => {
+    // 当前图片节点位置。
+    const pos = getPos();
+    if (typeof pos !== "number") return;
+
+    editor.chain().focus().setNodeSelection(pos).run();
+  };
+
   return (
     <NodeViewWrapper
       ref={wrapperRef}
@@ -224,110 +267,145 @@ export function ImageNodeView({
       data-align={imageAlign}
       data-drag-handle
     >
-      {loadError ? (
-        <div
-          className={
-            selected ? "image-error-placeholder image-selected" : "image-error-placeholder"
-          }
-        >
-          <ImageOff size={32} />
-          <span>图片加载失败</span>
-        </div>
-      ) : (
-        <>
-          {!loaded && <div className="image-loading-placeholder" aria-hidden />}
-          <img
-            src={src}
-            alt={alt ?? ""}
-            title={title ?? ""}
-            className={selected ? "image-selected" : ""}
-            // 禁用原生 img 拖拽，避免浏览器按“复制资源”语义处理。
-            draggable={false}
-            onLoad={handleLoad}
-            onError={handleError}
-            style={imageStyle}
-          />
-        </>
-      )}
-      {canResize && (
-        <>
-          <button
-            type="button"
-            className="image-resize-handle image-resize-handle-left"
-            aria-label="向左拖拽调整图片宽度"
-            onMouseDown={(event) => handleResizeStart("left", event)}
-          />
-          <button
-            type="button"
-            className="image-resize-handle image-resize-handle-right"
-            aria-label="向右拖拽调整图片宽度"
-            onMouseDown={(event) => handleResizeStart("right", event)}
-          />
-        </>
-      )}
-      {editor.isEditable && selected && alignMenuPlacement != null && (
-        <div
-          className={`image-align-menu is-${alignMenuPlacement}`}
-          aria-label="图片对齐操作栏"
-        >
-          <button
-            type="button"
+      <div className="image-node-media">
+        {loadError ? (
+          <div
             className={
-              imageAlign === "left"
-                ? "image-align-menu-btn is-active"
-                : "image-align-menu-btn"
+              selected ? "image-error-placeholder image-selected" : "image-error-placeholder"
             }
-            aria-label="图片左对齐"
-            title="图片左对齐"
-            onMouseDown={(event) => handleAlignChange("left", event)}
           >
-            <AlignLeft size={16} />
-          </button>
+            <ImageOff size={32} />
+            <span>{imageNodeLocale.imageLoadFailed}</span>
+          </div>
+        ) : (
+          <>
+            {!loaded && <div className="image-loading-placeholder" aria-hidden />}
+            <img
+              src={src}
+              alt={alt ?? ""}
+              title={title ?? ""}
+              className={selected ? "image-selected" : ""}
+              // 禁用原生 img 拖拽，避免浏览器按“复制资源”语义处理。
+              draggable={false}
+              onLoad={handleLoad}
+              onError={handleError}
+              style={imageStyle}
+            />
+          </>
+        )}
+        {canResize && (
+          <>
+            <button
+              type="button"
+              className="image-resize-handle image-resize-handle-left"
+              aria-label={imageNodeLocale.resizeLeft}
+              onMouseDown={(event) => handleResizeStart("left", event)}
+            />
+            <button
+              type="button"
+              className="image-resize-handle image-resize-handle-right"
+              aria-label={imageNodeLocale.resizeRight}
+              onMouseDown={(event) => handleResizeStart("right", event)}
+            />
+          </>
+        )}
+        {editor.isEditable && selected && alignMenuPlacement != null && (
+          <div
+            className={`image-align-menu is-${alignMenuPlacement}`}
+            aria-label={imageNodeLocale.alignMenu}
+          >
+            <button
+              type="button"
+              className={
+                imageAlign === "left"
+                  ? "image-align-menu-btn is-active"
+                  : "image-align-menu-btn"
+              }
+              aria-label={imageNodeLocale.alignLeft}
+              title={imageNodeLocale.alignLeft}
+              onMouseDown={(event) => handleAlignChange("left", event)}
+            >
+              <AlignLeft size={16} />
+            </button>
+            <button
+              type="button"
+              className={
+                imageAlign === "center"
+                  ? "image-align-menu-btn is-active"
+                  : "image-align-menu-btn"
+              }
+              aria-label={imageNodeLocale.alignCenter}
+              title={imageNodeLocale.alignCenter}
+              onMouseDown={(event) => handleAlignChange("center", event)}
+            >
+              <AlignCenter size={16} />
+            </button>
+            <button
+              type="button"
+              className={
+                imageAlign === "right"
+                  ? "image-align-menu-btn is-active"
+                  : "image-align-menu-btn"
+              }
+              aria-label={imageNodeLocale.alignRight}
+              title={imageNodeLocale.alignRight}
+              onMouseDown={(event) => handleAlignChange("right", event)}
+            >
+              <AlignRight size={16} />
+            </button>
+            <button
+              type="button"
+              className={
+                hasCaptionEnabled
+                  ? "image-align-menu-btn is-active"
+                  : "image-align-menu-btn"
+              }
+              aria-label={
+                hasCaptionEnabled
+                  ? imageNodeLocale.disableCaption
+                  : imageNodeLocale.enableCaption
+              }
+              title={
+                hasCaptionEnabled
+                  ? imageNodeLocale.disableCaption
+                  : imageNodeLocale.enableCaption
+              }
+              onMouseDown={handleCaptionToggle}
+            >
+              <Captions size={16} />
+            </button>
+          </div>
+        )}
+        {editor.isEditable && (
           <button
             type="button"
-            className={
-              imageAlign === "center"
-                ? "image-align-menu-btn is-active"
-                : "image-align-menu-btn"
-            }
-            aria-label="图片居中对齐"
-            title="图片居中对齐"
-            onMouseDown={(event) => handleAlignChange("center", event)}
+            className="image-delete-btn"
+            aria-label={imageNodeLocale.deleteImage}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              deleteNode();
+            }}
           >
-            <AlignCenter size={16} />
+            <Trash2 size={14} />
           </button>
-          <button
-            type="button"
-            className={
-              imageAlign === "right"
-                ? "image-align-menu-btn is-active"
-                : "image-align-menu-btn"
-            }
-            aria-label="图片右对齐"
-            title="图片右对齐"
-            onMouseDown={(event) => handleAlignChange("right", event)}
-          >
-            <AlignRight size={16} />
-          </button>
-        </div>
-      )}
-      {editor.isEditable && (
-        <button
-          type="button"
-          className="image-delete-btn"
-          aria-label="删除图片"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            deleteNode();
-          }}
-        >
-          <Trash2 size={14} />
-        </button>
+        )}
+      </div>
+      {!loadError && loaded && hasCaptionEnabled && (
+        <ImageCaptionInput
+          placeholder={imageNodeLocale.captionPlaceholder}
+          ariaLabel={imageNodeLocale.captionAriaLabel}
+          autoFocus={shouldFocusCaption}
+          caption={caption}
+          editable={editor.isEditable}
+          onAutoFocusComplete={handleCaptionFocused}
+          onCaptionChange={handleCaptionChange}
+          onEnter={handleCaptionEnter}
+        />
       )}
     </NodeViewWrapper>
   );

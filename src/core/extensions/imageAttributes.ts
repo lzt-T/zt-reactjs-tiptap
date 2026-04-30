@@ -10,6 +10,7 @@ export interface ImageAttrs {
   src: string;
   alt?: string;
   title?: string;
+  caption?: string | null;
   width?: number | string | null;
   align?: ImageAlign | null;
 }

@@ -43,11 +43,16 @@ function hasSameNodeInRange(
   doc.nodesBetween(safeFrom, safeTo, (node) => {
     if (found) return false
     if (node.type.name !== typeName) return
-    // Atom nodes: attrs equality is a good-enough identity
-    const keys = Object.keys(attrs)
+    // 用资源身份判断同一节点，避免 caption、尺寸、对齐等属性更新被误判为删除。
+    const nextAttrs = (node.attrs ?? {}) as Record<string, unknown>
     const same =
-      keys.length === Object.keys(node.attrs ?? {}).length &&
-      keys.every((k) => (node.attrs as Record<string, unknown>)[k] === attrs[k])
+      typeName === 'image'
+        ? typeof attrs.src === 'string' && nextAttrs.src === attrs.src
+        : typeName === 'fileAttachment'
+          ? typeof attrs.url === 'string' &&
+            nextAttrs.url === attrs.url &&
+            nextAttrs.name === attrs.name
+          : false
     if (same) found = true
   })
   return found

@@ -5,6 +5,15 @@ import { Selection } from "@tiptap/pm/state";
 import type { Editor } from "@tiptap/react";
 import { HeadlessToolbarMode } from "@/react/editor/types";
 
+// 编辑器内部需要独立接管焦点但仍保持编辑器聚焦态的元素标记。
+const EDITOR_FOCUS_RETAINED_SELECTOR = '[data-editor-focus-retained="true"]';
+
+// 内部控件离开编辑器容器时触发统一 blur 收口的事件名。
+const FOCUS_RETAINED_EXIT_OUTSIDE_EVENT = "zt-editor-focus-retained-exit-outside";
+
+// 内部控件进入焦点时恢复编辑器聚焦态的事件名。
+const FOCUS_RETAINED_ENTER_INSIDE_EVENT = "zt-editor-focus-retained-enter-inside";
+
 interface UseHeadlessFocusControllerOptions {
   editor: Editor | null;
   isNotionLike: boolean;
@@ -70,11 +79,23 @@ export function useHeadlessFocusController({
     [isInsideCodeBlockLanguageSelect],
   );
 
+  /** 判定目标是否位于需要保留编辑器聚焦态的内部控件中。 */
+  const isInsideFocusRetainedElement = useCallback(
+    (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false;
+      if (!containerRef.current?.contains(target)) return false;
+
+      return Boolean(target.closest(EDITOR_FOCUS_RETAINED_SELECTOR));
+    },
+    [containerRef],
+  );
+
   /** 统一 blur 收口：同步焦点状态、清理可见选区并触发 TipTap blur。 */
   const finalizeBlurIfNeeded = useCallback(
     (editorFocused: boolean) => {
       if (!editor || editorFocused || hasBlurFinalizedRef.current) return;
       if (isInsideLanguageMenu(document.activeElement)) return;
+      if (isInsideFocusRetainedElement(document.activeElement)) return;
       hasBlurFinalizedRef.current = true;
       // 失焦时清空范围选区：将非空选区折叠到原选区起点。
       const selection = editor.state.selection;
@@ -94,7 +115,7 @@ export function useHeadlessFocusController({
       setIsEditorFocusStable(false);
       editor.commands.blur();
     },
-    [editor, isInsideLanguageMenu],
+    [editor, isInsideLanguageMenu, isInsideFocusRetainedElement],
   );
 
   /** 代码语言菜单关闭后延迟校验聚焦状态，必要时同步清空聚焦态。 */
@@ -118,6 +139,55 @@ export function useHeadlessFocusController({
   const finalizeBlurFromOverlayClose = useCallback(() => {
     finalizeBlurIfNeeded(editor?.isFocused ?? false);
   }, [editor, finalizeBlurIfNeeded]);
+
+  /** 激活编辑器外层聚焦态，不抢占当前 DOM 焦点。 */
+  const activateEditorFocusState = useCallback(() => {
+    hasBlurFinalizedRef.current = false;
+    setIsEditorFocused(true);
+    if (focusStableRafIdRef.current != null) {
+      cancelAnimationFrame(focusStableRafIdRef.current);
+    }
+    focusStableRafIdRef.current = setTimeout(() => {
+      setIsEditorFocusStable(true);
+      focusStableRafIdRef.current = null;
+    }, 80);
+  }, []);
+
+  useEffect(() => {
+    // 编辑器根容器。
+    const container = containerRef.current;
+    if (!container) return;
+
+    /** 内部保活控件获得焦点后，恢复编辑器外层聚焦态。 */
+    const handleFocusRetainedEnterInside = () => {
+      activateEditorFocusState();
+    };
+
+    /** 内部保活控件离开编辑器容器后，复用统一 blur 收口。 */
+    const handleFocusRetainedExitOutside = () => {
+      finalizeBlurIfNeeded(editor?.isFocused ?? false);
+    };
+
+    container.addEventListener(
+      FOCUS_RETAINED_ENTER_INSIDE_EVENT,
+      handleFocusRetainedEnterInside,
+    );
+    container.addEventListener(
+      FOCUS_RETAINED_EXIT_OUTSIDE_EVENT,
+      handleFocusRetainedExitOutside,
+    );
+
+    return () => {
+      container.removeEventListener(
+        FOCUS_RETAINED_ENTER_INSIDE_EVENT,
+        handleFocusRetainedEnterInside,
+      );
+      container.removeEventListener(
+        FOCUS_RETAINED_EXIT_OUTSIDE_EVENT,
+        handleFocusRetainedExitOutside,
+      );
+    };
+  }, [activateEditorFocusState, containerRef, editor, finalizeBlurIfNeeded]);
 
   useEffect(() => {
     if (!editor) return;
@@ -149,15 +219,7 @@ export function useHeadlessFocusController({
 
     /** 聚焦后补触发未聚焦点击公式事件。 */
     const onFocus = () => {
-      hasBlurFinalizedRef.current = false;
-      setIsEditorFocused(true);
-      if (focusStableRafIdRef.current != null) {
-        cancelAnimationFrame(focusStableRafIdRef.current);
-      }
-      focusStableRafIdRef.current = setTimeout(() => {
-        setIsEditorFocusStable(true);
-        focusStableRafIdRef.current = null;
-      }, 80);
+      activateEditorFocusState();
       const pending = pendingMathClickRef.current;
       if (!pending) return;
       pendingMathClickRef.current = null;
@@ -179,12 +241,15 @@ export function useHeadlessFocusController({
 
     /** 失焦后按点击位置决定是否保留聚焦态。 */
     const onBlur = () => {
+      if (isInsideFocusRetainedElement(document.activeElement)) return;
       if (focusStableRafIdRef.current != null) {
         cancelAnimationFrame(focusStableRafIdRef.current);
         focusStableRafIdRef.current = null;
       }
       if (mouseDownInsideRef.current) return;
       requestAnimationFrame(() => {
+        if (isInsideFocusRetainedElement(document.activeElement)) return;
+
         if (
           (!containerRef.current?.contains(document.activeElement) ||
             !editor.isFocused) &&
@@ -212,7 +277,9 @@ export function useHeadlessFocusController({
     containerRef,
     editor,
     isInsideLanguageMenu,
+    isInsideFocusRetainedElement,
     isNotionLike,
+    activateEditorFocusState,
     onBlockMathClick,
     onInlineMathClick,
     finalizeBlurIfNeeded,

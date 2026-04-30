@@ -125,6 +125,20 @@ export interface EditorLocale {
     confirm: string;
     uploading: string;
   };
+  imageNode: {
+    imageLoadFailed: string;
+    resizeLeft: string;
+    resizeRight: string;
+    alignMenu: string;
+    alignLeft: string;
+    alignCenter: string;
+    alignRight: string;
+    enableCaption: string;
+    disableCaption: string;
+    deleteImage: string;
+    captionPlaceholder: string;
+    captionAriaLabel: string;
+  };
   fileDialog: {
     title: string;
     uploading: string;

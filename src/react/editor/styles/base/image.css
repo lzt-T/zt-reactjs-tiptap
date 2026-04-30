@@ -4,7 +4,7 @@
   display: block;
   width: fit-content;
   max-width: 100%;
-  line-height: 0;
+  line-height: 1.5;
 }
 
 .editor-wrapper .ProseMirror .image-node-wrapper.is-error {
@@ -17,6 +17,15 @@
   width: 100%;
   min-height: 120px;
   position: relative;
+}
+
+.editor-wrapper .ProseMirror .image-node-media {
+  position: relative;
+  line-height: 0;
+}
+
+.editor-wrapper .ProseMirror .image-node-wrapper.is-loading .image-node-media {
+  min-height: 120px;
 }
 
 /* 图片加载中占位：避免先空白再出图的闪烁 */
@@ -46,6 +55,51 @@
   max-width: 100%;
   height: auto;
   border-radius: 4px;
+}
+
+.editor-wrapper .ProseMirror .image-caption-input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  margin: 6px auto 0;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ui-text-muted);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  resize: none;
+  outline: none;
+  transition: color 0.15s ease;
+}
+
+.editor-wrapper .ProseMirror .image-caption-input::placeholder {
+  color: var(--ui-text-muted);
+  opacity: 0.72;
+}
+
+.editor-wrapper .ProseMirror .image-caption-input:focus {
+  color: var(--ui-text);
+}
+
+.editor-wrapper .ProseMirror .image-caption-text {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 6px auto 0;
+  padding: 6px 8px;
+  color: var(--ui-text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .editor-wrapper .ProseMirror .image-node-wrapper img.image-selected,

@@ -165,7 +165,9 @@ export function useTiptapEditor({
         codeBlock: false,
       }),
       createCodeBlockLowlightExtension(defaultCodeBlockLanguage),
-      ResizableImage,
+      ResizableImage.configure({
+        locale,
+      }),
       FileAttachment,
       DeletionCallbacks,
       Table.configure({
