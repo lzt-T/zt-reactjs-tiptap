@@ -69,6 +69,8 @@ interface UseTiptapEditorOptions {
   defaultCodeBlockLanguage?: string;
   onInlineMathClick: MathClickHandler;
   onBlockMathClick: MathClickHandler;
+  /** 是否启用斜杠命令扩展。 */
+  enableSlashCommands: boolean;
   /** 控制 editor 何时重建的依赖集合（例如模式切换时重建以刷新扩展回调） */
   recreateDeps?: ReadonlyArray<unknown>;
   /** 额外扩展：按顺序追加在内置扩展后。 */
@@ -99,6 +101,7 @@ export function useTiptapEditor({
   defaultCodeBlockLanguage = DEFAULT_CODE_BLOCK_LANGUAGE,
   onInlineMathClick,
   onBlockMathClick,
+  enableSlashCommands,
   recreateDeps = [],
   extensions = [],
 }: UseTiptapEditorOptions) {
@@ -207,20 +210,24 @@ export function useTiptapEditor({
       }),
       CodeBlockKeyboardHandler,
       TableBackspaceHandler,
-      SlashCommands.configure({
-        onStart,
-        onUpdate,
-        onIndexChange,
-        onClientRect,
-        onExit,
-        onMathDialog,
-        onImageUpload,
-        onFileUpload,
-        locale,
-        // 本库内部统一走 getCommands 动态读取命令列表。
-        commands: [],
-        getCommands,
-      }),
+      ...(enableSlashCommands
+        ? [
+            SlashCommands.configure({
+              onStart,
+              onUpdate,
+              onIndexChange,
+              onClientRect,
+              onExit,
+              onMathDialog,
+              onImageUpload,
+              onFileUpload,
+              locale,
+              // 本库内部统一走 getCommands 动态读取命令列表。
+              commands: [],
+              getCommands,
+            }),
+          ]
+        : []),
       HtmlPasteSanitizer.configure({
         onError: (event) => {
           onError?.(event);
@@ -241,6 +248,7 @@ export function useTiptapEditor({
       onUpdate,
       locale,
       defaultCodeBlockLanguage,
+      enableSlashCommands,
       placeholder,
       onError,
     ]

@@ -328,6 +328,11 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
                 return false
               }
 
+              // 无匹配命令时不拦截方向键和回车，交还给编辑器默认行为。
+              if (props.event.key !== 'Escape' && items.length === 0) {
+                return false
+              }
+
               props.event.preventDefault()
               props.event.stopPropagation()
 

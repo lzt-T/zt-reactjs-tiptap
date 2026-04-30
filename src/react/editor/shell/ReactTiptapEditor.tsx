@@ -217,6 +217,7 @@ const ReactTiptapEditor = ({
     onFileAttachmentClick,
     onInlineMathClick: mathDialog.handleInlineMathClick,
     onBlockMathClick: mathDialog.handleBlockMathClick,
+    enableSlashCommands: resolvedConfig.isNotionLike,
     recreateDeps: resolvedConfig.editorRecreateDeps,
     extensions: resolvedConfig.stableExtensions as typeof extensions,
   });
