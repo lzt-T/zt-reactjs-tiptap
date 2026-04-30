@@ -1,5 +1,5 @@
 import { mergeAttributes } from "@tiptap/core";
-import Image from "@tiptap/extension-image";
+import Image, { type ImageOptions } from "@tiptap/extension-image";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import enUS from "@/shared/locales/en-US";
 import type { EditorLocale } from "@/shared/locales";
@@ -12,10 +12,7 @@ import {
   parseImageWidthPercent,
 } from "./imageAttributes";
 
-interface ResizableImageOptions {
-  inline: boolean;
-  allowBase64: boolean;
-  HTMLAttributes: Record<string, unknown>;
+interface ResizableImageOptions extends ImageOptions {
   locale: EditorLocale;
 }
 
@@ -23,6 +20,10 @@ export const ResizableImage = Image.extend<ResizableImageOptions>({
   /** 扩展图片配置，补充节点视图所需文案。 */
   addOptions() {
     return {
+      inline: false,
+      allowBase64: false,
+      HTMLAttributes: {},
+      resize: false,
       ...this.parent?.(),
       locale: enUS,
     };
