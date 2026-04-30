@@ -237,7 +237,7 @@ const BubbleMenu = ({
           onColorSelect={onHighlightColorSelect}
           locale={locale}
           portalContainer={portalContainer}
-          popoverClassName="bubble-menu-popover-panel"
+          popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
           triggerClassName="bubble-menu-btn"
         />
         {/* 官方的需要钱 */}
@@ -253,7 +253,7 @@ const BubbleMenu = ({
           onColorSelect={onTextColorSelect}
           locale={locale}
           portalContainer={portalContainer}
-          popoverClassName="bubble-menu-popover-panel"
+          popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
           triggerClassName="bubble-menu-btn"
         />
         <span className="separator" />

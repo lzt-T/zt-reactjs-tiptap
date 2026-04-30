@@ -164,4 +164,10 @@
   box-shadow: none;
 }
 
+.bubble-menu-color-popover-no-animation {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
 
