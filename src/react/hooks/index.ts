@@ -10,8 +10,8 @@ export { useEditorCommands } from "./useEditorCommands";
 export { useStableArray } from "./useStableArray";
 export { useTableInsertRowRunAndClose } from "./useTableInsertRowRunAndClose";
 export { useTableInsertColumnRunAndClose } from "./useTableInsertColumnRunAndClose";
-export { useOverlayCloseDispatcher } from "./useOverlayCloseDispatcher";
-export type { OverlayCloseDelay } from "./useOverlayCloseDispatcher";
+export { useScopedActiveDispatcher } from "./useScopedActiveDispatcher";
+export type { ScopedActiveExitDelay } from "./useScopedActiveDispatcher";
 export type { TableRowMenuTarget } from "./useTableInsertRowRunAndClose";
 export type { TableColumnMenuTarget } from "./useTableInsertColumnRunAndClose";
 export type {

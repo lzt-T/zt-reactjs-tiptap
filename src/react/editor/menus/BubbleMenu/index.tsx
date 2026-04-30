@@ -21,7 +21,7 @@ import {
   ListIndentDecrease,
   ListIndentIncrease,
 } from "lucide-react";
-import { useEditorCommands, useOverlayCloseDispatcher } from "@/react/hooks";
+import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import {
   Popover,
@@ -74,11 +74,11 @@ const BubbleMenu = ({
   };
 
   /** 管理“高亮颜色弹层”关闭后的焦点分流。 */
-  const { handleOpenChange: handleHighlightColorPickerOpenChange } =
-    useOverlayCloseDispatcher({
-      isOpen: showColorPicker === "highlight",
-      setOpen: (open) => {
-        if (open) {
+  const { handleActiveChange: handleHighlightColorPickerOpenChange } =
+    useScopedActiveDispatcher({
+      isActive: showColorPicker === "highlight",
+      setActive: (active) => {
+        if (active) {
           setShowMoreMenu(false);
           setShowColorPicker("highlight");
           return;
@@ -87,18 +87,18 @@ const BubbleMenu = ({
           setShowColorPicker(null);
         }
       },
-      onCloseInside: focusEditorAfterColorPopoverClose,
-      onCloseOutside: onOverlayCloseOutside,
+      onExitInside: focusEditorAfterColorPopoverClose,
+      onExitOutside: onOverlayCloseOutside,
       isInsideContainer: isInsideOverlayContainer,
-      closeDelay: "raf",
+      exitDelay: "raf",
     });
 
   /** 管理“文字颜色弹层”关闭后的焦点分流。 */
-  const { handleOpenChange: handleTextColorPickerOpenChange } =
-    useOverlayCloseDispatcher({
-      isOpen: showColorPicker === "text",
-      setOpen: (open) => {
-        if (open) {
+  const { handleActiveChange: handleTextColorPickerOpenChange } =
+    useScopedActiveDispatcher({
+      isActive: showColorPicker === "text",
+      setActive: (active) => {
+        if (active) {
           setShowMoreMenu(false);
           setShowColorPicker("text");
           return;
@@ -107,10 +107,10 @@ const BubbleMenu = ({
           setShowColorPicker(null);
         }
       },
-      onCloseInside: focusEditorAfterColorPopoverClose,
-      onCloseOutside: onOverlayCloseOutside,
+      onExitInside: focusEditorAfterColorPopoverClose,
+      onExitOutside: onOverlayCloseOutside,
       isInsideContainer: isInsideOverlayContainer,
-      closeDelay: "raf",
+      exitDelay: "raf",
     });
 
   const onTextColorSelect = (color: string) => {

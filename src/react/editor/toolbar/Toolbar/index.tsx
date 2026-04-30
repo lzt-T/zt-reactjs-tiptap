@@ -8,7 +8,7 @@ import {
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
 import { Highlighter, Palette } from "lucide-react";
-import { useEditorCommands, useOverlayCloseDispatcher } from "@/react/hooks";
+import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
@@ -67,11 +67,11 @@ const Toolbar = ({
   };
 
   /** 管理“高亮颜色弹层”关闭后的焦点分流。 */
-  const { handleOpenChange: handleHighlightColorPickerOpenChange } =
-    useOverlayCloseDispatcher({
-      isOpen: showColorPicker === "highlight",
-      setOpen: (open) => {
-        if (open) {
+  const { handleActiveChange: handleHighlightColorPickerOpenChange } =
+    useScopedActiveDispatcher({
+      isActive: showColorPicker === "highlight",
+      setActive: (active) => {
+        if (active) {
           setShowHeadingMenu(false);
           setShowTableSizePicker(false);
           setShowColorPicker("highlight");
@@ -81,18 +81,18 @@ const Toolbar = ({
           setShowColorPicker(null);
         }
       },
-      onCloseInside: focusEditorAfterColorPopoverClose,
-      onCloseOutside: onOverlayCloseOutside,
+      onExitInside: focusEditorAfterColorPopoverClose,
+      onExitOutside: onOverlayCloseOutside,
       isInsideContainer: isInsideOverlayContainer,
-      closeDelay: "raf",
+      exitDelay: "raf",
     });
 
   /** 管理“文字颜色弹层”关闭后的焦点分流。 */
-  const { handleOpenChange: handleTextColorPickerOpenChange } =
-    useOverlayCloseDispatcher({
-      isOpen: showColorPicker === "text",
-      setOpen: (open) => {
-        if (open) {
+  const { handleActiveChange: handleTextColorPickerOpenChange } =
+    useScopedActiveDispatcher({
+      isActive: showColorPicker === "text",
+      setActive: (active) => {
+        if (active) {
           setShowHeadingMenu(false);
           setShowTableSizePicker(false);
           setShowColorPicker("text");
@@ -102,10 +102,10 @@ const Toolbar = ({
           setShowColorPicker(null);
         }
       },
-      onCloseInside: focusEditorAfterColorPopoverClose,
-      onCloseOutside: onOverlayCloseOutside,
+      onExitInside: focusEditorAfterColorPopoverClose,
+      onExitOutside: onOverlayCloseOutside,
       isInsideContainer: isInsideOverlayContainer,
-      closeDelay: "raf",
+      exitDelay: "raf",
     });
 
   /**
