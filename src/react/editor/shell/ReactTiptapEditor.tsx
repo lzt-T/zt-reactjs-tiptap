@@ -454,6 +454,7 @@ const ReactTiptapEditor = ({
         }
       />
       <EditorDialogs
+        isNotionLike={resolvedConfig.isNotionLike}
         portalContainer={themePortalState.portalContainer}
         formulaCategories={formulaCategories}
         locale={locale}

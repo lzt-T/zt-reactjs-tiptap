@@ -7,6 +7,7 @@ import FileUploadDialog from "@/react/editor/dialogs/FileUploadDialog";
 import VideoUploadDialog from "@/react/editor/dialogs/VideoUploadDialog";
 
 interface EditorDialogsProps {
+  isNotionLike: boolean;
   portalContainer: HTMLDivElement | null;
   formulaCategories: FormulaPickerCategory[] | undefined;
   locale: EditorLocale;
@@ -48,6 +49,7 @@ interface EditorDialogsProps {
 
 /** 编辑器相关弹窗渲染：数学公式、图片/视频上传与附件上传。 */
 export default function EditorDialogs({
+  isNotionLike,
   portalContainer,
   formulaCategories,
   locale,
@@ -78,6 +80,7 @@ export default function EditorDialogs({
         onCancel={mathDialog.handleMathCancel}
         formulaCategories={formulaCategories}
         locale={locale}
+        preserveEditorFocus={isNotionLike}
         portalContainer={portalContainer}
       />
       <ImageUploadDialog
@@ -89,6 +92,7 @@ export default function EditorDialogs({
         onError={onError}
         imageMaxSizeBytes={imageMaxSizeBytes}
         locale={locale}
+        preserveEditorFocus={isNotionLike}
         portalContainer={portalContainer}
       />
       <VideoUploadDialog
@@ -100,6 +104,7 @@ export default function EditorDialogs({
         onError={onError}
         videoMaxSizeBytes={videoMaxSizeBytes}
         locale={locale}
+        preserveEditorFocus={isNotionLike}
         portalContainer={portalContainer}
       />
       {onFilePreUpload && (
@@ -113,6 +118,7 @@ export default function EditorDialogs({
           fileMaxSizeBytes={fileMaxSizeBytes}
           fileUploadTypes={fileUploadTypes}
           locale={locale}
+          preserveEditorFocus={isNotionLike}
           portalContainer={portalContainer}
         />
       )}

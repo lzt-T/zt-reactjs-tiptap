@@ -26,6 +26,8 @@ interface VideoUploadDialogProps {
   /** 视频最大体积（字节），超过则拒绝。 */
   videoMaxSizeBytes?: number;
   locale: EditorLocale;
+  /** 为 true 时标记为编辑器焦点保活区域，避免 NotionLike 下误触发 blur 收口。 */
+  preserveEditorFocus?: boolean;
   /** 弹窗挂载容器，用于继承编辑器作用域主题变量。 */
   portalContainer?: HTMLElement | null;
 }
@@ -39,6 +41,7 @@ const VideoUploadDialog = ({
   onError,
   videoMaxSizeBytes = config.VIDEO_MAX_SIZE_BYTES,
   locale,
+  preserveEditorFocus = false,
   portalContainer,
 }: VideoUploadDialogProps) => {
   // 当前上传方式：文件上传或 URL 输入。
@@ -257,6 +260,7 @@ const VideoUploadDialog = ({
         className="video-upload-dialog-content max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
         showCloseButton={false}
         onKeyDown={handleKeyDown}
+        data-editor-focus-retained={preserveEditorFocus ? "true" : undefined}
         portalContainer={portalContainer}
       >
         <DialogHeader>
