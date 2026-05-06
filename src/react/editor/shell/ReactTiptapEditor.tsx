@@ -19,6 +19,7 @@ import {
   useCommandMenu,
   useMathDialog,
   useImageUploadDialog,
+  useVideoUploadDialog,
   useFileUploadDialog,
   useTiptapEditor,
   useEditorCommands,
@@ -73,6 +74,10 @@ const noopMathDialog = noop as (
 const noopImageUpload = noop as (
   cb: (src: string, alt?: string) => void,
 ) => void;
+// 空视频上传回调。
+const noopVideoUpload = noop as (
+  cb: (src: string, title?: string) => void,
+) => void;
 
 const ReactTiptapEditor = ({
   editorMode = EditorMode.NotionLike,
@@ -83,6 +88,8 @@ const ReactTiptapEditor = ({
   onImageUpload,
   onImagePreUpload,
   onImageDelete,
+  onVideoUpload,
+  onVideoPreUpload,
   onFileUpload,
   onFilePreUpload,
   onFileDelete,
@@ -95,6 +102,7 @@ const ReactTiptapEditor = ({
   onChangeDebounceMs = config.DEFAULT_ON_CHANGE_DEBOUNCE_MS,
   border = true,
   imageMaxSizeBytes = config.IMAGE_MAX_SIZE_BYTES,
+  videoMaxSizeBytes = config.VIDEO_MAX_SIZE_BYTES,
   fileMaxSizeBytes = config.FILE_UPLOAD_MAX_SIZE_BYTES,
   theme,
   fileUploadTypes,
@@ -176,6 +184,8 @@ const ReactTiptapEditor = ({
 
   // 图片弹窗状态。
   const imageDialog = useImageUploadDialog({ editorRef });
+  // 视频弹窗状态。
+  const videoDialog = useVideoUploadDialog({ editorRef });
   // 附件弹窗状态。
   const fileUploadDialog = useFileUploadDialog({ editorRef });
 
@@ -207,6 +217,9 @@ const ReactTiptapEditor = ({
     onImageUpload: resolvedConfig.isNotionLike
       ? imageDialog.openImageDialog
       : noopImageUpload,
+    onVideoUpload: resolvedConfig.isNotionLike
+      ? videoDialog.openVideoDialog
+      : noopVideoUpload,
     onFileUpload:
       resolvedConfig.isNotionLike && onFilePreUpload
         ? fileUploadDialog.openFileUploadDialog
@@ -272,6 +285,7 @@ const ReactTiptapEditor = ({
   const { runCommandItem } = useEditorCommands(editor, {
     onOpenMathDialog: mathDialog.handleMathDialogFromSlash,
     onOpenImageDialog: imageDialog.openImageDialog,
+    onOpenVideoDialog: videoDialog.openVideoDialog,
     onOpenFileUploadDialog: onFilePreUpload
       ? fileUploadDialog.openFileUploadDialog
       : undefined,
@@ -303,6 +317,28 @@ const ReactTiptapEditor = ({
       });
     },
     [onError, onImageUpload, runAfterOnChange],
+  );
+
+  /** 在 onChange 之后再回调外部视频上传事件，避免时序竞争。 */
+  const handleVideoUploadAfterChange = useCallback(
+    (payload: { file: File; url: string; title?: string }) => {
+      runAfterOnChange(() => {
+        if (onVideoUpload) {
+          void Promise.resolve(onVideoUpload(payload)).catch((error: unknown) => {
+            onError?.({
+              source: "video-upload",
+              stage: "confirm",
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "Video confirm callback failed",
+              error,
+            });
+          });
+        }
+      });
+    },
+    [onError, onVideoUpload, runAfterOnChange],
   );
 
   /** 在 onChange 之后再回调外部附件上传事件，避免时序竞争。 */
@@ -408,6 +444,7 @@ const ReactTiptapEditor = ({
         onHandleCommand={handleCommand}
         onOpenMathDialog={mathDialog.handleMathDialogFromSlash}
         onOpenImageDialog={imageDialog.openImageDialog}
+        onOpenVideoDialog={videoDialog.openVideoDialog}
         onOpenFileUploadDialog={
           onFilePreUpload ? fileUploadDialog.openFileUploadDialog : undefined
         }
@@ -421,15 +458,19 @@ const ReactTiptapEditor = ({
         formulaCategories={formulaCategories}
         locale={locale}
         imageMaxSizeBytes={imageMaxSizeBytes}
+        videoMaxSizeBytes={videoMaxSizeBytes}
         fileMaxSizeBytes={fileMaxSizeBytes}
         fileUploadTypes={resolvedConfig.resolvedFileUploadTypes}
         onImagePreUpload={onImagePreUpload}
+        onVideoPreUpload={onVideoPreUpload}
         onFilePreUpload={onFilePreUpload}
         onError={onError}
         onImageUploadAfterChange={handleImageUploadAfterChange}
+        onVideoUploadAfterChange={handleVideoUploadAfterChange}
         onFileUploadAfterChange={handleFileUploadAfterChange}
         mathDialog={mathDialog}
         imageDialog={imageDialog}
+        videoDialog={videoDialog}
         fileUploadDialog={fileUploadDialog}
         onPortalContainerRef={themePortalState.handlePortalContainerRef}
       />

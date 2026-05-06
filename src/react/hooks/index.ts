@@ -5,6 +5,7 @@ export { usePortalOverlayPosition } from "./usePortalOverlayPosition";
 export { useMathDialog } from "./useMathDialog";
 export { useImageUploadDialog } from "./useImageUploadDialog";
 export { useFileUploadDialog } from "./useFileUploadDialog";
+export { useVideoUploadDialog } from "./useVideoUploadDialog";
 export { useTiptapEditor } from "./useTiptapEditor";
 export { useEditorCommands } from "./useEditorCommands";
 export { useStableArray } from "./useStableArray";

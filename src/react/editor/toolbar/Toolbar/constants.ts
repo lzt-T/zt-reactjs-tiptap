@@ -12,6 +12,7 @@ export const BUILTIN_GROUP_MAP: Record<string, string> = {
   [BuiltinToolbarItemKey.InlineMath]: "insert",
   [BuiltinToolbarItemKey.BlockMath]: "insert",
   [BuiltinToolbarItemKey.Image]: "insert",
+  [BuiltinToolbarItemKey.Video]: "insert",
   [BuiltinToolbarItemKey.UploadAttachment]: "insert",
   [BuiltinToolbarItemKey.Bold]: "format",
   [BuiltinToolbarItemKey.Italic]: "format",

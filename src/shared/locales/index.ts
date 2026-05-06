@@ -30,6 +30,7 @@ export interface EditorLocale {
     inlineMath: { title: string; description: string };
     blockMath: { title: string; description: string };
     image: { title: string; description: string };
+    video: { title: string; description: string };
     uploadAttachment: { title: string; description: string };
   };
   slashCommandGroups: {
@@ -50,6 +51,7 @@ export interface EditorLocale {
     inlineMath: string;
     blockMath: string;
     image: string;
+    video: string;
     uploadAttachment: string;
     bold: string;
     italic: string;
@@ -138,6 +140,26 @@ export interface EditorLocale {
     confirm: string;
     uploading: string;
   };
+  videoDialog: {
+    title: string;
+    uploadFileTab: string;
+    videoUrlTab: string;
+    uploadingVideo: string;
+    clickOrDrag: string;
+    supportsAndMax: (maxSizeText: string) => string;
+    videoUrlLabel: string;
+    videoUrlPlaceholder: string;
+    invalidVideoFile: string;
+    videoSizeExceeded: (maxSizeText: string) => string;
+    uploadFailed: string;
+    fileReadFailed: string;
+    invalidVideoUrl: string;
+    selectOrEnterVideo: string;
+    uploadingWait: string;
+    cancel: string;
+    confirm: string;
+    uploading: string;
+  };
   imageNode: {
     imageLoadFailed: string;
     resizeLeft: string;
@@ -151,6 +173,15 @@ export interface EditorLocale {
     deleteImage: string;
     captionPlaceholder: string;
     captionAriaLabel: string;
+  };
+  videoNode: {
+    resizeLeft: string;
+    resizeRight: string;
+    alignMenu: string;
+    alignLeft: string;
+    alignCenter: string;
+    alignRight: string;
+    deleteVideo: string;
   };
   fileDialog: {
     title: string;

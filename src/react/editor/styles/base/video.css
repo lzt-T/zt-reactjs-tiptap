@@ -1,0 +1,152 @@
+.editor-wrapper .ProseMirror .video-node-wrapper {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.editor-wrapper .ProseMirror .video-node-wrapper video {
+  display: block;
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.editor-wrapper .ProseMirror .video-resize-handle {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 72px;
+  max-height: calc(100% - 16px);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: ew-resize;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.15s ease;
+}
+
+.editor-wrapper .ProseMirror .video-resize-handle::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 46px;
+  max-height: 80%;
+  border-radius: 999px;
+  background: var(--ui-control-active);
+  transform: translate(-50%, -50%);
+}
+
+.editor-wrapper .ProseMirror .video-resize-handle-left {
+  left: 6px;
+}
+
+.editor-wrapper .ProseMirror .video-resize-handle-right {
+  right: 6px;
+}
+
+.editor-wrapper .ProseMirror .video-node-wrapper:hover .video-resize-handle,
+.editor-wrapper .ProseMirror .video-node-wrapper.is-resizing .video-resize-handle {
+  opacity: 1;
+}
+
+.editor-wrapper .ProseMirror .video-align-menu {
+  position: absolute;
+  top: 8px;
+  right: 42px;
+  left: 8px;
+  z-index: 42;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: max-content;
+  max-width: calc(100% - 50px);
+  margin: 0 auto;
+  padding: 4px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-text-inverse);
+  box-shadow: var(--ui-shadow-xl);
+}
+
+.editor-container.is-editor-blurred .editor-wrapper .ProseMirror .video-align-menu,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .video-align-menu {
+  display: none;
+}
+
+.editor-wrapper .ProseMirror .video-align-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ui-text);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.editor-wrapper .ProseMirror .video-align-menu-btn:hover {
+  background: var(--ui-bg-hover-soft);
+  color: var(--ui-text-strong);
+}
+
+.editor-wrapper .ProseMirror .video-align-menu-btn.is-active {
+  background: var(--ui-control-active);
+  color: var(--ui-text-inverse);
+}
+
+.editor-wrapper .ProseMirror .video-align-menu-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.editor-wrapper .ProseMirror .video-node-wrapper video.video-selected,
+.editor-wrapper .ProseMirror .video-node-wrapper.ProseMirror-selectednode video {
+  outline: 2px solid var(--ui-control-active);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.editor-container.is-editor-blurred .editor-wrapper .ProseMirror .video-node-wrapper video.video-selected,
+.editor-container.is-editor-blurred .editor-wrapper .ProseMirror .video-node-wrapper.ProseMirror-selectednode video,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .video-node-wrapper video.video-selected,
+.editor-container.is-editor-focus-unstable .editor-wrapper .ProseMirror .video-node-wrapper.ProseMirror-selectednode video {
+  outline: none;
+}
+
+.editor-wrapper .ProseMirror .video-delete-btn {
+  position: absolute;
+  top: 20px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--ui-image-badge-bg);
+  color: var(--ui-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  box-shadow: var(--ui-shadow-md);
+}
+
+.editor-wrapper .ProseMirror .video-node-wrapper:hover .video-delete-btn {
+  opacity: 1;
+}
+
+.editor-wrapper .ProseMirror .video-delete-btn:hover {
+  background: var(--ui-image-badge-hover-bg);
+  color: var(--ui-text-muted-strong);
+}

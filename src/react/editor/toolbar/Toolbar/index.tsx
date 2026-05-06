@@ -45,6 +45,7 @@ const Toolbar = ({
   isEditorFocusStable = true,
   onOpenMathDialog,
   onOpenImageDialog,
+  onOpenVideoDialog,
   onOpenFileUploadDialog,
   textColorOptions,
   highlightColorOptions,
@@ -147,6 +148,7 @@ const Toolbar = ({
     (editor.isActive("inlineMath") ||
       editor.isActive("blockMath") ||
       editor.isActive("image") ||
+      editor.isActive("video") ||
       editor.isActive("fileAttachment"));
   /** 光标是否位于代码块。Headless 模式下代码块内统一禁用顶部工具栏按钮。 */
   const isInsideCodeBlock =
@@ -174,6 +176,7 @@ const Toolbar = ({
         editor.isActive("inlineMath") ||
         editor.isActive("blockMath") ||
         editor.isActive("image") ||
+        editor.isActive("video") ||
         editor.isActive("code") ||
         editor.isActive("codeBlock")
       ) {
@@ -193,6 +196,7 @@ const Toolbar = ({
   const { format, block, dialogs } = useEditorCommands(editor, {
     onOpenMathDialog,
     onOpenImageDialog,
+    onOpenVideoDialog,
     onOpenFileUploadDialog,
   });
 
@@ -338,6 +342,7 @@ const Toolbar = ({
     showColorPicker,
     canUseMathDialog: !!onOpenMathDialog,
     canUseImageDialog: !!onOpenImageDialog,
+    canUseVideoDialog: !!onOpenVideoDialog,
     canUseFileUploadDialog: !!onOpenFileUploadDialog,
     runToolbarAction,
   };

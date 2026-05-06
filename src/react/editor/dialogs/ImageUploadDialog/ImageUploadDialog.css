@@ -7,7 +7,6 @@
 
 .image-upload-dialog-content [data-slot="dialog-header"] {
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
 }
 
 .image-upload-dialog-content [data-slot="dialog-footer"] {
@@ -15,43 +14,8 @@
   border-top: 1px solid var(--border);
 }
 
-/* 标签页 */
-.image-upload-tabs {
-  display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid var(--border);
-  margin: 0 -1.5rem;
-  padding: 0 1.5rem;
-}
-
-.image-upload-tab {
-  background: none;
-  border: none;
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
-  position: relative;
-  top: 1px;
-  outline: none;
-  border-radius: 0;
-}
-
-.image-upload-tab:hover {
-  color: var(--foreground);
-}
-
-.image-upload-tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
-
-.image-upload-tab:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
+.image-upload-segmented-switch {
+  margin-bottom: 0.5rem;
 }
 
 /* 内容区域 */
@@ -295,11 +259,6 @@
 @media (max-width: 640px) {
   .image-upload-dialog-content {
     max-width: 95%;
-  }
-
-  .image-upload-tabs {
-    margin: 0 -1rem;
-    padding: 0 1rem;
   }
 
   .image-upload-file-label {

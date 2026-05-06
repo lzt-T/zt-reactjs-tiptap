@@ -16,6 +16,7 @@
 - 🔗 链接编辑面板（Toolbar 与 BubbleMenu 共用，支持更新与删除链接）
 - 📝 支持标题（H1、H2、H3）、列表（有序/无序）、引用、可高亮代码块
 - 🖼️ 图片插入和管理（文件上传、URL 插入、缩放、对齐、描述）
+- 🎬 视频插入（文件上传、URL 插入）
 - 📎 附件上传与文件链接（支持文件选择、拖拽上传、类型限制）
 - 📊 完整表格支持（插入/删除行列、切换表头、单元格对齐、合并/拆分、删除表格）
 - ✅ 任务列表（带复选框的可交互待办事项）
@@ -63,7 +64,7 @@ function App() {
 }
 ```
 
-### 带图片与附件预上传（Confirm 后回调）
+### 带图片/视频/附件预上传（Confirm 后回调）
 
 ```tsx
 import { ReactTiptapEditor } from 'zt-reactjs-tiptap'
@@ -89,6 +90,23 @@ function App() {
     console.log('Image confirmed:', payload)
   }
 
+  // 选择/拖拽视频时触发（预上传）
+  const handleVideoPreUpload = async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await fetch('/api/video-upload', {
+      method: 'POST',
+      body: formData,
+    })
+    const data = await response.json()
+    return data.url
+  }
+
+  // 仅在点击 Confirm 时触发
+  const handleVideoUpload = async (payload: { file: File; url: string; title?: string }) => {
+    console.log('Video confirmed:', payload)
+  }
+
   // 选择/拖拽附件时触发（预上传）
   const handleFilePreUpload = async (file: File) => {
     const formData = new FormData()
@@ -112,6 +130,8 @@ function App() {
       onChange={setContent}
       onImagePreUpload={handleImagePreUpload}
       onImageUpload={handleImageUpload}
+      onVideoPreUpload={handleVideoPreUpload}
+      onVideoUpload={handleVideoUpload}
       onFilePreUpload={handleFilePreUpload}
       onFileUpload={handleFileUpload}
       fileUploadTypes={['pdf', 'docx']}
@@ -231,9 +251,11 @@ function App() {
 |------|------|------|--------|------|
 | `value` | `string` | 否 | - | 编辑器的 HTML 内容 |
 | `onChange` | `(html: string) => void` | 否 | - | 内容变化时的回调函数，参数为 HTML 字符串 |
-| `onError` | `(event: { source: 'image-upload' \| 'file-upload' \| 'paste'; stage: 'pre-upload' \| 'confirm' \| 'transform'; message: string; error?: unknown }) => void` | 否 | - | 统一错误上报：上传预处理失败、Confirm 回调失败、HTML 粘贴清洗失败等 |
+| `onError` | `(event: { source: 'image-upload' \| 'video-upload' \| 'file-upload' \| 'paste'; stage: 'pre-upload' \| 'confirm' \| 'transform'; message: string; error?: unknown }) => void` | 否 | - | 统一错误上报：上传预处理失败、Confirm 回调失败、HTML 粘贴清洗失败等 |
 | `onImagePreUpload` | `(file: File) => Promise<string>` | 否 | - | 图片预上传函数（选择/拖拽文件时触发），返回图片 URL。不提供时图片将以 Base64 插入 |
 | `onImageUpload` | `(payload: { file: File; url: string; alt?: string }) => void \| Promise<void>` | 否 | - | 图片 Confirm 回调（仅在点击 Confirm 后触发） |
+| `onVideoPreUpload` | `(file: File) => Promise<string>` | 否 | - | 视频预上传函数（选择/拖拽文件时触发），返回视频 URL。不提供时视频将以 Base64 插入 |
+| `onVideoUpload` | `(payload: { file: File; url: string; title?: string }) => void \| Promise<void>` | 否 | - | 视频 Confirm 回调（仅在点击 Confirm 后触发） |
 | `onFilePreUpload` | `(file: File) => Promise<{ url: string; name: string }>` | 否 | - | 附件预上传函数（选择/拖拽文件时触发），返回文件 URL 与展示名 |
 | `onFileUpload` | `(payload: { file: File; url: string; name: string }) => void \| Promise<void>` | 否 | - | 附件 Confirm 回调（仅在点击 Confirm/Insert Link 后触发） |
 | `editorMode` | `'notion-like' \| 'headless'` | 否 | `'notion-like'` | 编辑器模式：Notion 风格（斜杠命令、块状编辑等）或无头模式 |
@@ -247,6 +269,7 @@ function App() {
 | `onChangeDebounceMs` | `number` | 否 | `300` | `onChange` 防抖延迟（毫秒） |
 | `border` | `boolean` | 否 | `true` | 是否显示编辑器容器边框 |
 | `imageMaxSizeBytes` | `number` | 否 | `5242880`（5MB） | 图片上传最大体积（字节），超过则拒绝并提示 |
+| `videoMaxSizeBytes` | `number` | 否 | `52428800`（50MB） | 视频上传最大体积（字节），超过则拒绝并提示 |
 | `fileMaxSizeBytes` | `number` | 否 | `10485760`（10MB） | 附件上传最大体积（字节），超过则拒绝并提示 |
 | `fileUploadTypes` | `string[]` | 否 | `['pdf']` | 附件可上传扩展名列表（不区分大小写），如 `['pdf', 'docx']`。会自动去空格、去重、去掉前导 `.`；为空时回落到默认 `['pdf']` |
 | `codeBlockLanguages` | `Array<{ value: string; label: string }>` | 否 | 内置 20 种常用语言 | 代码块语言列表。传入后覆盖内置列表（会自动去重并回落无效语言） |
@@ -296,6 +319,7 @@ function App() {
 - **代码块**：语法高亮的代码块
 - **表格**：插入 3x3 表格
 - **图片**：打开图片上传对话框
+- **视频**：打开视频上传对话框
 - **数学公式**：行内公式、块级公式
 - **分割线**：水平分隔线
 
@@ -544,6 +568,14 @@ const custom = htmlToPlainText(html, { blockSeparator: '\n\n' })
 - 可通过 `fileUploadTypes` 自定义可上传扩展名（如 `['pdf', 'docx']`）
 - 拖拽上传与文件选择共用同一套类型校验和大小校验
 
+### 视频上传
+
+- 视频上传通过 `onVideoPreUpload` + `onVideoUpload` 配置
+- 支持两种方式：文件上传与 URL 插入
+- 如果提供 `onVideoPreUpload` 函数，将执行预上传并使用返回 URL 预览/插入
+- 如果没有提供 `onVideoPreUpload`，视频将以 Base64 格式直接插入
+- `onVideoUpload` 仅在点击 Confirm 后触发，不负责执行上传
+
 ### 任务列表
 
 支持创建可交互的待办事项列表：
@@ -604,7 +636,7 @@ import 'zt-reactjs-tiptap/style.css'
 
 5. **UI 主题 Token 化**：编辑器 UI（工具栏、菜单、表格操作、弹窗、输入框、滚动条等）已统一使用主题 token。默认 `light` 视觉与旧版保持一致，切换 `theme="dark"` 时同一套 token 会自动映射为暗色值。
 
-6. **弹层/对话框**：图片、公式、附件弹层通过 Portal 挂载到编辑器容器内，继承同一套作用域变量；若样式仍异常，优先检查宿主全局 reset 或高优先级选择器
+6. **弹层/对话框**：图片、视频、公式、附件弹层通过 Portal 挂载到编辑器容器内，继承同一套作用域变量；若样式仍异常，优先检查宿主全局 reset 或高优先级选择器
 
 ## 开发
 

@@ -23,6 +23,8 @@ export interface ToolbarProps {
   ) => void;
   /** 打开图片上传弹窗（headless 时由 TiptapEditor 传入） */
   onOpenImageDialog?: (callback: (src: string, alt?: string) => void) => void;
+  /** 打开视频上传弹窗（headless 时由 TiptapEditor 传入） */
+  onOpenVideoDialog?: (callback: (src: string, title?: string) => void) => void;
   /** 打开附件上传弹窗（headless 时由 TiptapEditor 传入） */
   onOpenFileUploadDialog?: (
     callback: (url: string, name: string) => void,
@@ -62,6 +64,7 @@ export interface ToolbarRenderContext {
   showColorPicker: "text" | "highlight" | null;
   canUseMathDialog: boolean;
   canUseImageDialog: boolean;
+  canUseVideoDialog: boolean;
   canUseFileUploadDialog: boolean;
   runToolbarAction: (
     action: () => void,

@@ -1,6 +1,7 @@
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { ResizableImage } from "@/core/extensions/ResizableImage";
+import { Video } from "@/core/extensions/Video";
 import { FileAttachment } from "@/core/extensions/FileAttachment";
 import { DeletionCallbacks } from "@/core/extensions/DeletionCallbacks";
 import {
@@ -63,6 +64,7 @@ interface UseTiptapEditorOptions {
     callback: (latex: string) => void
   ) => void;
   onImageUpload: (callback: (src: string, alt?: string) => void) => void;
+  onVideoUpload: (callback: (src: string, title?: string) => void) => void;
   onFileUpload?: (callback: (url: string, name: string) => void) => void;
   getCommands?: () => CommandItem[];
   onFileAttachmentClick?: (params: { url: string; name: string }) => void;
@@ -95,6 +97,7 @@ export function useTiptapEditor({
   onExit,
   onMathDialog,
   onImageUpload,
+  onVideoUpload,
   onFileUpload,
   getCommands,
   onFileAttachmentClick,
@@ -172,6 +175,9 @@ export function useTiptapEditor({
       ResizableImage.configure({
         locale,
       }),
+      Video.configure({
+        locale,
+      }),
       FileAttachment,
       DeletionCallbacks,
       Table.configure({
@@ -224,6 +230,7 @@ export function useTiptapEditor({
               onExit,
               onMathDialog,
               onImageUpload,
+              onVideoUpload,
               onFileUpload,
               locale,
               // 本库内部统一走 getCommands 动态读取命令列表。
@@ -245,6 +252,7 @@ export function useTiptapEditor({
       onExit,
       onFileUpload,
       onImageUpload,
+      onVideoUpload,
       onIndexChange,
       onInlineMathClick,
       onMathDialog,

@@ -25,6 +25,7 @@ import {
   Sigma,
   SquareFunction,
   Image,
+  Video,
   FileUp,
 } from "lucide-react";
 import { cn } from "@/shared/utils/utils";
@@ -460,6 +461,30 @@ export function renderToolbarItem(
             title={ctx.locale.toolbar.link}
           >
             <LinkIcon size={16} />
+          </button>
+        ),
+      };
+    case BuiltinToolbarItemKey.Video:
+      return {
+        key: item.key,
+        group,
+        element: (
+          <button
+            type="button"
+            className={cn(
+              "editor-toolbar-btn",
+              (!ctx.canUseVideoDialog || ctx.isToolbarLocked) && "is-disabled",
+            )}
+            onClick={() => {
+              if (!ctx.canUseVideoDialog || ctx.isToolbarLocked) return;
+              ctx.runToolbarAction(
+                () => ctx.actionContext.dialogs.openVideo(),
+                { gapPolicy: "keep-gap" },
+              );
+            }}
+            title={ctx.locale.toolbar.video}
+          >
+            <Video size={16} />
           </button>
         ),
       };

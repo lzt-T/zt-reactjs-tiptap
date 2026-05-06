@@ -4,18 +4,22 @@ import type { EditorErrorEvent } from "@/react/editor/types";
 import MathDialog from "@/react/editor/dialogs/MathDialog";
 import ImageUploadDialog from "@/react/editor/dialogs/ImageUploadDialog";
 import FileUploadDialog from "@/react/editor/dialogs/FileUploadDialog";
+import VideoUploadDialog from "@/react/editor/dialogs/VideoUploadDialog";
 
 interface EditorDialogsProps {
   portalContainer: HTMLDivElement | null;
   formulaCategories: FormulaPickerCategory[] | undefined;
   locale: EditorLocale;
   imageMaxSizeBytes: number;
+  videoMaxSizeBytes: number;
   fileMaxSizeBytes: number;
   fileUploadTypes: string[];
   onImagePreUpload: ((file: File) => Promise<string>) | undefined;
+  onVideoPreUpload: ((file: File) => Promise<string>) | undefined;
   onFilePreUpload: ((file: File) => Promise<{ url: string; name: string }>) | undefined;
   onError: ((event: EditorErrorEvent) => void) | undefined;
   onImageUploadAfterChange: (payload: { file: File; url: string; alt?: string }) => void;
+  onVideoUploadAfterChange: (payload: { file: File; url: string; title?: string }) => void;
   onFileUploadAfterChange: (payload: { file: File; url: string; name: string }) => void;
   mathDialog: {
     showMathDialog: boolean;
@@ -34,25 +38,34 @@ interface EditorDialogsProps {
     handleFileUploadConfirm: (url: string, name: string) => void;
     handleFileUploadCancel: () => void;
   };
+  videoDialog: {
+    showVideoDialog: boolean;
+    handleVideoConfirm: (src: string, title?: string) => void;
+    handleVideoCancel: () => void;
+  };
   onPortalContainerRef: (node: HTMLDivElement | null) => void;
 }
 
-/** 编辑器相关弹窗渲染：数学公式、图片上传与附件上传。 */
+/** 编辑器相关弹窗渲染：数学公式、图片/视频上传与附件上传。 */
 export default function EditorDialogs({
   portalContainer,
   formulaCategories,
   locale,
   imageMaxSizeBytes,
+  videoMaxSizeBytes,
   fileMaxSizeBytes,
   fileUploadTypes,
   onImagePreUpload,
+  onVideoPreUpload,
   onFilePreUpload,
   onError,
   onImageUploadAfterChange,
+  onVideoUploadAfterChange,
   onFileUploadAfterChange,
   mathDialog,
   imageDialog,
   fileUploadDialog,
+  videoDialog,
   onPortalContainerRef,
 }: EditorDialogsProps) {
   return (
@@ -75,6 +88,17 @@ export default function EditorDialogs({
         onUpload={onImageUploadAfterChange}
         onError={onError}
         imageMaxSizeBytes={imageMaxSizeBytes}
+        locale={locale}
+        portalContainer={portalContainer}
+      />
+      <VideoUploadDialog
+        isOpen={videoDialog.showVideoDialog}
+        onConfirm={videoDialog.handleVideoConfirm}
+        onCancel={videoDialog.handleVideoCancel}
+        onPreUpload={onVideoPreUpload}
+        onUpload={onVideoUploadAfterChange}
+        onError={onError}
+        videoMaxSizeBytes={videoMaxSizeBytes}
         locale={locale}
         portalContainer={portalContainer}
       />

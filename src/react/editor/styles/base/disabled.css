@@ -30,6 +30,10 @@
   display: none;
 }
 
+.editor-container.is-disabled .editor-wrapper .ProseMirror .ProseMirror-selectednode video {
+  outline: none;
+}
+
 /* Disabled: 任务列表复选框不用指针样式 */
 .editor-container.is-disabled .editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"] {
   cursor: default;

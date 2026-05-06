@@ -58,6 +58,7 @@ interface EditorSurfaceProps {
     callback: (latex: string) => void,
   ) => void;
   onOpenImageDialog: (callback: (src: string, alt?: string) => void) => void;
+  onOpenVideoDialog: (callback: (src: string, title?: string) => void) => void;
   onOpenFileUploadDialog?: (
     callback: (url: string, name: string) => void,
   ) => void;
@@ -102,6 +103,7 @@ export default function EditorSurface({
   onHandleCommand,
   onOpenMathDialog,
   onOpenImageDialog,
+  onOpenVideoDialog,
   onOpenFileUploadDialog,
   onMenuRootChange,
   onCodeBlockLanguageMenuOpenChecked,
@@ -124,6 +126,7 @@ export default function EditorSurface({
           isEditorFocusStable={isEditorFocusStable}
           onOpenMathDialog={onOpenMathDialog}
           onOpenImageDialog={onOpenImageDialog}
+          onOpenVideoDialog={onOpenVideoDialog}
           locale={locale}
           onOpenFileUploadDialog={onOpenFileUploadDialog}
           textColorOptions={textColorOptions}

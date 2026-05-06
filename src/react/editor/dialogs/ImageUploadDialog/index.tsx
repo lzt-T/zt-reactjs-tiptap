@@ -8,6 +8,7 @@ import {
 } from '@/react/components/ui/dialog'
 import { Button } from '@/react/components/ui/button'
 import { Label } from '@/react/components/ui/label'
+import { SegmentedSwitch } from '@/react/components/SegmentedSwitch'
 import { Loader2, ImagePlus, AlertCircle, ImageOff } from 'lucide-react'
 import { config } from '@/shared/config'
 import { formatFileSize } from '@/shared/utils/utils'
@@ -55,6 +56,11 @@ const ImageUploadDialog = ({
   const shouldReserveReselectHint = uploadType === 'file' && (isUploading || Boolean(imageUrl))
   // 仅在可重选阶段展示提示文案；容器常驻用于稳定布局高度
   const shouldShowReselectHint = uploadType === 'file' && Boolean(imageUrl) && !isUploading
+  /** 上传类型切换选项。 */
+  const uploadTypeOptions = [
+    { label: locale.imageDialog.uploadFileTab, value: 'file' },
+    { label: locale.imageDialog.imageUrlTab, value: 'url' },
+  ]
 
   const resetStates = useCallback(() => {
     setUploadType('file')
@@ -240,24 +246,13 @@ const ImageUploadDialog = ({
           <DialogTitle>{locale.imageDialog.title}</DialogTitle>
         </DialogHeader>
 
-        <div className="image-upload-tabs">
-          <button
-            type="button"
-            className={`image-upload-tab ${uploadType === 'file' ? 'active' : ''}`}
-            disabled={isInteractionLocked}
-            onClick={() => setUploadType('file')}
-          >
-            {locale.imageDialog.uploadFileTab}
-          </button>
-          <button
-            type="button"
-            className={`image-upload-tab ${uploadType === 'url' ? 'active' : ''}`}
-            disabled={isInteractionLocked}
-            onClick={() => setUploadType('url')}
-          >
-            {locale.imageDialog.imageUrlTab}
-          </button>
-        </div>
+        <SegmentedSwitch
+          className="image-upload-segmented-switch"
+          value={uploadType}
+          options={uploadTypeOptions}
+          disabled={isInteractionLocked}
+          onChange={(next) => setUploadType(next as 'file' | 'url')}
+        />
 
         <div className="image-upload-content">
           {uploadType === 'file' ? (

@@ -14,6 +14,7 @@ export interface UseEditorCommandsOptions {
     callback: (latex: string) => void
   ) => void;
   onOpenImageDialog?: (callback: (src: string, alt?: string) => void) => void;
+  onOpenVideoDialog?: (callback: (src: string, title?: string) => void) => void;
   onOpenFileUploadDialog?: (
     callback: (url: string, name: string) => void
   ) => void;
@@ -56,6 +57,7 @@ export function useEditorCommands(
   const {
     onOpenMathDialog,
     onOpenImageDialog,
+    onOpenVideoDialog,
     onOpenFileUploadDialog,
   } = options;
 
@@ -191,10 +193,19 @@ export function useEditorCommands(
     });
   }, [editor, onOpenFileUploadDialog]);
 
+  /** 打开视频上传弹窗，在回调中向编辑器插入视频节点。 */
+  const openVideo = useCallback(() => {
+    if (!editor || !onOpenVideoDialog) return;
+    onOpenVideoDialog((src, title) => {
+      editor.chain().focus().setVideo({ src, title }).run();
+    });
+  }, [editor, onOpenVideoDialog]);
+
   /**
    * 运行一个来自斜杠菜单的命令项：
    * - 若包含 `mathType` 则走数学公式弹窗流程；
    * - 若标记为 `imageUpload` 则走图片上传流程；
+   * - 若标记为 `videoUpload` 则走视频上传流程；
    * - 若标记为 `fileAttachment` 则走附件上传流程；
    * - 否则直接调用命令项自身的 `command`。
    */
@@ -217,6 +228,10 @@ export function useEditorCommands(
         onOpenImageDialog((src, alt) => {
           editor.chain().focus().setImage({ src, alt }).run();
         });
+      } else if (item.videoUpload && onOpenVideoDialog) {
+        onOpenVideoDialog((src, title) => {
+          editor.chain().focus().setVideo({ src, title }).run();
+        });
       } else if (item.fileAttachment && onOpenFileUploadDialog) {
         onOpenFileUploadDialog((url, name) => {
           runInsertFileAttachment(editor, { url, name });
@@ -225,14 +240,14 @@ export function useEditorCommands(
         item.command({ editor });
       }
     },
-    [editor, onOpenMathDialog, onOpenImageDialog, onOpenFileUploadDialog]
+    [editor, onOpenMathDialog, onOpenImageDialog, onOpenVideoDialog, onOpenFileUploadDialog]
   );
 
   return {
     runFormat,
     format,
     block,
-    dialogs: { openInlineMath, openBlockMath, openImage, openFileUpload },
+    dialogs: { openInlineMath, openBlockMath, openImage, openVideo, openFileUpload },
     runCommandItem,
   };
 }

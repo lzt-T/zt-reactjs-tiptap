@@ -26,6 +26,7 @@ import {
   Sigma,
   SquareFunction,
   Image,
+  Video,
   FileUp,
   type LucideIcon,
 } from 'lucide-react'
@@ -61,6 +62,8 @@ export const BuiltinSlashCommandKey = {
   BlockMath: "blockMath",
   // 图片。
   Image: "image",
+  // 视频。
+  Video: "video",
   // 附件上传。
   UploadAttachment: "uploadAttachment",
 } as const
@@ -82,6 +85,8 @@ export interface CommandItem {
   command: ({ editor }: { editor: Editor }) => void
   mathType?: 'inline' | 'block'
   imageUpload?: boolean
+  /** Upload or insert video */
+  videoUpload?: boolean
   /** Upload attachment and insert file block link */
   fileAttachment?: boolean
   /** 为 true 时在斜杠菜单中灰显，且方向键会跳过该项 */
@@ -96,6 +101,7 @@ export interface SlashCommandsOptions {
   onClientRect: (rect: DOMRect | null) => void
   onMathDialog?: (type: 'inline' | 'block', initialValue: string, callback: (latex: string) => void) => void
   onImageUpload?: (callback: (src: string, alt?: string) => void) => void
+  onVideoUpload?: (callback: (src: string, title?: string) => void) => void
   onFileUpload?: (callback: (url: string, name: string) => void) => void
   locale: EditorLocale
   getCommands?: () => CommandItem[]
@@ -225,6 +231,17 @@ export function createDefaultCommands(
       },
     },
     {
+      key: SlashCommandKey.Video,
+      title: locale.slashCommands.video.title,
+      description: locale.slashCommands.video.description,
+      icon: Video,
+      videoUpload: true,
+      command: ({ editor }) => {
+        // This will be handled by the video upload dialog
+        editor.chain().focus().run()
+      },
+    },
+    {
       key: SlashCommandKey.UploadAttachment,
       title: locale.slashCommands.uploadAttachment.title,
       description: locale.slashCommands.uploadAttachment.description,
@@ -249,6 +266,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
       onClientRect: () => {},
       onMathDialog: undefined,
       onImageUpload: undefined,
+      onVideoUpload: undefined,
       onFileUpload: undefined,
       locale: {} as EditorLocale,
       getCommands: undefined,
@@ -382,6 +400,11 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
                       // Handle image upload
                       this.options.onImageUpload((src, alt) => {
                         currentEditor.chain().focus().setImage({ src, alt }).run()
+                      })
+                    } else if (item.videoUpload && this.options.onVideoUpload) {
+                      // Handle video upload
+                      this.options.onVideoUpload((src, title) => {
+                        currentEditor.chain().focus().setVideo({ src, title }).run()
                       })
                     } else if (item.fileAttachment && this.options.onFileUpload) {
                       // Handle file attachment upload

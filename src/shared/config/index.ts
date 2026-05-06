@@ -26,6 +26,8 @@ export const config = {
   IMAGE_MAX_SIZE_BYTES: 5 * 1024 * 1024,
   /* 附件上传最大体积（字节），默认 10MB */
   FILE_UPLOAD_MAX_SIZE_BYTES: 10 * 1024 * 1024,
+  /* 视频上传最大体积（字节），默认 50MB */
+  VIDEO_MAX_SIZE_BYTES: 50 * 1024 * 1024,
   /* 附件上传默认扩展名（不含 "."），默认仅 PDF */
   DEFAULT_FILE_UPLOAD_TYPES: ["pdf"] as string[],
   /* 表格行/列操作按钮及下方、右侧加号条尺寸（px），默认 10 */

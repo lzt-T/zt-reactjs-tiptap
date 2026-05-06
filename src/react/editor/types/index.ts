@@ -50,6 +50,7 @@ export type HeadlessToolbarMode = (typeof HeadlessToolbarMode)[keyof typeof Head
 /** 错误来源：图片上传、附件上传或粘贴处理。 */
 export const EditorErrorSource = {
   ImageUpload: "image-upload",
+  VideoUpload: "video-upload",
   FileUpload: "file-upload",
   Paste: "paste",
 } as const;
@@ -110,6 +111,19 @@ export interface TiptapEditorProps {
    * @param params - { src, alt?, title? }
    */
   onImageDelete?: (params: { src: string; alt?: string; title?: string }) => void
+
+  /**
+   * 视频确认插入后触发（仅在点击 Confirm 后触发）
+   * @param payload - { file, url, title? }
+   */
+  onVideoUpload?: (payload: { file: File; url: string; title?: string }) => void | Promise<void>
+
+  /**
+   * 视频预上传处理函数（选择/拖拽文件时触发）
+   * @param file - 要上传的视频文件
+   * @returns Promise<string> - 返回视频 URL
+   */
+  onVideoPreUpload?: (file: File) => Promise<string>
 
   /**
    * 附件确认插入后触发（仅在点击 Confirm/Insert Link 后触发）
@@ -198,6 +212,12 @@ export interface TiptapEditorProps {
    * @default config.IMAGE_MAX_SIZE_BYTES（5MB）
    */
   imageMaxSizeBytes?: number
+
+  /**
+   * 视频上传最大体积（字节），超过则拒绝并提示
+   * @default config.VIDEO_MAX_SIZE_BYTES（50MB）
+   */
+  videoMaxSizeBytes?: number
 
   /**
    * 附件上传最大体积（字节），超过则拒绝并提示

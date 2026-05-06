@@ -18,6 +18,7 @@ export const BuiltinToolbarItemKey = {
   InlineMath: "inlineMath",
   BlockMath: "blockMath",
   Image: "image",
+  Video: "video",
   UploadAttachment: "uploadAttachment",
   Bold: "bold",
   Italic: "italic",
@@ -86,6 +87,7 @@ export interface EditorActionContext {
     openInlineMath: () => void;
     openBlockMath: () => void;
     openImage: () => void;
+    openVideo: () => void;
     openFileUpload: () => void;
   };
 }
@@ -151,6 +153,7 @@ export function createDefaultToolbarItems(locale: EditorLocale): ToolbarItemConf
     { type: "builtin", key: BuiltinToolbarItemKey.InlineMath, group: "insert" },
     { type: "builtin", key: BuiltinToolbarItemKey.BlockMath, group: "insert" },
     { type: "builtin", key: BuiltinToolbarItemKey.Image, group: "insert" },
+    { type: "builtin", key: BuiltinToolbarItemKey.Video, group: "insert" },
     { type: "builtin", key: BuiltinToolbarItemKey.UploadAttachment, group: "insert" },
     { type: "builtin", key: BuiltinToolbarItemKey.Bold, group: "format" },
     { type: "builtin", key: BuiltinToolbarItemKey.Italic, group: "format" },
@@ -188,6 +191,7 @@ export function createDefaultSlashCommands(locale: EditorLocale): SlashCommandCo
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.InlineMath, group: "math" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.BlockMath, group: "math" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Image, group: "media" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Video, group: "media" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.UploadAttachment, group: "media" },
   ];
 }
