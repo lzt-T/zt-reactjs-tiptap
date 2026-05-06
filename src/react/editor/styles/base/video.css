@@ -56,16 +56,18 @@
 .editor-wrapper .ProseMirror .video-align-menu {
   position: absolute;
   top: 8px;
-  right: 42px;
-  left: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 42;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 2px;
   width: max-content;
-  max-width: calc(100% - 50px);
-  margin: 0 auto;
+  max-width: calc(100% - 16px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
   padding: 4px;
   border: 1px solid var(--ui-border);
   border-radius: 8px;

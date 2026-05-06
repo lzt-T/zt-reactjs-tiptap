@@ -214,11 +214,13 @@
 
 .editor-wrapper .ProseMirror .image-align-menu.is-inside {
   top: 8px;
-  right: 42px;
-  left: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   width: max-content;
-  max-width: calc(100% - 50px);
-  margin: 0 auto;
+  max-width: calc(100% - 16px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
 
 .editor-container.is-editor-blurred .editor-wrapper .ProseMirror .image-align-menu,
