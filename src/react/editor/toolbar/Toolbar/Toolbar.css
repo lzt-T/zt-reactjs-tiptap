@@ -142,4 +142,12 @@
   box-shadow: var(--ui-shadow-xl);
 }
 
+.editor-toolbar-link-popover {
+  width: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
 

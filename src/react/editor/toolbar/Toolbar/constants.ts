@@ -18,6 +18,7 @@ export const BUILTIN_GROUP_MAP: Record<string, string> = {
   [BuiltinToolbarItemKey.Underline]: "format",
   [BuiltinToolbarItemKey.Strikethrough]: "format",
   [BuiltinToolbarItemKey.InlineCode]: "format",
+  [BuiltinToolbarItemKey.Link]: "format",
   [BuiltinToolbarItemKey.Highlight]: "color",
   [BuiltinToolbarItemKey.TextColor]: "color",
   [BuiltinToolbarItemKey.Superscript]: "script",

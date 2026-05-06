@@ -81,6 +81,8 @@ export function useEditorCommands(
             toggleUnderline: noop,
             toggleStrike: noop,
             toggleCode: noop,
+            setLink: noopStr,
+            unsetLink: noop,
             toggleSuperscript: noop,
             toggleSubscript: noop,
             setTextAlign: noopAlign,
@@ -95,6 +97,8 @@ export function useEditorCommands(
             toggleUnderline: () => runFormat(() => cmd.toggleUnderline(editor)),
             toggleStrike: () => runFormat(() => cmd.toggleStrike(editor)),
             toggleCode: () => runFormat(() => cmd.toggleCode(editor)),
+            setLink: (href: string) => runFormat(() => cmd.setLink(editor, href)),
+            unsetLink: () => runFormat(() => cmd.unsetLink(editor)),
             toggleSuperscript: () =>
               runFormat(() => cmd.toggleSuperscript(editor)),
             toggleSubscript: () => runFormat(() => cmd.toggleSubscript(editor)),

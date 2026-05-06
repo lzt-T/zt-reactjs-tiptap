@@ -20,9 +20,11 @@ import {
   AlignJustify,
   ListIndentDecrease,
   ListIndentIncrease,
+  Link as LinkIcon,
 } from "lucide-react";
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
+import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
 import {
   Popover,
   PopoverContent,
@@ -44,7 +46,9 @@ interface BubbleMenuProps {
 /** 判断 mousedown 事件是否来自 BubbleMenu 的颜色面板内容。 */
 function isFromColorPopoverContent(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
-  return Boolean(target.closest(".color-picker"));
+  return Boolean(
+    target.closest(".color-picker") || target.closest(".editor-link-panel"),
+  );
 }
 
 const BubbleMenu = ({
@@ -60,6 +64,10 @@ const BubbleMenu = ({
     "text" | "highlight" | null
   >(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  /** 链接编辑面板开关。 */
+  const [showLinkEditor, setShowLinkEditor] = useState(false);
+  /** 链接输入框草稿值。 */
+  const [linkDraft, setLinkDraft] = useState("");
 
   const { format, block } = useEditorCommands(editor, {});
   // 减少缩进按钮是否不可用。
@@ -112,6 +120,24 @@ const BubbleMenu = ({
       isInsideContainer: isInsideOverlayContainer,
       exitDelay: "raf",
     });
+  /** 管理“链接面板”关闭后的焦点分流。 */
+  const { handleActiveChange: handleLinkEditorOpenChange } =
+    useScopedActiveDispatcher({
+      isActive: showLinkEditor,
+      setActive: (active) => {
+        if (active) {
+          setShowMoreMenu(false);
+          setShowColorPicker(null);
+          setShowLinkEditor(true);
+          return;
+        }
+        setShowLinkEditor(false);
+      },
+      onExitInside: focusEditorAfterColorPopoverClose,
+      onExitOutside: onOverlayCloseOutside,
+      isInsideContainer: isInsideOverlayContainer,
+      exitDelay: "raf",
+    });
 
   const onTextColorSelect = (color: string) => {
     const current = (editor.getAttributes("textStyle").color ?? "")
@@ -138,6 +164,24 @@ const BubbleMenu = ({
       }
     }
   };
+  /** 打开链接编辑面板，并预填当前链接地址。 */
+  const openLinkEditor = () => {
+    const currentHref = String(editor.getAttributes("link").href ?? "").trim();
+    setLinkDraft(currentHref);
+    handleLinkEditorOpenChange(true);
+  };
+  /** 提交链接修改：非空 URL 时更新选区链接。 */
+  const submitLinkDraft = () => {
+    const href = linkDraft.trim();
+    if (!href) return;
+    format.setLink(href);
+    handleLinkEditorOpenChange(false);
+  };
+  /** 删除当前链接并关闭面板。 */
+  const removeLink = () => {
+    format.unsetLink();
+    handleLinkEditorOpenChange(false);
+  };
 
   if (!editor) {
     return null;
@@ -157,7 +201,7 @@ const BubbleMenu = ({
         onMouseDown={handleBubbleMenuMouseDown}
         shouldShow={({ state }) => {
           // 颜色 Popover 打开时保活锚点，关闭后立即回到选区驱动显示逻辑。
-          if (showColorPicker !== null) return true;
+          if (showColorPicker !== null || showLinkEditor) return true;
           const { selection } = state;
           // NodeSelection（图片、公式、整个表格节点等）不显示
           if (selection instanceof NodeSelection) return false;
@@ -223,6 +267,47 @@ const BubbleMenu = ({
         >
           <Code size={16} />
         </button>
+        <Popover
+          open={showLinkEditor}
+          onOpenChange={(open) => {
+            if (open) {
+              openLinkEditor();
+              return;
+            }
+            handleLinkEditorOpenChange(false);
+          }}
+        >
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
+            <button
+              className={
+                editor.isActive("link")
+                  ? "bubble-menu-btn is-active"
+                  : "bubble-menu-btn"
+              }
+              title={locale.bubbleMenu.link}
+            >
+              <LinkIcon size={16} />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            container={portalContainer ?? undefined}
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="bubble-menu-popover-panel"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <LinkEditorPanel
+              value={linkDraft}
+              locale={locale}
+              onChange={setLinkDraft}
+              onSubmit={submitLinkDraft}
+              onRemove={removeLink}
+              onClose={() => handleLinkEditorOpenChange(false)}
+            />
+          </PopoverContent>
+        </Popover>
         <span className="separator" />
         {/* 官方是免费的 */}
         <ColorPopoverPicker

@@ -86,6 +86,16 @@
     color: var(--ui-text-muted);
 }
 
+/* 正文文本链接：默认下划线，hover 仅变手型。 */
+.editor-wrapper .ProseMirror a {
+    color: var(--ui-text-link);
+    text-decoration: underline;
+}
+
+.editor-wrapper .ProseMirror a:hover {
+    cursor: pointer;
+}
+
 .editor-wrapper .ProseMirror code {
     background: var(--ui-bg-subtle);
     padding: 0.2em 0.4em;

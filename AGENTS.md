@@ -119,7 +119,7 @@ examples/
 - 修改前先定位受影响域（`core` / `react/editor` / `shared`）。
 - 变更应最小化且与现有分层一致，不引入反向依赖。
 - 提交前至少执行：`pnpm lint`；涉及导出/类型时执行 `pnpm exec tsc --project tsconfig.lib.json --noEmit false`。
-- 若改动导出接口、目录结构或行为语义，必须同步更新 README 与 CHANGELOG。
+- 若改动导出接口、目录结构或行为语义，必须同步更新 README。
 
 ### 8.1 注释 Skill 默认使用（强约束）
 

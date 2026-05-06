@@ -1,0 +1,58 @@
+.editor-link-panel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 260px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--ui-border);
+  background: var(--ui-text-inverse);
+  box-shadow: var(--ui-shadow-xl);
+}
+
+.editor-link-panel-input {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  padding: 0 8px;
+  color: var(--ui-text);
+  background: var(--ui-bg);
+  font-size: 13px;
+}
+
+.editor-link-panel-input:focus {
+  outline: none;
+  border-color: var(--ui-control-active);
+}
+
+.editor-link-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor-link-panel-action-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ui-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.editor-link-panel-action-btn:hover {
+  background: var(--ui-bg-hover-soft);
+  color: var(--ui-text-strong);
+}
+
+.editor-link-panel-action-btn:disabled,
+.editor-link-panel-action-btn.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

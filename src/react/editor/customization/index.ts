@@ -24,6 +24,7 @@ export const BuiltinToolbarItemKey = {
   Underline: "underline",
   Strikethrough: "strikethrough",
   InlineCode: "inlineCode",
+  Link: "link",
   Highlight: "highlight",
   TextColor: "textColor",
   Superscript: "superscript",
@@ -56,6 +57,8 @@ export interface EditorActionContext {
     toggleUnderline: () => void;
     toggleStrike: () => void;
     toggleCode: () => void;
+    setLink: (href: string) => void;
+    unsetLink: () => void;
     toggleSuperscript: () => void;
     toggleSubscript: () => void;
     setTextAlign: (align: "left" | "center" | "right" | "justify") => void;
@@ -154,6 +157,7 @@ export function createDefaultToolbarItems(locale: EditorLocale): ToolbarItemConf
     { type: "builtin", key: BuiltinToolbarItemKey.Underline, group: "format" },
     { type: "builtin", key: BuiltinToolbarItemKey.Strikethrough, group: "format" },
     { type: "builtin", key: BuiltinToolbarItemKey.InlineCode, group: "format" },
+    { type: "builtin", key: BuiltinToolbarItemKey.Link, group: "format" },
     { type: "builtin", key: BuiltinToolbarItemKey.Highlight, group: "color" },
     { type: "builtin", key: BuiltinToolbarItemKey.TextColor, group: "color" },
     { type: "builtin", key: BuiltinToolbarItemKey.Superscript, group: "script" },

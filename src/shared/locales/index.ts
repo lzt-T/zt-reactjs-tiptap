@@ -56,6 +56,11 @@ export interface EditorLocale {
     underline: string;
     strikethrough: string;
     inlineCode: string;
+    link: string;
+    editLink: string;
+    updateLink: string;
+    removeLink: string;
+    linkPlaceholder: string;
     highlight: string;
     textColor: string;
     superscript: string;
@@ -74,6 +79,7 @@ export interface EditorLocale {
     underline: string;
     strikethrough: string;
     inlineCode: string;
+    link: string;
     highlight: string;
     textColor: string;
     more: string;

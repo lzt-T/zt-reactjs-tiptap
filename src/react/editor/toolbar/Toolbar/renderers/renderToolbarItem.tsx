@@ -4,6 +4,7 @@ import {
   Underline,
   Strikethrough,
   Code,
+  Link as LinkIcon,
   Highlighter,
   Palette,
   Superscript,
@@ -441,6 +442,24 @@ export function renderToolbarItem(
             title={ctx.locale.toolbar.inlineCode}
           >
             <Code size={16} />
+          </button>
+        ),
+      };
+    case BuiltinToolbarItemKey.Link:
+      return {
+        key: item.key,
+        group,
+        element: (
+          <button
+            type="button"
+            className={cn(
+              "editor-toolbar-btn",
+              ctx.showActiveState && ctx.editor.isActive("link") && "is-active",
+              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+            )}
+            title={ctx.locale.toolbar.link}
+          >
+            <LinkIcon size={16} />
           </button>
         ),
       };

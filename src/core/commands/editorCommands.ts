@@ -23,6 +23,16 @@ export function toggleCode(editor: Editor): void {
   editor.chain().focus().toggleCode().run();
 }
 
+/** 为当前选区设置链接。 */
+export function setLink(editor: Editor, href: string): void {
+  editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+}
+
+/** 取消当前选区链接。 */
+export function unsetLink(editor: Editor): void {
+  editor.chain().focus().extendMarkRange("link").unsetLink().run();
+}
+
 export function toggleCodeBlock(editor: Editor): void {
   editor.chain().focus().toggleCodeBlock().run();
 }

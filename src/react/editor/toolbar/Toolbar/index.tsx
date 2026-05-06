@@ -3,6 +3,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useCallback,
   type MouseEvent,
 } from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
@@ -12,6 +13,7 @@ import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
+import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
 import TableSizePicker from "@/react/editor/table/TableSizePicker";
 import {
   Popover,
@@ -27,10 +29,12 @@ import type {
 import { useToolbarUIState } from "./hooks/useToolbarUIState";
 import "./Toolbar.css";
 
-/** 判断 mousedown 事件是否来自颜色面板内容。 */
+/** 判断 mousedown 事件是否来自允许交互的浮层内容。 */
 function isFromColorPopoverContent(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
-  return Boolean(target.closest(".color-picker"));
+  return Boolean(
+    target.closest(".color-picker") || target.closest(".editor-link-panel"),
+  );
 }
 
 const Toolbar = ({
@@ -59,6 +63,10 @@ const Toolbar = ({
     showTableSizePicker,
     setShowTableSizePicker,
   } = useToolbarUIState({ isEditorFocused });
+  /** 链接编辑面板开关。 */
+  const [showLinkEditor, setShowLinkEditor] = useState(false);
+  /** 链接输入框草稿值。 */
+  const [linkDraft, setLinkDraft] = useState("");
 
   /** 颜色弹层关闭后回焦编辑器，避免关闭后焦点丢失。 */
   const focusEditorAfterColorPopoverClose = () => {
@@ -103,6 +111,28 @@ const Toolbar = ({
         }
       },
       onExitInside: focusEditorAfterColorPopoverClose,
+      onExitOutside: onOverlayCloseOutside,
+      isInsideContainer: isInsideOverlayContainer,
+      exitDelay: "raf",
+    });
+  /** 管理“链接面板”关闭后的焦点分流。 */
+  const { handleActiveChange: handleLinkEditorOpenChange } =
+    useScopedActiveDispatcher({
+      isActive: showLinkEditor,
+      setActive: (active) => {
+        if (active) {
+          setShowHeadingMenu(false);
+          setShowTableSizePicker(false);
+          setShowColorPicker(null);
+          setShowLinkEditor(true);
+          return;
+        }
+        setShowLinkEditor(false);
+      },
+      onExitInside: () => {
+        if (editor.isDestroyed) return;
+        editor.commands.focus();
+      },
       onExitOutside: onOverlayCloseOutside,
       isInsideContainer: isInsideOverlayContainer,
       exitDelay: "raf",
@@ -259,12 +289,33 @@ const Toolbar = ({
     runToolbarAction(() => block.toggleHeading(level));
     setShowHeadingMenu(false);
   };
+  /** 打开链接编辑面板，并预填当前链接地址。 */
+  const openLinkEditor = useCallback(() => {
+    const currentHref = String(editor.getAttributes("link").href ?? "").trim();
+    setLinkDraft(currentHref);
+    handleLinkEditorOpenChange(true);
+  }, [editor, handleLinkEditorOpenChange]);
+
+  /** 提交链接修改：空值不提交，非空值更新当前选区链接。 */
+  const submitLinkDraft = useCallback(() => {
+    const href = linkDraft.trim();
+    if (!href) return;
+    runToolbarAction(() => format.setLink(href));
+    setShowLinkEditor(false);
+  }, [format, linkDraft, runToolbarAction]);
+
+  /** 删除当前链接并关闭面板。 */
+  const removeLink = useCallback(() => {
+    runToolbarAction(() => format.unsetLink());
+    setShowLinkEditor(false);
+  }, [format, runToolbarAction]);
 
   // 统一关闭工具栏所有浮层，避免多个 Popover 同时打开。
   const closeAllPopovers = () => {
     setShowColorPicker(null);
     setShowHeadingMenu(false);
     setShowTableSizePicker(false);
+    setShowLinkEditor(false);
   };
 
   const isHeadingDisabled = isFocusNodeOnly || isInsideCodeBlock;
@@ -424,6 +475,44 @@ const Toolbar = ({
                 closeAllPopovers();
               }}
               locale={locale}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (item.key === BuiltinToolbarItemKey.Link) {
+      return (
+        <Popover
+          open={showLinkEditor}
+          onOpenChange={(open) => {
+            if (open && (isToolbarLocked || isInsideCode)) return;
+            if (open) {
+              openLinkEditor();
+              return;
+            }
+            handleLinkEditorOpenChange(false);
+          }}
+        >
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
+            {item.element}
+          </PopoverTrigger>
+          <PopoverContent
+            container={portalContainer ?? undefined}
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="editor-toolbar-link-popover"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <LinkEditorPanel
+              value={linkDraft}
+              locale={locale}
+              onChange={setLinkDraft}
+              onSubmit={submitLinkDraft}
+              onRemove={removeLink}
+              onClose={() => handleLinkEditorOpenChange(false)}
             />
           </PopoverContent>
         </Popover>
