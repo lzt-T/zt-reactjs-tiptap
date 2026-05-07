@@ -29,16 +29,13 @@
   min-width: 0;
 }
 
-/* 隐藏 label 内可能用于样式的 span，只显示我们样式的 input */
-.editor-wrapper .ProseMirror ul[data-type="taskList"] li label span:first-of-type {
-  display: none;
-}
-
-/* 任务列表复选框：未勾选为空心方框，勾选为带勾的方框（不依赖 li[data-type="taskItem"]，兼容 NodeView） */
+/* 任务列表复选框：未勾选为空心方框，勾选为带勾的方框 */
 .editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  position: relative;
+  z-index: 1;
   box-sizing: border-box;
   width: 1.125rem;
   height: 1.125rem;
@@ -53,10 +50,43 @@
 .editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"]:checked {
   background: var(--primary);
   border-color: var(--primary);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='var(--ui-text-inverse)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
-  background-size: 0.875rem;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label.task-item-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label .task-item-checkbox-box {
+  position: relative;
+  width: 1.125rem;
+  height: 1.125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label .task-item-checkmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ui-text-inverse);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label .task-item-checkmark svg {
+  display: block;
+}
+
+.editor-wrapper .ProseMirror ul[data-type="taskList"] li label input[type="checkbox"]:checked + .task-item-checkmark {
+  opacity: 1;
+}
 
