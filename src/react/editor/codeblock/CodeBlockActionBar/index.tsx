@@ -9,7 +9,11 @@ import {
   WandSparklesIcon,
 } from "lucide-react";
 import type { EditorLocale } from "@/shared/locales";
-import { useEditorOverlayPosition } from "@/react/hooks/useEditorOverlayPosition";
+import {
+  createEditorFloatingOverlayPositionContext,
+  useEditorFloatingOverlayPosition,
+  type EditorFloatingOverlayPositionContext,
+} from "@/react/hooks/useEditorFloatingOverlayPosition";
 
 // 代码块操作栏与代码块边缘的默认内边距。
 const CODE_BLOCK_ACTION_BAR_INSET = 8;
@@ -76,22 +80,20 @@ export default function CodeBlockActionBar({
   // 当前鼠标悬浮的代码块。
   const [hoveredCodeBlock, setHoveredCodeBlock] =
     useState<HoveredCodeBlock | null>(null);
+  // 代码块操作栏定位上下文。
+  const [positionContext, setPositionContext] =
+    useState<EditorFloatingOverlayPositionContext | null>(null);
   // 代码格式化进行中状态。
   const [isFormattingCode, setIsFormattingCode] = useState(false);
   // 代码复制成功状态。
   const [hasCopiedCode, setHasCopiedCode] = useState(false);
   // 复制成功状态恢复定时器。
   const copyResetTimerRef = useRef<number | null>(null);
-  // 统一复用编辑器内浮层定位逻辑。
-  const { position, overlayRef, updatePosition, clearPosition } =
-    useEditorOverlayPosition({
-      editorWrapperRef,
-      lockPlacement: true,
-      horizontalAlign: "end",
-      verticalMode: "inside-top",
-      horizontalOffset: CODE_BLOCK_ACTION_BAR_INSET,
-      verticalOffset: CODE_BLOCK_ACTION_BAR_INSET,
-      boundaryInset: CODE_BLOCK_ACTION_BAR_INSET,
+  // 统一复用编辑器浮层命令式定位逻辑。
+  const { overlayRef, clearPosition } =
+    useEditorFloatingOverlayPosition({
+      context: positionContext,
+      enabled: Boolean(hoveredCodeBlock && positionContext),
     });
   // 是否展示格式化操作。
   const showFormatAction = typeof onCodeBlockFormat === "function";
@@ -116,6 +118,7 @@ export default function CodeBlockActionBar({
   /** 清空当前悬浮代码块与操作栏位置。 */
   const clearHoveredCodeBlock = useCallback(() => {
     setHoveredCodeBlock(null);
+    setPositionContext(null);
     setIsFormattingCode(false);
     resetCopiedState();
     clearPosition();
@@ -144,17 +147,27 @@ export default function CodeBlockActionBar({
         resetCopiedState();
         return next;
       });
-      updatePosition(next.dom, {
-        fallbackWidth: actionBarWidth,
-        fallbackHeight: CODE_BLOCK_ACTION_BAR_HEIGHT,
-      });
+      setPositionContext(
+        createEditorFloatingOverlayPositionContext({
+          editorWrapper: editorWrapperRef.current,
+          anchor: next.dom,
+          lockPlacement: true,
+          horizontalAlign: "end",
+          verticalMode: "inside-top",
+          horizontalOffset: CODE_BLOCK_ACTION_BAR_INSET,
+          verticalOffset: CODE_BLOCK_ACTION_BAR_INSET,
+          boundaryInset: CODE_BLOCK_ACTION_BAR_INSET,
+          fallbackWidth: actionBarWidth,
+          fallbackHeight: CODE_BLOCK_ACTION_BAR_HEIGHT,
+        }),
+      );
     },
     [
       actionBarWidth,
       clearHoveredCodeBlock,
       editor,
+      editorWrapperRef,
       resetCopiedState,
-      updatePosition,
     ],
   );
 
@@ -189,10 +202,20 @@ export default function CodeBlockActionBar({
         clearHoveredCodeBlock();
         return;
       }
-      updatePosition(hoveredCodeBlock.dom, {
-        fallbackWidth: actionBarWidth,
-        fallbackHeight: CODE_BLOCK_ACTION_BAR_HEIGHT,
-      });
+      setPositionContext(
+        createEditorFloatingOverlayPositionContext({
+          editorWrapper: editorWrapperRef.current,
+          anchor: hoveredCodeBlock.dom,
+          lockPlacement: true,
+          horizontalAlign: "end",
+          verticalMode: "inside-top",
+          horizontalOffset: CODE_BLOCK_ACTION_BAR_INSET,
+          verticalOffset: CODE_BLOCK_ACTION_BAR_INSET,
+          boundaryInset: CODE_BLOCK_ACTION_BAR_INSET,
+          fallbackWidth: actionBarWidth,
+          fallbackHeight: CODE_BLOCK_ACTION_BAR_HEIGHT,
+        }),
+      );
     };
 
     editor.on("transaction", handleTransaction);
@@ -203,8 +226,8 @@ export default function CodeBlockActionBar({
     actionBarWidth,
     clearHoveredCodeBlock,
     editor,
+    editorWrapperRef,
     hoveredCodeBlock,
-    updatePosition,
   ]);
 
   useEffect(() => {
@@ -213,7 +236,7 @@ export default function CodeBlockActionBar({
     };
   }, [clearCopyResetTimer]);
 
-  if (!hoveredCodeBlock || !position) return null;
+  if (!hoveredCodeBlock || !positionContext) return null;
 
   /** 复制当前悬浮代码块内容。 */
   const handleCopyCodeBlock = () => {
@@ -283,8 +306,7 @@ export default function CodeBlockActionBar({
       className="code-block-action-bar"
       style={{
         position: "absolute",
-        top: position.top,
-        left: position.left,
+        visibility: "hidden",
         zIndex: 45,
       }}
       ref={overlayRef}

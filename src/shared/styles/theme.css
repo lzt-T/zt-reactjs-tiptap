@@ -15,6 +15,8 @@
 
 /* ========== CSS 变量 ========== */
 .zt-tiptap-theme {
+  /* 在编辑器作用域显式声明浅色原生控件基调，避免宿主全局 color-scheme 干扰。 */
+  color-scheme: light;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -85,6 +87,31 @@
   --ui-image-badge-hover-bg: rgba(241, 245, 249, 0.98);
 }
 
+/* 编辑器作用域统一滚动条基线：强制覆盖各子模块局部差异样式。 */
+.zt-tiptap-theme,
+.zt-tiptap-theme * {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--ui-scrollbar-thumb) transparent !important;
+}
+
+.zt-tiptap-theme *::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.zt-tiptap-theme *::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.zt-tiptap-theme *::-webkit-scrollbar-thumb {
+  background-color: var(--ui-scrollbar-thumb) !important;
+  border-radius: 999px !important;
+}
+
+.zt-tiptap-theme *::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ui-scrollbar-thumb-hover) !important;
+}
+
 /* ========== Tailwind 主题映射 ========== */
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -129,6 +156,8 @@
 
 /* ========== 暗色主题 ========== */
 .zt-tiptap-theme.dark {
+  /* 在编辑器作用域显式声明暗色原生控件基调。 */
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.225 0 0);
@@ -196,4 +225,9 @@
   --ui-scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
   --ui-image-badge-bg: rgba(15, 23, 42, 0.92);
   --ui-image-badge-hover-bg: rgba(30, 41, 59, 0.98);
+}
+
+/* 跟随宿主 html.dark 时，未显式传 theme 也保持暗色控件绘制。 */
+.dark .zt-tiptap-theme {
+  color-scheme: dark;
 }

@@ -1,10 +1,10 @@
-import type { CSSProperties, Ref, RefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
 import type { Editor } from "@tiptap/react";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import type { EditorLocale } from "@/shared/locales";
 import type { CodeBlockLanguageOption, ColorOption } from "@/shared/config";
 import { config } from "@/shared/config";
-import type { MenuPlacement } from "@/react/editor/types";
+import type { EditorFloatingOverlayPositionContext } from "@/react/hooks/useEditorFloatingOverlayPosition";
 import type { ToolbarItemConfig } from "@/react/editor/customization";
 import Toolbar from "@/react/editor/toolbar/Toolbar";
 import TableRowActions from "@/react/editor/table/TableRowActions";
@@ -20,8 +20,7 @@ interface CommandMenuState {
   showCommandMenu: boolean;
   filteredCommands: CommandItem[];
   selectedIndex: number;
-  menuPosition: { top: number; left: number; placement: MenuPlacement } | null;
-  menuOverlayRef: Ref<HTMLDivElement>;
+  menuPositionContext: EditorFloatingOverlayPositionContext | null;
   setShowCommandMenu: (value: boolean) => void;
 }
 
@@ -197,19 +196,17 @@ export default function EditorSurface({
           commandMenu.showCommandMenu &&
           editor &&
           !disabled &&
-          commandMenu.menuPosition && (
+          commandMenu.menuPositionContext && (
             <CommandMenu
               items={commandMenu.filteredCommands}
               command={onHandleCommand}
               locale={locale}
               selectedIndex={commandMenu.selectedIndex}
-              position={commandMenu.menuPosition}
+              positionContext={commandMenu.menuPositionContext}
               maxHeight={commandMenuMaxHeight}
               minHeight={commandMenuMinHeight}
-              overlayRef={commandMenu.menuOverlayRef}
               editor={editor}
               portalContainer={portalContainer}
-              editorWrapperRef={editorWrapperRef}
             />
           )}
       </div>

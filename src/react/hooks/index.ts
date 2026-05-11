@@ -1,7 +1,9 @@
 export { useBlockMathDeleteButton } from "./useBlockMathDeleteButton";
 export { useCommandMenu } from "./useCommandMenu";
-export { useEditorOverlayPosition } from "./useEditorOverlayPosition";
-export { usePortalOverlayPosition } from "./usePortalOverlayPosition";
+export {
+  createEditorFloatingOverlayPositionContext,
+  useEditorFloatingOverlayPosition,
+} from "./useEditorFloatingOverlayPosition";
 export { useMathDialog } from "./useMathDialog";
 export { useImageUploadDialog } from "./useImageUploadDialog";
 export { useFileUploadDialog } from "./useFileUploadDialog";
@@ -16,12 +18,9 @@ export type { ScopedActiveExitDelay } from "./useScopedActiveDispatcher";
 export type { TableRowMenuTarget } from "./useTableInsertRowRunAndClose";
 export type { TableColumnMenuTarget } from "./useTableInsertColumnRunAndClose";
 export type {
-  EditorOverlayAnchor,
-  EditorOverlayPosition,
-  UpdateEditorOverlayPositionOptions,
-  UseEditorOverlayPositionOptions,
-} from "./useEditorOverlayPosition";
-export type {
-  PortalOverlayViewportPosition,
-  UsePortalOverlayPositionOptions,
-} from "./usePortalOverlayPosition";
+  CreateEditorFloatingOverlayPositionContextOptions,
+  EditorFloatingOverlayAnchor,
+  EditorFloatingOverlayHorizontalAlign,
+  EditorFloatingOverlayPositionContext,
+  EditorFloatingOverlayVerticalMode,
+} from "./useEditorFloatingOverlayPosition";

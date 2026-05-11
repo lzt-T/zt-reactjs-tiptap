@@ -3,15 +3,7 @@ import {
   SlashCommandKey,
   type CommandItem as SlashCommandItem,
 } from "@/core/extensions/SlashCommands";
-import {
-  useCallback,
-  useEffect,
-  Fragment,
-  useRef,
-  type MutableRefObject,
-  type RefObject,
-  type Ref,
-} from "react";
+import { useEffect, Fragment, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   Command,
@@ -19,7 +11,10 @@ import {
   CommandList,
   CommandItem,
 } from "@/react/components/ui/command";
-import { usePortalOverlayPosition } from "@/react/hooks/usePortalOverlayPosition";
+import {
+  useEditorFloatingOverlayPosition,
+  type EditorFloatingOverlayPositionContext,
+} from "@/react/hooks/useEditorFloatingOverlayPosition";
 import { cn } from "@/shared/utils/utils";
 import { MenuPlacement } from "@/react/editor/types";
 import type { EditorLocale } from "@/shared/locales";
@@ -30,17 +25,13 @@ interface CommandMenuProps {
   command: (item: SlashCommandItem) => void;
   locale: EditorLocale;
   selectedIndex: number;
-  position: { top: number; left: number; placement: MenuPlacement };
+  positionContext: EditorFloatingOverlayPositionContext;
   maxHeight: number;
   minHeight: number;
-  /** 菜单根节点 ref，用于回填真实尺寸后重算位置。 */
-  overlayRef?: Ref<HTMLDivElement>;
   /** 用于判断是否禁用「表格」等依赖上下文的选项（如在表格内禁用插入表格） */
   editor?: Editor | null;
   /** 编辑器内 Portal 挂载容器：存在时优先使用 Portal 渲染。 */
   portalContainer?: HTMLDivElement | null;
-  /** 编辑器滚动容器引用：用于内容坐标到视口坐标换算。 */
-  editorWrapperRef: RefObject<HTMLDivElement | null>;
 }
 
 interface CommandMenuGroupModel {
@@ -98,54 +89,38 @@ const CommandMenu = ({
   command,
   locale,
   selectedIndex,
-  position,
+  positionContext,
   maxHeight,
   minHeight,
-  overlayRef,
   editor,
   portalContainer,
-  editorWrapperRef,
 }: CommandMenuProps) => {
   // 当前高亮项的 DOM 引用，用于自动滚动到可视区域。
   const selectedRef = useRef<HTMLDivElement>(null);
-  // 通用 Portal 浮层视口定位。
-  const { viewportPosition, scheduleSync } = usePortalOverlayPosition({
-    editorWrapperRef,
-    position,
+  // Milkdown 式命令式定位，避免滚动/缩放时通过 React state 追帧。
+  const { overlayRef, updatePosition } = useEditorFloatingOverlayPosition({
+    context: positionContext,
+    portalContainer,
     enabled: items.length > 0,
   });
-
-  /** 同步本地 ref 与外部 overlayRef。 */
-  const setMenuRefs = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (!overlayRef) return;
-      if (typeof overlayRef === "function") {
-        overlayRef(node);
-        return;
-      }
-      (overlayRef as MutableRefObject<HTMLDivElement | null>).current = node;
-    },
-    [overlayRef],
-  );
 
   useEffect(() => {
     if (selectedRef.current) {
       selectedRef.current.scrollIntoView({
         block: "nearest",
-        behavior: "smooth",
       });
       // 列表滚动后同步一次菜单锚点，避免视觉漂移。
-      scheduleSync();
+      updatePosition();
     }
-  }, [scheduleSync, selectedIndex]);
+  }, [selectedIndex, updatePosition]);
 
   if (items.length === 0) {
     return null;
   }
 
-  const viewport = viewportPosition;
+  // 初始展开方向样式，后续由命令式定位 Hook 保持同步。
   const transform =
-    position.placement === MenuPlacement.Top
+    positionContext.placement === MenuPlacement.Top
       ? "translateY(-100%)"
       : undefined;
   // 菜单连续分组，仅用于渲染分类标题。
@@ -155,12 +130,11 @@ const CommandMenu = ({
     <div
       className="command-menu-overlay"
       style={{
-        position: portalContainer && viewport ? "fixed" : "absolute",
-        top: portalContainer && viewport ? viewport.top : position.top,
-        left: portalContainer && viewport ? viewport.left : position.left,
+        position: portalContainer ? "fixed" : "absolute",
+        visibility: "hidden",
         transform,
       }}
-      ref={setMenuRefs}
+      ref={overlayRef}
     >
       <Command shouldFilter={false} className="command-menu-shell">
         <CommandList
@@ -231,12 +205,8 @@ const CommandMenu = ({
     </div>
   );
 
-  if (portalContainer && viewport) {
-    return createPortal(menuContent, portalContainer);
-  }
-
   if (portalContainer) {
-    return null;
+    return createPortal(menuContent, portalContainer);
   }
 
   // 无 Portal 挂载点时回退原地渲染。

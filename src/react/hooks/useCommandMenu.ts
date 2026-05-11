@@ -1,6 +1,9 @@
 import { useState, useCallback } from "react";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
-import { useEditorOverlayPosition } from "@/react/hooks/useEditorOverlayPosition";
+import {
+  createEditorFloatingOverlayPositionContext,
+  type EditorFloatingOverlayPositionContext,
+} from "@/react/hooks/useEditorFloatingOverlayPosition";
 
 interface UseCommandMenuOptions {
   editorWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -20,17 +23,9 @@ export function useCommandMenu({
   const [commandQuery, setCommandQuery] = useState("");
   // 当前键盘高亮的命令索引。
   const [selectedIndex, setSelectedIndex] = useState(0);
-  // 统一复用编辑器内浮层定位逻辑。
-  const {
-    position: menuPosition,
-    overlayRef,
-    updatePosition,
-    clearPosition,
-  } = useEditorOverlayPosition({
-    editorWrapperRef,
-    placementThreshold: commandMenuMaxHeight,
-    verticalOffset: 4,
-  });
+  // Slash 菜单命令式定位上下文。
+  const [menuPositionContext, setMenuPositionContext] =
+    useState<EditorFloatingOverlayPositionContext | null>(null);
 
   /** 打开命令菜单并重置查询词。 */
   const handleStart = useCallback(() => {
@@ -51,16 +46,24 @@ export function useCommandMenu({
   /** 根据 suggestion 提供的锚点矩形重算菜单位置。 */
   const handleClientRect = useCallback(
     (rect: DOMRect | null) => {
-      updatePosition(rect);
+      setMenuPositionContext(
+        createEditorFloatingOverlayPositionContext({
+          editorWrapper: editorWrapperRef.current,
+          anchor: rect,
+          placementThreshold: commandMenuMaxHeight,
+          verticalOffset: 4,
+          boundaryInset: 0,
+        }),
+      );
     },
-    [updatePosition],
+    [commandMenuMaxHeight, editorWrapperRef],
   );
 
   /** 关闭命令菜单并清空其定位信息。 */
   const handleExit = useCallback(() => {
     setShowCommandMenu(false);
-    clearPosition();
-  }, [clearPosition]);
+    setMenuPositionContext(null);
+  }, []);
 
   // 根据查询词过滤可展示的命令项。
   const filteredCommands = commands.filter((item) =>
@@ -70,8 +73,7 @@ export function useCommandMenu({
   return {
     showCommandMenu,
     setShowCommandMenu,
-    menuPosition,
-    menuOverlayRef: overlayRef,
+    menuPositionContext,
     selectedIndex,
     filteredCommands,
     handleStart,

@@ -171,7 +171,13 @@ function App() {
           onFileAttachmentClick={onFileAttachmentClick}
           // onCodeBlockFormat={onCodeBlockFormat}
         />
+        <div
+          style={{
+            height: "900px",
+          }}
+        ></div>
       </div>
+
       <div className="h-[900px]"></div>
     </div>
   );

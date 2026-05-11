@@ -23,7 +23,11 @@ import {
   isRegisteredCodeBlockLanguage,
 } from "@/core/extensions/codeBlockLowlight";
 import { setCodeBlockLanguage } from "@/core/commands/editorCommands";
-import { useEditorOverlayPosition } from "@/react/hooks/useEditorOverlayPosition";
+import {
+  createEditorFloatingOverlayPositionContext,
+  useEditorFloatingOverlayPosition,
+  type EditorFloatingOverlayPositionContext,
+} from "@/react/hooks/useEditorFloatingOverlayPosition";
 
 // 语言选择器与代码块边缘的默认内边距。
 const CODE_BLOCK_LANGUAGE_MENU_INSET = 8;
@@ -89,20 +93,14 @@ export default function CodeBlockLanguageMenu({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // 语言菜单检索关键词。
   const [searchQuery, setSearchQuery] = useState("");
-  // 统一复用编辑器内浮层定位逻辑。
-  const { position, overlayRef, updatePosition, clearPosition } =
-    useEditorOverlayPosition({
-      editorWrapperRef,
-      // 触发器位置固定在代码块下方，不因下拉面板可用空间而翻转。
-      lockPlacement: true,
-      horizontalAlign: "end",
-      // 语言选择器放在代码块底边外侧，而不是内容区内部。
-      verticalMode: "outside",
-      // 右边缘与代码块右边缘贴齐，不再额外向左缩进。
-      horizontalOffset: 0,
-      verticalOffset: CODE_BLOCK_LANGUAGE_MENU_INSET,
-      boundaryInset: CODE_BLOCK_LANGUAGE_MENU_INSET,
-    });
+  // 代码块语言选择器定位上下文。
+  const [positionContext, setPositionContext] =
+    useState<EditorFloatingOverlayPositionContext | null>(null);
+  // 统一复用编辑器浮层命令式定位逻辑。
+  const { overlayRef, clearPosition } = useEditorFloatingOverlayPosition({
+    context: positionContext,
+    enabled: Boolean(positionContext && currentLanguage),
+  });
 
   // 归一化可选语言，过滤未注册项并确保 plaintext 始终可选。
   const resolvedLanguages = useMemo(() => {
@@ -161,12 +159,14 @@ export default function CodeBlockLanguageMenu({
     if (!enabled) {
       setCurrentLanguage(null);
       setIsMenuOpen(false);
+      setPositionContext(null);
       clearPosition();
       return;
     }
     if (!editor.isActive("codeBlock")) {
       setCurrentLanguage(null);
       setIsMenuOpen(false);
+      setPositionContext(null);
       clearPosition();
       return;
     }
@@ -174,17 +174,31 @@ export default function CodeBlockLanguageMenu({
     if (!active) {
       setCurrentLanguage(null);
       setIsMenuOpen(false);
+      setPositionContext(null);
       clearPosition();
       return;
     }
     setCurrentLanguage(
       resolveCodeBlockLanguage(active.language, defaultLanguage),
     );
-    updatePosition(active.dom, {
-      fallbackWidth: CODE_BLOCK_LANGUAGE_TRIGGER_MIN_WIDTH,
-      fallbackHeight: CODE_BLOCK_LANGUAGE_TRIGGER_HEIGHT,
-    });
-  }, [clearPosition, defaultLanguage, editor, enabled, updatePosition]);
+    setPositionContext(
+      createEditorFloatingOverlayPositionContext({
+        editorWrapper: editorWrapperRef.current,
+        anchor: active.dom,
+        // 触发器位置固定在代码块下方，不因下拉面板可用空间而翻转。
+        lockPlacement: true,
+        horizontalAlign: "end",
+        // 语言选择器放在代码块底边外侧，而不是内容区内部。
+        verticalMode: "outside",
+        // 右边缘与代码块右边缘贴齐，不再额外向左缩进。
+        horizontalOffset: 0,
+        verticalOffset: CODE_BLOCK_LANGUAGE_MENU_INSET,
+        boundaryInset: CODE_BLOCK_LANGUAGE_MENU_INSET,
+        fallbackWidth: CODE_BLOCK_LANGUAGE_TRIGGER_MIN_WIDTH,
+        fallbackHeight: CODE_BLOCK_LANGUAGE_TRIGGER_HEIGHT,
+      }),
+    );
+  }, [clearPosition, defaultLanguage, editor, editorWrapperRef, enabled]);
 
   useEffect(() => {
     const rafId = window.requestAnimationFrame(() => {
@@ -202,11 +216,11 @@ export default function CodeBlockLanguageMenu({
   }, [editor, updateMenuState]);
 
   useEffect(() => {
-    if (!position) {
+    if (!positionContext) {
       setIsMenuOpen(false);
       onMenuRootChange?.(null);
     }
-  }, [onMenuRootChange, position]);
+  }, [onMenuRootChange, positionContext]);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -227,15 +241,14 @@ export default function CodeBlockLanguageMenu({
     [onMenuRootChange, overlayRef],
   );
 
-  if (!portalContainer || !position || !currentLanguage) return null;
+  if (!portalContainer || !positionContext || !currentLanguage) return null;
 
   return (
     <div
       className="code-block-language-menu"
       style={{
         position: "absolute",
-        top: position.top,
-        left: position.left,
+        visibility: "hidden",
         zIndex: 45,
       }}
       ref={handleMenuRootRef}
