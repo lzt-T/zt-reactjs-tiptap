@@ -4,6 +4,7 @@ import {
   CheckIcon,
   ChevronDownIcon,
 } from "lucide-react";
+import { createPortal } from "react-dom";
 import type { CodeBlockLanguageOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import {
@@ -13,11 +14,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/react/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/react/components/ui/popover";
 import {
   resolveCodeBlockLanguage,
   isRegisteredCodeBlockLanguage,
@@ -99,6 +95,7 @@ export default function CodeBlockLanguageMenu({
   // 统一复用编辑器浮层命令式定位逻辑。
   const { overlayRef, clearPosition } = useEditorFloatingOverlayPosition({
     context: positionContext,
+    portalContainer,
     enabled: Boolean(positionContext && currentLanguage),
   });
 
@@ -142,14 +139,6 @@ export default function CodeBlockLanguageMenu({
   const focusSearchInput = useCallback(() => {
     const input = document.querySelector<HTMLInputElement>(
       '.code-block-language-select-content [data-slot="command-input"]',
-    );
-    input?.focus();
-  }, []);
-
-  /** 根据给定根节点聚焦语言搜索输入框。 */
-  const focusSearchInputFromRoot = useCallback((root: Element) => {
-    const input = root.querySelector<HTMLInputElement>(
-      '[data-slot="command-input"]',
     );
     input?.focus();
   }, []);
@@ -243,7 +232,20 @@ export default function CodeBlockLanguageMenu({
 
   if (!portalContainer || !positionContext || !currentLanguage) return null;
 
-  return (
+  /** 关闭语言下拉并同步编辑器焦点状态。 */
+  const closeLanguageMenu = () => {
+    setIsMenuOpen(false);
+    requestAnimationFrame(() => {
+      onMenuOpenStateChecked?.(editor.isFocused);
+    });
+  };
+
+  // 当前语言展示文案。
+  const currentLanguageLabel =
+    resolvedLanguages.find((item) => item.value === currentLanguage)?.label ??
+    locale.codeBlock.plainText;
+  // 语言选择器 Portal 内容。
+  const menuContent = (
     <div
       className="code-block-language-menu"
       style={{
@@ -254,101 +256,81 @@ export default function CodeBlockLanguageMenu({
       ref={handleMenuRootRef}
     >
       <div className="code-block-control-bar">
-        <Popover
-          open={isMenuOpen}
-          onOpenChange={(open) => {
-            setIsMenuOpen(open);
-            if (open) return;
-            requestAnimationFrame(() => {
-              onMenuOpenStateChecked?.(editor.isFocused);
-            });
+        <button
+          type="button"
+          className="code-block-control-language-trigger"
+          aria-label={locale.codeBlock.languageButton}
+          aria-expanded={isMenuOpen}
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
+          onClick={() => {
+            if (isMenuOpen) {
+              requestAnimationFrame(() => {
+                onMenuOpenStateChecked?.(editor.isFocused);
+              });
+            }
+            setIsMenuOpen(!isMenuOpen);
           }}
         >
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="code-block-control-language-trigger"
-              aria-label={locale.codeBlock.languageButton}
-              aria-expanded={isMenuOpen}
-            >
-              <span className="code-block-control-language-text">
-                {resolvedLanguages.find(
-                  (item) => item.value === currentLanguage,
-                )?.label ?? locale.codeBlock.plainText}
-              </span>
-              <ChevronDownIcon className="size-3.5 opacity-50" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            container={portalContainer}
-            align="end"
-            sideOffset={6}
-            className="code-block-language-select-content"
-            onOpenAutoFocus={(event) => {
-              event.preventDefault();
-              if (event.currentTarget instanceof Element) {
-                focusSearchInputFromRoot(event.currentTarget);
-              }
-            }}
-            onEscapeKeyDown={() => {
-              setIsMenuOpen(false);
-              requestAnimationFrame(() => {
-                editor.commands.focus();
-              });
-            }}
-            onCloseAutoFocus={(event) => {
-              event.preventDefault();
-            }}
+          <span className="code-block-control-language-text">
+            {currentLanguageLabel}
+          </span>
+          <ChevronDownIcon className="size-3.5 opacity-50" />
+        </button>
+      </div>
+      {isMenuOpen && (
+        <div className="code-block-language-select-content">
+          <Command
+            shouldFilter={false}
+            className="code-block-language-command"
           >
-            <Command
-              shouldFilter={false}
-              className="code-block-language-command"
-            >
-              <CommandInput
-                value={searchQuery}
-                className="code-block-language-search"
-                placeholder={locale.codeBlock.searchPlaceholder}
-                onValueChange={(value) => {
-                  setSearchQuery(value);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") {
-                    setIsMenuOpen(false);
+            <CommandInput
+              value={searchQuery}
+              className="code-block-language-search"
+              placeholder={locale.codeBlock.searchPlaceholder}
+              onValueChange={(value) => {
+                setSearchQuery(value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  closeLanguageMenu();
+                  requestAnimationFrame(() => {
+                    editor.commands.focus();
+                  });
+                }
+              }}
+            />
+            <CommandList className="code-block-language-list">
+              <CommandEmpty className="code-block-language-empty">
+                {locale.codeBlock.noMatch}
+              </CommandEmpty>
+              {filteredLanguages.map((item) => (
+                <CommandItem
+                  key={item.value}
+                  value={`${item.value} ${getLanguageLabel(item)}`}
+                  className="code-block-language-option"
+                  onSelect={() => {
+                    setCodeBlockLanguage(editor, item.value);
+                    closeLanguageMenu();
                     requestAnimationFrame(() => {
                       editor.commands.focus();
                     });
-                  }
-                }}
-              />
-              <CommandList className="code-block-language-list">
-                <CommandEmpty className="code-block-language-empty">
-                  {locale.codeBlock.noMatch}
-                </CommandEmpty>
-                {filteredLanguages.map((item) => (
-                  <CommandItem
-                    key={item.value}
-                    value={`${item.value} ${getLanguageLabel(item)}`}
-                    className="code-block-language-option"
-                    onSelect={() => {
-                      setCodeBlockLanguage(editor, item.value);
-                      setIsMenuOpen(false);
-                      requestAnimationFrame(() => {
-                        editor.commands.focus();
-                      });
-                      updateMenuState();
-                    }}
-                  >
-                    <span>{getLanguageLabel(item)}</span>
-                    {item.value === currentLanguage ? (
-                      <CheckIcon className="ml-auto size-4" />
-                    ) : null}
-                  </CommandItem>
-                ))}
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
+                    updateMenuState();
+                  }}
+                >
+                  <span>{getLanguageLabel(item)}</span>
+                  {item.value === currentLanguage ? (
+                    <CheckIcon className="ml-auto size-4" />
+                  ) : null}
+                </CommandItem>
+              ))}
+            </CommandList>
+          </Command>
+        </div>
+      )}
     </div>
   );
+
+  return createPortal(menuContent, portalContainer);
 }

@@ -290,6 +290,27 @@ function resolveOverlayCoordinates(
   };
 }
 
+/** 将视口坐标转换为 Portal 容器内坐标。 */
+function resolvePortalCoordinates(
+  coordinates: ReturnType<typeof resolveOverlayCoordinates>,
+  portalContainer: HTMLDivElement | null | undefined,
+) {
+  if (!portalContainer) {
+    return {
+      left: coordinates.contentLeft,
+      top: coordinates.contentTop,
+    };
+  }
+
+  // Portal 容器视口矩形。
+  const portalRect = portalContainer.getBoundingClientRect();
+
+  return {
+    left: coordinates.viewportLeft - portalRect.left,
+    top: coordinates.viewportTop - portalRect.top,
+  };
+}
+
 /** 创建 RAF 节流调度器。 */
 function createRafScheduler(update: () => void) {
   // 当前等待执行的 RAF id。
@@ -347,16 +368,15 @@ export function useEditorFloatingOverlayPosition({
 
     // 浮层坐标。
     const coordinates = resolveOverlayCoordinates(currentContext, overlay);
-    // Portal 场景用 fixed，避免依赖 Portal 容器自身定位上下文。
-    const useFixedPosition = Boolean(portalContainerRef.current);
+    // Portal 内坐标或原地内容坐标。
+    const overlayPosition = resolvePortalCoordinates(
+      coordinates,
+      portalContainerRef.current,
+    );
 
-    overlay.style.position = useFixedPosition ? "fixed" : "absolute";
-    overlay.style.left = `${
-      useFixedPosition ? coordinates.viewportLeft : coordinates.contentLeft
-    }px`;
-    overlay.style.top = `${
-      useFixedPosition ? coordinates.viewportTop : coordinates.contentTop
-    }px`;
+    overlay.style.position = "absolute";
+    overlay.style.left = `${overlayPosition.left}px`;
+    overlay.style.top = `${overlayPosition.top}px`;
     overlay.style.transform =
       coordinates.placement === MenuPlacement.Top ? "translateY(-100%)" : "";
     overlay.style.visibility = "visible";

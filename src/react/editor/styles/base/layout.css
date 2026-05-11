@@ -1,11 +1,12 @@
 .editor-container {
+  position: relative;
   border: 1px solid var(--ui-border-muted);
   border-radius: 8px;
   background: var(--ui-text-inverse);
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* 配置了 maxHeight 时：高度随内容增长，到 maxHeight 后内部滚动 */
@@ -20,6 +21,17 @@
 
 .editor-container.no-border {
   border: none;
+}
+
+.zt-tiptap-portal {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.zt-tiptap-portal > * {
+  pointer-events: auto;
 }
 
 .editor-wrapper {

@@ -1,5 +1,6 @@
 .command-menu-overlay {
   z-index: 48;
+  pointer-events: auto;
 }
 
 .command-menu-overlay .command-menu-shell {

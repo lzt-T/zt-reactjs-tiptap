@@ -130,7 +130,7 @@ const CommandMenu = ({
     <div
       className="command-menu-overlay"
       style={{
-        position: portalContainer ? "fixed" : "absolute",
+        position: "absolute",
         visibility: "hidden",
         transform,
       }}

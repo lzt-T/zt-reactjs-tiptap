@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RefObject } from "react";
+import type { MouseEvent as ReactMouseEvent, RefObject } from "react";
 import type { Editor } from "@tiptap/react";
 import {
   CheckIcon,
@@ -8,6 +8,7 @@ import {
   Trash2Icon,
   WandSparklesIcon,
 } from "lucide-react";
+import { createPortal } from "react-dom";
 import type { EditorLocale } from "@/shared/locales";
 import {
   createEditorFloatingOverlayPositionContext,
@@ -36,6 +37,7 @@ interface CodeBlockActionBarProps {
   editor: Editor;
   locale: EditorLocale;
   editorWrapperRef: RefObject<HTMLDivElement | null>;
+  portalContainer: HTMLDivElement | null;
   defaultLanguage: string;
   onCodeBlockFormat?: (payload: {
     code: string;
@@ -74,6 +76,7 @@ export default function CodeBlockActionBar({
   editor,
   locale,
   editorWrapperRef,
+  portalContainer,
   defaultLanguage,
   onCodeBlockFormat,
 }: CodeBlockActionBarProps) {
@@ -93,6 +96,7 @@ export default function CodeBlockActionBar({
   const { overlayRef, clearPosition } =
     useEditorFloatingOverlayPosition({
       context: positionContext,
+      portalContainer,
       enabled: Boolean(hoveredCodeBlock && positionContext),
     });
   // 是否展示格式化操作。
@@ -171,6 +175,14 @@ export default function CodeBlockActionBar({
     ],
   );
 
+  /** 判断节点是否在当前操作栏内。 */
+  const isInsideActionBar = useCallback((target: EventTarget | null) => {
+    return (
+      target instanceof Element &&
+      Boolean(target.closest(".code-block-action-bar"))
+    );
+  }, []);
+
   useEffect(() => {
     const wrapper = editorWrapperRef.current;
     if (!wrapper) return;
@@ -180,13 +192,24 @@ export default function CodeBlockActionBar({
       updateHoveredCodeBlock(event.target);
     };
 
+    /** 鼠标离开编辑器时保留进入 Portal 操作栏的悬浮态。 */
+    const handleMouseLeave = (event: MouseEvent) => {
+      if (isInsideActionBar(event.relatedTarget)) return;
+      clearHoveredCodeBlock();
+    };
+
     wrapper.addEventListener("mousemove", handleMouseMove);
-    wrapper.addEventListener("mouseleave", clearHoveredCodeBlock);
+    wrapper.addEventListener("mouseleave", handleMouseLeave);
     return () => {
       wrapper.removeEventListener("mousemove", handleMouseMove);
-      wrapper.removeEventListener("mouseleave", clearHoveredCodeBlock);
+      wrapper.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [clearHoveredCodeBlock, editorWrapperRef, updateHoveredCodeBlock]);
+  }, [
+    clearHoveredCodeBlock,
+    editorWrapperRef,
+    isInsideActionBar,
+    updateHoveredCodeBlock,
+  ]);
 
   useEffect(() => {
     /** 编辑器内容变化后确认悬浮代码块仍然有效。 */
@@ -236,7 +259,7 @@ export default function CodeBlockActionBar({
     };
   }, [clearCopyResetTimer]);
 
-  if (!hoveredCodeBlock || !positionContext) return null;
+  if (!portalContainer || !hoveredCodeBlock || !positionContext) return null;
 
   /** 复制当前悬浮代码块内容。 */
   const handleCopyCodeBlock = () => {
@@ -301,7 +324,14 @@ export default function CodeBlockActionBar({
       });
   };
 
-  return (
+  /** 处理鼠标离开 Portal 操作栏后的悬浮态同步。 */
+  const handleActionBarMouseLeave = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (isInsideActionBar(event.relatedTarget)) return;
+    updateHoveredCodeBlock(event.relatedTarget);
+  };
+
+  // 代码块操作栏 Portal 内容。
+  const actionBarContent = (
     <div
       className="code-block-action-bar"
       style={{
@@ -310,6 +340,7 @@ export default function CodeBlockActionBar({
         zIndex: 45,
       }}
       ref={overlayRef}
+      onMouseLeave={handleActionBarMouseLeave}
       onMouseDown={(event) => {
         event.preventDefault();
       }}
@@ -370,4 +401,6 @@ export default function CodeBlockActionBar({
       </button>
     </div>
   );
+
+  return createPortal(actionBarContent, portalContainer);
 }

@@ -97,6 +97,7 @@
 
 .code-block-language-menu {
   z-index: 45;
+  pointer-events: auto;
 }
 
 .code-block-control-bar {
@@ -148,6 +149,7 @@
   background: color-mix(in oklab, var(--background) 92%, transparent);
   box-shadow: var(--shadow-xs);
   overflow: hidden;
+  pointer-events: auto;
 }
 
 .code-block-control-action-btn {
@@ -183,11 +185,21 @@
 }
 
 .code-block-language-select-content {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
   width: 220px;
   min-width: 150px;
   max-height: 210px;
   z-index: 46;
   padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: var(--ui-shadow-popover);
+  outline: none;
+  pointer-events: auto;
 }
 
 .code-block-language-command {

@@ -176,6 +176,7 @@ export default function EditorSurface({
             editor={editor}
             locale={locale}
             editorWrapperRef={editorWrapperRef}
+            portalContainer={portalContainer}
             defaultLanguage={resolvedDefaultCodeBlockLanguage}
             onCodeBlockFormat={onCodeBlockFormat}
           />
