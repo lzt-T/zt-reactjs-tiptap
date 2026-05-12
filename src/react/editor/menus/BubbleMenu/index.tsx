@@ -1,7 +1,7 @@
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
-import { useState, type MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { config, type ColorOption } from "@/shared/config";
 import {
   Bold,
@@ -68,6 +68,8 @@ const BubbleMenu = ({
   isInsideOverlayContainer,
   onOverlayCloseOutside,
 }: BubbleMenuProps) => {
+  /** 选区/内容变化时自增，驱动 BubbleMenu 按当前选区重算 isActive 状态。 */
+  const [selectionKey, setSelectionKey] = useState(0);
   const [showColorPicker, setShowColorPicker] = useState<
     "text" | "highlight" | null
   >(null);
@@ -77,9 +79,23 @@ const BubbleMenu = ({
   /** 链接输入框草稿值。 */
   const [linkDraft, setLinkDraft] = useState("");
 
+  useEffect(() => {
+    /** 选区或事务变化后触发一次重渲染，避免按钮激活态偶发滞后。 */
+    const onSelectionUpdate = () => {
+      setSelectionKey((key) => key + 1);
+    };
+
+    editor.on("selectionUpdate", onSelectionUpdate);
+    editor.on("transaction", onSelectionUpdate);
+    return () => {
+      editor.off("selectionUpdate", onSelectionUpdate);
+      editor.off("transaction", onSelectionUpdate);
+    };
+  }, [editor]);
+
   const { format, block } = useEditorCommands(editor, {});
   /** 当前选区是否在 inline code（code mark）内。 */
-  const isInsideCode = editor.isActive("code");
+  const isInsideCode = editor.isFocused && editor.isActive("code");
   const inlineDisabledMap = createInlineControlDisabledState(isInsideCode);
   /** inline code 下禁用的气泡菜单按钮状态。 */
   const isBoldDisabled = inlineDisabledMap.bold;
@@ -204,6 +220,7 @@ const BubbleMenu = ({
   return (
     <>
       <TiptapBubbleMenu
+        data-selection-key={selectionKey}
         editor={editor}
         className="bubble-menu"
         onMouseDown={handleBubbleMenuMouseDown}
@@ -294,11 +311,7 @@ const BubbleMenu = ({
         </button>
         <button
           onClick={() => format.toggleCode()}
-          className={
-            editor.isActive("code")
-              ? "bubble-menu-btn is-active"
-              : "bubble-menu-btn"
-          }
+          className={isInsideCode ? "bubble-menu-btn is-active" : "bubble-menu-btn"}
           title={locale.bubbleMenu.inlineCode}
         >
           <Code size={16} />
