@@ -14,6 +14,7 @@ import { config } from "@/shared/config";
 import { formatFileSize } from "@/shared/utils/utils";
 import type { EditorLocale } from "@/shared/locales";
 import type { EditorErrorEvent } from "@/react/editor/types";
+import { useUploadDialogFlow } from "@/react/editor/dialogs/shared/useUploadDialogFlow";
 import "./VideoUploadDialog.css";
 
 interface VideoUploadDialogProps {
@@ -54,14 +55,19 @@ const VideoUploadDialog = ({
   const [error, setError] = useState("");
   // 文件上传中状态。
   const [isUploading, setIsUploading] = useState(false);
-  // 拖拽高亮状态。
-  const [isDragOver, setIsDragOver] = useState(false);
   // 文件输入引用。
   const fileInputRef = useRef<HTMLInputElement>(null);
   // URL 输入引用。
   const urlInputRef = useRef<HTMLInputElement>(null);
-  // 上传期间锁定可能触发重复上传的交互。
-  const isInteractionLocked = isUploading;
+  const {
+    isDragOver,
+    isInteractionLocked,
+    resetFlowStates,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleConfirmKeyDown,
+  } = useUploadDialogFlow({ isUploading });
   // 上传类型切换选项。
   const uploadTypeOptions = [
     { label: locale.videoDialog.uploadFileTab, value: "file" },
@@ -74,8 +80,8 @@ const VideoUploadDialog = ({
     setVideoUrl("");
     setError("");
     setIsUploading(false);
-    setIsDragOver(false);
-  }, []);
+    resetFlowStates();
+  }, [resetFlowStates]);
 
   /** 校验并处理视频文件，生成可插入地址或上报上传错误。 */
   const processFile = useCallback(
@@ -143,37 +149,6 @@ const VideoUploadDialog = ({
     [processFile]
   );
 
-  const handleDragOver = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (isInteractionLocked) return;
-      e.dataTransfer.dropEffect = "copy";
-      setIsDragOver(true);
-    },
-    [isInteractionLocked]
-  );
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragOver(false);
-    }
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragOver(false);
-      if (isInteractionLocked) return;
-      const file = e.dataTransfer.files?.[0];
-      if (file) processFile(file);
-    },
-    [isInteractionLocked, processFile]
-  );
-
   const handleUrlChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const url = e.target.value;
@@ -237,15 +212,9 @@ const VideoUploadDialog = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleConfirm();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        handleCancel();
-      }
+      handleConfirmKeyDown(e, { onConfirm: handleConfirm, onCancel: handleCancel });
     },
-    [handleCancel, handleConfirm]
+    [handleCancel, handleConfirm, handleConfirmKeyDown]
   );
 
   useEffect(() => {
@@ -293,7 +262,7 @@ const VideoUploadDialog = ({
                 aria-disabled={isInteractionLocked}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+                onDrop={(e) => handleDrop(e, processFile)}
               >
                 {isUploading ? (
                   <>

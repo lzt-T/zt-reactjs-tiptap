@@ -25,7 +25,14 @@ import {
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
-import { isInlineCodeMarkControlDisabled } from "@/react/editor/toolbar/shared/markDisableRules";
+import {
+  createInlineControlDisabledState,
+  openLinkDraft,
+  removeLink as removeLinkAction,
+  resolveLinkDraftHref,
+  toggleHighlightColor,
+  toggleTextColor,
+} from "@/react/editor/shared/editorActionStrategies";
 import {
   Popover,
   PopoverContent,
@@ -73,37 +80,17 @@ const BubbleMenu = ({
   const { format, block } = useEditorCommands(editor, {});
   /** 当前选区是否在 inline code（code mark）内。 */
   const isInsideCode = editor.isActive("code");
+  const inlineDisabledMap = createInlineControlDisabledState(isInsideCode);
   /** inline code 下禁用的气泡菜单按钮状态。 */
-  const isBoldDisabled = isInlineCodeMarkControlDisabled(isInsideCode, "bold");
-  const isItalicDisabled = isInlineCodeMarkControlDisabled(
-    isInsideCode,
-    "italic",
-  );
-  const isUnderlineDisabled = isInlineCodeMarkControlDisabled(
-    isInsideCode,
-    "underline",
-  );
-  const isStrikethroughDisabled = isInlineCodeMarkControlDisabled(
-    isInsideCode,
-    "strikethrough",
-  );
-  const isLinkDisabled = isInlineCodeMarkControlDisabled(isInsideCode, "link");
-  const isHighlightDisabled = isInlineCodeMarkControlDisabled(
-    isInsideCode,
-    "highlight",
-  );
-  const isTextColorDisabled = isInlineCodeMarkControlDisabled(
-    isInsideCode,
-    "textColor",
-  );
-  const isSuperscriptDisabled = isInlineCodeMarkControlDisabled(
-    isInsideCode,
-    "superscript",
-  );
-  const isSubscriptDisabled = isInlineCodeMarkControlDisabled(
-    isInsideCode,
-    "subscript",
-  );
+  const isBoldDisabled = inlineDisabledMap.bold;
+  const isItalicDisabled = inlineDisabledMap.italic;
+  const isUnderlineDisabled = inlineDisabledMap.underline;
+  const isStrikethroughDisabled = inlineDisabledMap.strikethrough;
+  const isLinkDisabled = inlineDisabledMap.link;
+  const isHighlightDisabled = inlineDisabledMap.highlight;
+  const isTextColorDisabled = inlineDisabledMap.textColor;
+  const isSuperscriptDisabled = inlineDisabledMap.superscript;
+  const isSubscriptDisabled = inlineDisabledMap.subscript;
   // 减少缩进按钮是否不可用。
   const isDecreaseIndentDisabled = !block.canDecreaseIndent();
   // 增加缩进按钮是否不可用。
@@ -174,46 +161,33 @@ const BubbleMenu = ({
     });
 
   const onTextColorSelect = (color: string) => {
-    const current = (editor.getAttributes("textStyle").color ?? "")
-      .trim()
-      .toLowerCase();
-    if (current && color.trim().toLowerCase() === current) {
-      format.unsetColor();
-    } else {
-      format.setColor(color);
-    }
+    toggleTextColor(editor, color, {
+      setColor: format.setColor,
+      unsetColor: format.unsetColor,
+    });
   };
 
   const onHighlightColorSelect = (color: string) => {
-    if (color === "") {
-      format.unsetHighlight();
-    } else {
-      const current = (editor.getAttributes("highlight").color ?? "")
-        .trim()
-        .toLowerCase();
-      if (current === color.trim().toLowerCase()) {
-        format.unsetHighlight();
-      } else {
-        format.setHighlight(color);
-      }
-    }
+    toggleHighlightColor(editor, color, {
+      setHighlight: format.setHighlight,
+      unsetHighlight: format.unsetHighlight,
+    });
   };
   /** 打开链接编辑面板，并预填当前链接地址。 */
   const openLinkEditor = () => {
-    const currentHref = String(editor.getAttributes("link").href ?? "").trim();
-    setLinkDraft(currentHref);
+    setLinkDraft(openLinkDraft(editor));
     handleLinkEditorOpenChange(true);
   };
   /** 提交链接修改：非空 URL 时更新选区链接。 */
   const submitLinkDraft = () => {
-    const href = linkDraft.trim();
+    const href = resolveLinkDraftHref(linkDraft);
     if (!href) return;
     format.setLink(href);
     handleLinkEditorOpenChange(false);
   };
   /** 删除当前链接并关闭面板。 */
   const removeLink = () => {
-    format.unsetLink();
+    removeLinkAction({ unsetLink: format.unsetLink });
     handleLinkEditorOpenChange(false);
   };
 

@@ -12,6 +12,7 @@ import { config } from "@/shared/config";
 import { formatFileSize } from "@/shared/utils/utils";
 import type { EditorLocale } from "@/shared/locales";
 import type { EditorErrorEvent } from "@/react/editor/types";
+import { useUploadDialogFlow } from "@/react/editor/dialogs/shared/useUploadDialogFlow";
 import "./FileUploadDialog.css";
 
 const EXTENSION_MIME_MAP: Record<string, string[]> = {
@@ -123,18 +124,24 @@ const FileUploadDialog = ({
   );
   const [error, setError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // 上传进行中时锁定可能再次触发上传的交互入口（保留 Cancel 可用）
-  const isInteractionLocked = isUploading;
+  const {
+    isDragOver,
+    isInteractionLocked,
+    resetFlowStates,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleConfirmKeyDown,
+  } = useUploadDialogFlow({ isUploading });
 
   const resetStates = useCallback(() => {
     setSelectedFile(null);
     setResult(null);
     setError("");
     setIsUploading(false);
-    setIsDragOver(false);
-  }, []);
+    resetFlowStates();
+  }, [resetFlowStates]);
 
   const processFile = useCallback(
     async (file: File) => {
@@ -193,36 +200,6 @@ const FileUploadDialog = ({
     [processFile]
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // 上传中不进入拖拽高亮态，避免误导用户当前可重新上传
-    if (isInteractionLocked) return;
-    e.dataTransfer.dropEffect = "copy";
-    setIsDragOver(true);
-  }, [isInteractionLocked]);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragOver(false);
-    }
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragOver(false);
-      // 上传中直接忽略 drop，避免并发上传造成状态错乱
-      if (isInteractionLocked) return;
-      const file = e.dataTransfer.files?.[0];
-      if (file) processFile(file);
-    },
-    [isInteractionLocked, processFile]
-  );
-
   const handleConfirm = useCallback(() => {
     if (!selectedFile || !result) {
       setError(locale.fileDialog.selectAndUploadFirst);
@@ -256,15 +233,9 @@ const FileUploadDialog = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleConfirm();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        handleCancel();
-      }
+      handleConfirmKeyDown(e, { onConfirm: handleConfirm, onCancel: handleCancel });
     },
-    [handleConfirm, handleCancel]
+    [handleCancel, handleConfirm, handleConfirmKeyDown]
   );
 
   return (
@@ -297,7 +268,7 @@ const FileUploadDialog = ({
               aria-disabled={isInteractionLocked}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
+              onDrop={(e) => handleDrop(e, processFile)}
             >
               {isUploading ? (
                 <>

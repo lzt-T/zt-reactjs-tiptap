@@ -12,11 +12,18 @@ import { TextSelection } from "@tiptap/pm/state";
 import { Highlighter, Palette } from "lucide-react";
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
-import { isInlineCodeMarkControlDisabled } from "@/react/editor/toolbar/shared/markDisableRules";
 import type { EditorActionContext } from "@/react/editor/customization";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
 import TableSizePicker from "@/react/editor/table/TableSizePicker";
+import {
+  createInlineControlDisabledState,
+  openLinkDraft,
+  removeLink as removeLinkAction,
+  resolveLinkDraftHref,
+  toggleHighlightColor,
+  toggleTextColor,
+} from "@/react/editor/shared/editorActionStrategies";
 import {
   Popover,
   PopoverContent,
@@ -266,29 +273,21 @@ const Toolbar = ({
   };
 
   const onTextColorSelect = (color: string) => {
-    const current = (editor.getAttributes("textStyle").color ?? "")
-      .trim()
-      .toLowerCase();
-    if (current && color.trim().toLowerCase() === current) {
-      runToolbarAction(() => format.unsetColor());
-    } else {
-      runToolbarAction(() => format.setColor(color));
-    }
+    runToolbarAction(() =>
+      toggleTextColor(editor, color, {
+        setColor: format.setColor,
+        unsetColor: format.unsetColor,
+      }),
+    );
   };
 
   const onHighlightColorSelect = (color: string) => {
-    if (color === "") {
-      runToolbarAction(() => format.unsetHighlight());
-    } else {
-      const current = (editor.getAttributes("highlight").color ?? "")
-        .trim()
-        .toLowerCase();
-      if (current === color.trim().toLowerCase()) {
-        runToolbarAction(() => format.unsetHighlight());
-      } else {
-        runToolbarAction(() => format.setHighlight(color));
-      }
-    }
+    runToolbarAction(() =>
+      toggleHighlightColor(editor, color, {
+        setHighlight: format.setHighlight,
+        unsetHighlight: format.unsetHighlight,
+      }),
+    );
   };
 
   const onHeadingSelect = (level: 1 | 2 | 3) => {
@@ -297,14 +296,13 @@ const Toolbar = ({
   };
   /** 打开链接编辑面板，并预填当前链接地址。 */
   const openLinkEditor = useCallback(() => {
-    const currentHref = String(editor.getAttributes("link").href ?? "").trim();
-    setLinkDraft(currentHref);
+    setLinkDraft(openLinkDraft(editor));
     handleLinkEditorOpenChange(true);
   }, [editor, handleLinkEditorOpenChange]);
 
   /** 提交链接修改：空值不提交，非空值更新当前选区链接。 */
   const submitLinkDraft = useCallback(() => {
-    const href = linkDraft.trim();
+    const href = resolveLinkDraftHref(linkDraft);
     if (!href) return;
     runToolbarAction(() => format.setLink(href));
     setShowLinkEditor(false);
@@ -312,7 +310,7 @@ const Toolbar = ({
 
   /** 删除当前链接并关闭面板。 */
   const removeLink = useCallback(() => {
-    runToolbarAction(() => format.unsetLink());
+    runToolbarAction(() => removeLinkAction({ unsetLink: format.unsetLink }));
     setShowLinkEditor(false);
   }, [format, runToolbarAction]);
 
@@ -324,15 +322,13 @@ const Toolbar = ({
     setShowLinkEditor(false);
   };
 
+  const inlineDisabledMap = createInlineControlDisabledState(isInsideCode);
   const isHeadingDisabled = isFocusNodeOnly || isInsideCodeBlock;
   const isHighlightDisabled =
-    isToolbarLocked ||
-    isInlineCodeMarkControlDisabled(isInsideCode, "highlight");
+    isToolbarLocked || inlineDisabledMap.highlight;
   const isTextColorDisabled =
-    isToolbarLocked ||
-    isInlineCodeMarkControlDisabled(isInsideCode, "textColor");
-  const isLinkDisabled =
-    isToolbarLocked || isInlineCodeMarkControlDisabled(isInsideCode, "link");
+    isToolbarLocked || inlineDisabledMap.textColor;
+  const isLinkDisabled = isToolbarLocked || inlineDisabledMap.link;
   const isInsertTableDisabled = isInsideTable || isToolbarLocked;
 
   const renderContext: ToolbarRenderContext = {

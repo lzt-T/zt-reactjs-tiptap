@@ -14,6 +14,7 @@ import { config } from '@/shared/config'
 import { formatFileSize } from '@/shared/utils/utils'
 import type { EditorLocale } from '@/shared/locales'
 import type { EditorErrorEvent } from '@/react/editor/types'
+import { useUploadDialogFlow } from '@/react/editor/dialogs/shared/useUploadDialogFlow'
 import './ImageUploadDialog.css'
 
 interface ImageUploadDialogProps {
@@ -50,11 +51,17 @@ const ImageUploadDialog = ({
   const [previewLoadError, setPreviewLoadError] = useState(false)
   const [error, setError] = useState('')
   const [isUploading, setIsUploading] = useState(false)
-  const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
-  // 上传进行中时锁定可能触发二次上传的交互入口（保留 Cancel 可用）
-  const isInteractionLocked = isUploading
+  const {
+    isDragOver,
+    isInteractionLocked,
+    resetFlowStates,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleConfirmKeyDown,
+  } = useUploadDialogFlow({ isUploading })
   // 仅在上传中或已有图片结果时保留重选提示区域，避免初始空态出现多余留白
   const shouldReserveReselectHint = uploadType === 'file' && (isUploading || Boolean(imageUrl))
   // 仅在可重选阶段展示提示文案；容器常驻用于稳定布局高度
@@ -72,8 +79,8 @@ const ImageUploadDialog = ({
     setPreviewLoadError(false)
     setError('')
     setIsUploading(false)
-    setIsDragOver(false)
-  }, [])
+    resetFlowStates()
+  }, [resetFlowStates])
 
   /** 校验并处理图片文件，生成可预览地址或上报上传错误。 */
   const processFile = useCallback(async (file: File) => {
@@ -136,33 +143,6 @@ const ImageUploadDialog = ({
     e.target.value = ''
   }, [processFile])
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // 上传中禁止进入拖拽高亮态，避免误导用户仍可重新上传
-    if (isInteractionLocked) return
-    e.dataTransfer.dropEffect = 'copy'
-    setIsDragOver(true)
-  }, [isInteractionLocked])
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragOver(false)
-    }
-  }, [])
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragOver(false)
-    // 上传中直接忽略 drop，防止并发触发新的上传流程
-    if (isInteractionLocked) return
-    const file = e.dataTransfer.files?.[0]
-    if (file) processFile(file)
-  }, [isInteractionLocked, processFile])
-
   const handleUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value
     setSelectedFile(null)
@@ -222,14 +202,8 @@ const ImageUploadDialog = ({
   }, [onCancel, resetStates])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleConfirm()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      handleCancel()
-    }
-  }, [handleConfirm, handleCancel])
+    handleConfirmKeyDown(e, { onConfirm: handleConfirm, onCancel: handleCancel })
+  }, [handleCancel, handleConfirm, handleConfirmKeyDown])
 
   useEffect(() => {
     if (isOpen && uploadType === 'url') {
@@ -276,7 +250,7 @@ const ImageUploadDialog = ({
                 aria-disabled={isInteractionLocked}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+                onDrop={(e) => handleDrop(e, processFile)}
               >
                 {isUploading ? (
                   <>

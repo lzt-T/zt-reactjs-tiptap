@@ -18,6 +18,7 @@ import type { EditorLocale } from '@/shared/locales'
 import TableAddRowColumnButtons, { TABLE_ADD_BAR_SIZE } from '../TableAddRowColumnButtons'
 import TableAlignmentMenu from '../TableAlignmentMenu'
 import { applyTableCellAlignment, getTableCellAlignmentState } from '../tableAlignment'
+import { ensureTableActionsWrapper, useTableActionsPositioning } from '../shared/useTableActionsPositioning'
 import type {
   TableCellTextAlign,
   TableCellVerticalAlign,
@@ -59,7 +60,17 @@ const TableRowActions = ({
   const [currentRow, setCurrentRow] = useState<RowActionItem | null>(null)
   /** 当前焦点所在表格的行数，用于菜单中「删除行」/「删除表格」 */
   const [focusedTableRowCount, setFocusedTableRowCount] = useState(0)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const {
+    menuOpen,
+    setMenuOpen,
+    portalTarget,
+    setPortalTarget,
+    portalButtonPosition,
+    setPortalButtonPosition,
+    closeMenu: closeMenuBase,
+    handleMenuOpenChange: handleMenuOpenChangeBase,
+    clearPortalState,
+  } = useTableActionsPositioning<{ top: number; left: number; height: number }>()
   const buttonRef = useRef<HTMLButtonElement>(null)
   /**
    * 打开菜单时记录目标行信息，供 useTableInsertRowRunAndClose 用。
@@ -73,14 +84,6 @@ const TableRowActions = ({
     lastRowFirstCellPos: number
     lastRowIndex: number
   } | null>(null)
-  /** Portal 目标（用 state 以便在 render 中使用） */
-  const [portalTarget, setPortalTarget] = useState<HTMLDivElement | null>(null)
-  /** 单个按钮在 tableWrapper 坐标系下的位置（仅在有 portal 时使用） */
-  const [portalButtonPosition, setPortalButtonPosition] = useState<{
-    top: number
-    left: number
-    height: number
-  } | null>(null)
   /** 聚焦表格尺寸，用于下方/右侧加号按钮定位；有 portal 时设置 */
   const [tableSize, setTableSize] = useState<{ width: number; height: number } | null>(null)
   /** 聚焦表格 index，加号按钮点击时用于定位表格 */
@@ -89,11 +92,10 @@ const TableRowActions = ({
   const clearTableRowStates = useCallback(() => {
     setCurrentRow(null)
     setFocusedTableRowCount(0)
-    setPortalTarget(null)
-    setPortalButtonPosition(null)
+    clearPortalState()
     setTableSize(null)
     setFocusedTableIndexForPlus(null)
-  }, [])
+  }, [clearPortalState])
 
   const updatePositions = useCallback(() => {
     const wrapper = editorWrapperRef.current
@@ -244,17 +246,10 @@ const TableRowActions = ({
     /* 计算 tableWrapper 内 absolute 定位用的坐标，用于 Portal 渲染 */
     if (nextTableIndex != null && focusedItem != null && tables.length) {
       const table = tables[nextTableIndex] as HTMLTableElement | undefined
-      const tableWrapper = table?.closest?.('.tableWrapper') as HTMLDivElement | undefined
-      let target: HTMLDivElement | null = tableWrapper ?? null
-      if (table && tableWrapper) {
+      let target: HTMLDivElement | null = ensureTableActionsWrapper(table)
+      if (table && target) {
         /* 注入可随表格横向滚动的 wrapper，行/列按钮都挂在其内，随表格一起滚动 */
-        let scrollWrapper = table.parentElement as HTMLDivElement | null
-        if (scrollWrapper?.getAttribute('data-table-actions-wrapper') !== 'true') {
-          scrollWrapper = document.createElement('div')
-          scrollWrapper.setAttribute('data-table-actions-wrapper', 'true')
-          tableWrapper.insertBefore(scrollWrapper, table)
-          scrollWrapper.appendChild(table)
-        }
+        const scrollWrapper = target
         scrollWrapper.style.position = 'relative'
         scrollWrapper.style.display = 'inline-block'
         scrollWrapper.style.minWidth = '100%'
@@ -307,16 +302,16 @@ const TableRowActions = ({
   }, [editor, editorWrapperRef, updatePositions])
 
   const closeMenu = useCallback(() => {
-    setMenuOpen(false)
-    menuTargetRef.current = null
-  }, [])
+    closeMenuBase(() => {
+      menuTargetRef.current = null
+    })
+  }, [closeMenuBase])
   // Popover 开关状态统一收敛到这里，关闭时同步清理目标引用。
   const handleMenuOpenChange = useCallback((open: boolean) => {
-    setMenuOpen(open)
-    if (!open) {
+    handleMenuOpenChangeBase(open, () => {
       menuTargetRef.current = null
-    }
-  }, [])
+    })
+  }, [handleMenuOpenChangeBase])
 
   const handleRowButtonClick = useCallback(
     (e: React.MouseEvent) => {

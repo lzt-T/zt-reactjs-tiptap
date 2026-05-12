@@ -17,6 +17,7 @@ import { config } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
 import TableAlignmentMenu from '../TableAlignmentMenu'
 import { applyTableCellAlignment, getTableCellAlignmentState } from '../tableAlignment'
+import { resolveTableActionsPortalTarget, useTableActionsPositioning } from '../shared/useTableActionsPositioning'
 import type {
   TableCellTextAlign,
   TableCellVerticalAlign,
@@ -57,7 +58,17 @@ const TableColumnActions = ({
   const [currentColumn, setCurrentColumn] = useState<ColumnActionItem | null>(null)
   /** 当前焦点所在表格的列数，用于菜单中「删除列」/「删除表格」 */
   const [focusedTableColCount, setFocusedTableColCount] = useState(0)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const {
+    menuOpen,
+    setMenuOpen,
+    portalTarget,
+    setPortalTarget,
+    portalButtonPosition,
+    setPortalButtonPosition,
+    closeMenu: closeMenuBase,
+    handleMenuOpenChange: handleMenuOpenChangeBase,
+    clearPortalState,
+  } = useTableActionsPositioning<{ top: number; left: number; width: number }>()
   const buttonRef = useRef<HTMLButtonElement>(null)
   /**
    * 打开菜单时记录目标列信息，供 useTableInsertColumnRunAndClose 用。
@@ -71,21 +82,11 @@ const TableColumnActions = ({
     lastColumnFirstCellPos: number
     lastColumnIndex: number
   } | null>(null)
-  /** Portal 目标（用 state 以便在 render 中使用，与行操作共用 data-table-actions-wrapper） */
-  const [portalTarget, setPortalTarget] = useState<HTMLDivElement | null>(null)
-  /** 单个按钮在 scrollWrapper 坐标系下的位置（仅在有 portal 时使用） */
-  const [portalButtonPosition, setPortalButtonPosition] = useState<{
-    top: number
-    left: number
-    width: number
-  } | null>(null)
-
   const clearTableColumnStates = useCallback(() => {
     setCurrentColumn(null)
     setFocusedTableColCount(0)
-    setPortalTarget(null)
-    setPortalButtonPosition(null)
-  }, [])
+    clearPortalState()
+  }, [clearPortalState])
 
   const updatePositions = useCallback(() => {
     const wrapper = editorWrapperRef.current
@@ -239,11 +240,8 @@ const TableColumnActions = ({
     /* 与行操作共用 scroll wrapper，列按钮 relative 其定位，随表格滚动，无需监听 scroll */
     if (nextTableIndex != null && focusedItem != null && tables.length) {
       const table = tables[nextTableIndex] as HTMLTableElement | undefined
-      const target =
-        (table?.parentElement?.getAttribute('data-table-actions-wrapper') === 'true'
-          ? table.parentElement
-          : table?.closest?.('.tableWrapper')) as HTMLDivElement | undefined
-      setPortalTarget(target ?? null)
+      const target = resolveTableActionsPortalTarget(table)
+      setPortalTarget(target)
       if (target && firstCell && lastCell) {
         const targetRect = target.getBoundingClientRect()
         const tableTopPadding = config.TABLE_ACTION_BUTTON_PADDING
@@ -276,16 +274,16 @@ const TableColumnActions = ({
   }, [editor, editorWrapperRef, updatePositions])
 
   const closeMenu = useCallback(() => {
-    setMenuOpen(false)
-    menuTargetRef.current = null
-  }, [])
+    closeMenuBase(() => {
+      menuTargetRef.current = null
+    })
+  }, [closeMenuBase])
   // Popover 开关状态统一收敛到这里，关闭时同步清理目标引用。
   const handleMenuOpenChange = useCallback((open: boolean) => {
-    setMenuOpen(open)
-    if (!open) {
+    handleMenuOpenChangeBase(open, () => {
       menuTargetRef.current = null
-    }
-  }, [])
+    })
+  }, [handleMenuOpenChangeBase])
 
   const handleColumnButtonClick = useCallback(
     (e: React.MouseEvent) => {
