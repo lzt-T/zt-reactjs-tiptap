@@ -63,21 +63,7 @@ const noopRect = noop as (rect: DOMRect | null) => void;
 // 空索引回调。
 const noopIndex = noop as (index: number) => void;
 // 空查询回调。
-const noopUpdate = noop as (query: string) => void;
-// 空数学弹窗回调。
-const noopMathDialog = noop as (
-  type: "inline" | "block",
-  initial: string,
-  cb: (latex: string) => void,
-) => void;
-// 空图片上传回调。
-const noopImageUpload = noop as (
-  cb: (src: string, alt?: string) => void,
-) => void;
-// 空视频上传回调。
-const noopVideoUpload = noop as (
-  cb: (src: string, title?: string) => void,
-) => void;
+const noopUpdate = noop as (query: string, items?: CommandItem[]) => void;
 
 const ReactTiptapEditor = ({
   editorMode = EditorMode.NotionLike,
@@ -149,6 +135,8 @@ const ReactTiptapEditor = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // disabled 状态引用，供事件回调读取最新值。
   const disabledRef = useRef(disabled);
+  // 斜杠命令执行引用，用于连接 TipTap 扩展与 React 层命令执行器。
+  const slashCommandRunnerRef = useRef<(item: CommandItem) => void>(() => {});
 
   // 主题与 portal 状态。
   const themePortalState = useEditorThemePortalState();
@@ -173,8 +161,12 @@ const ReactTiptapEditor = ({
   const commandMenu = useCommandMenu({
     editorWrapperRef,
     commandMenuMaxHeight,
-    commands: resolvedConfig.resolvedSlashCommands,
   });
+
+  /** 执行 TipTap 扩展提交的斜杠菜单命令。 */
+  const handleSlashCommandFromExtension = useCallback((item: CommandItem) => {
+    slashCommandRunnerRef.current(item);
+  }, []);
 
   // 数学公式弹窗状态。
   const mathDialog = useMathDialog({
@@ -211,15 +203,7 @@ const ReactTiptapEditor = ({
       ? commandMenu.handleClientRect
       : noopRect,
     onExit: resolvedConfig.isNotionLike ? commandMenu.handleExit : noop,
-    onMathDialog: resolvedConfig.isNotionLike
-      ? mathDialog.handleMathDialogFromSlash
-      : noopMathDialog,
-    onImageUpload: resolvedConfig.isNotionLike
-      ? imageDialog.openImageDialog
-      : noopImageUpload,
-    onVideoUpload: resolvedConfig.isNotionLike
-      ? videoDialog.openVideoDialog
-      : noopVideoUpload,
+    onCommand: handleSlashCommandFromExtension,
     onFileUpload:
       resolvedConfig.isNotionLike && onFilePreUpload
         ? fileUploadDialog.openFileUploadDialog
@@ -290,6 +274,7 @@ const ReactTiptapEditor = ({
       ? fileUploadDialog.openFileUploadDialog
       : undefined,
   });
+  slashCommandRunnerRef.current = runCommandItem;
 
   useBlockMathDeleteButton({
     editor,

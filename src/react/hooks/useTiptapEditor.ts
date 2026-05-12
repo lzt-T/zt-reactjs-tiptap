@@ -54,17 +54,11 @@ interface UseTiptapEditorOptions {
   onImageDelete?: (params: { src: string; alt?: string; title?: string }) => void;
   onFileDelete?: (params: { url: string; name: string }) => void;
   onStart: () => void;
-  onUpdate: (query: string) => void;
+  onUpdate: (query: string, items?: CommandItem[]) => void;
   onIndexChange: (index: number) => void;
   onClientRect: (rect: DOMRect | null) => void;
   onExit: () => void;
-  onMathDialog: (
-    type: "inline" | "block",
-    initialValue: string,
-    callback: (latex: string) => void
-  ) => void;
-  onImageUpload: (callback: (src: string, alt?: string) => void) => void;
-  onVideoUpload: (callback: (src: string, title?: string) => void) => void;
+  onCommand: (item: CommandItem) => void;
   onFileUpload?: (callback: (url: string, name: string) => void) => void;
   getCommands?: () => CommandItem[];
   onFileAttachmentClick?: (params: { url: string; name: string }) => void;
@@ -95,9 +89,7 @@ export function useTiptapEditor({
   onIndexChange,
   onClientRect,
   onExit,
-  onMathDialog,
-  onImageUpload,
-  onVideoUpload,
+  onCommand,
   onFileUpload,
   getCommands,
   onFileAttachmentClick,
@@ -228,9 +220,7 @@ export function useTiptapEditor({
               onIndexChange,
               onClientRect,
               onExit,
-              onMathDialog,
-              onImageUpload,
-              onVideoUpload,
+              onCommand,
               onFileUpload,
               locale,
               // 本库内部统一走 getCommands 动态读取命令列表。
@@ -251,11 +241,9 @@ export function useTiptapEditor({
       onClientRect,
       onExit,
       onFileUpload,
-      onImageUpload,
-      onVideoUpload,
+      onCommand,
       onIndexChange,
       onInlineMathClick,
-      onMathDialog,
       onStart,
       onUpdate,
       locale,

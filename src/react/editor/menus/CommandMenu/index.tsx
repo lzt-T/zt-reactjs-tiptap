@@ -1,8 +1,4 @@
-import type { Editor } from "@tiptap/react";
-import {
-  SlashCommandKey,
-  type CommandItem as SlashCommandItem,
-} from "@/core/extensions/SlashCommands";
+import type { CommandItem as SlashCommandItem } from "@/core/extensions/SlashCommands";
 import { useEffect, Fragment, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -28,8 +24,6 @@ interface CommandMenuProps {
   positionContext: EditorFloatingOverlayPositionContext;
   maxHeight: number;
   minHeight: number;
-  /** 用于判断是否禁用「表格」等依赖上下文的选项（如在表格内禁用插入表格） */
-  editor?: Editor | null;
   /** 编辑器内 Portal 挂载容器：存在时优先使用 Portal 渲染。 */
   portalContainer?: HTMLDivElement | null;
 }
@@ -92,7 +86,6 @@ const CommandMenu = ({
   positionContext,
   maxHeight,
   minHeight,
-  editor,
   portalContainer,
 }: CommandMenuProps) => {
   // 当前高亮项的 DOM 引用，用于自动滚动到可视区域。
@@ -149,19 +142,8 @@ const CommandMenu = ({
             const commandItems = group.items.map(({ item, index }) => {
               // 当前命令图标。
               const Icon = item.icon;
-              // 表格内禁用重复插入表格。
-              const isTableDisabled =
-                item.key === SlashCommandKey.Table &&
-                editor?.isActive?.("table");
-              // 外部自定义禁用状态。
-              const customDisabled =
-                typeof item.disabled === "function"
-                  ? editor
-                    ? item.disabled({ editor })
-                    : false
-                  : !!item.disabled;
-              // 最终禁用状态。
-              const disabled = isTableDisabled || customDisabled;
+              // 最终禁用状态由 TipTap Suggestion 层统一计算。
+              const disabled = !!item.disabled;
               return (
                 <CommandItem
                   key={item.title}

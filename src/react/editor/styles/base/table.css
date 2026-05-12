@@ -51,6 +51,33 @@
     font-weight: 600;
 }
 
+.editor-wrapper .ProseMirror th :not(pre) > code {
+    background: color-mix(in oklab, var(--ui-bg-subtle) 88%, var(--ui-border-muted) 12%);
+    border: 1px solid color-mix(in oklab, var(--ui-border-muted) 88%, var(--ui-border-strong) 12%);
+    border-radius: 5px;
+    font-weight: inherit;
+}
+
+.dark .editor-wrapper .ProseMirror th :not(pre) > code,
+.zt-tiptap-theme.dark .editor-wrapper .ProseMirror th :not(pre) > code {
+    background: color-mix(in oklab, var(--ui-bg-subtle) 84%, var(--ui-bg-hover) 16%);
+    border-color: color-mix(in oklab, var(--ui-border-muted) 86%, var(--ui-border-strong) 14%);
+}
+
+.editor-wrapper .ProseMirror th pre code {
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+.editor-wrapper .ProseMirror th pre,
+.editor-wrapper .ProseMirror td pre {
+    margin: 0.375em 0;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
 .editor-wrapper .ProseMirror .selectedCell {
     background: var(--ui-bg-table-highlight);
 }

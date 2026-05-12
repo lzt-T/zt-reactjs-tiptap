@@ -95,10 +95,11 @@ export interface CommandItem {
 
 export interface SlashCommandsOptions {
   onStart: () => void
-  onUpdate: (query: string) => void
+  onUpdate: (query: string, items?: CommandItem[]) => void
   onIndexChange: (index: number) => void
   onExit: () => void
   onClientRect: (rect: DOMRect | null) => void
+  onCommand: (item: CommandItem) => void
   onMathDialog?: (type: 'inline' | 'block', initialValue: string, callback: (latex: string) => void) => void
   onImageUpload?: (callback: (src: string, alt?: string) => void) => void
   onVideoUpload?: (callback: (src: string, title?: string) => void) => void
@@ -264,6 +265,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
       onIndexChange: () => {},
       onExit: () => {},
       onClientRect: () => {},
+      onCommand: () => {},
       onMathDialog: undefined,
       onImageUpload: undefined,
       onVideoUpload: undefined,
@@ -306,7 +308,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
         },
         command: ({ editor, range, props }: { editor: Editor; range: { from: number; to: number }; props: CommandItem }) => {
           editor.chain().focus().deleteRange(range).run()
-          props.command({ editor })
+          this.options.onCommand(props)
         },
         render: () => {
           let currentIndex = 0
@@ -321,7 +323,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
               currentRange = props.range
               currentIndex = findFirstEnabledIndex(items)
               this.options.onStart()
-              this.options.onUpdate(props.query)
+              this.options.onUpdate(props.query, items)
               this.options.onIndexChange(currentIndex)
               if (props.clientRect) {
                 const rect = props.clientRect()
@@ -333,7 +335,7 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
               currentEditor = props.editor
               currentRange = props.range
               currentIndex = findFirstEnabledIndex(items)
-              this.options.onUpdate(props.query)
+              this.options.onUpdate(props.query, items)
               this.options.onIndexChange(currentIndex)
               if (props.clientRect) {
                 const rect = props.clientRect()
@@ -380,42 +382,12 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
                 case 'Enter':
                   if (items[currentIndex]) {
                     const item = items[currentIndex]
-                    const isTableDisabled = item.key === SlashCommandKey.Table && currentEditor.isActive('table')
-                    if (isTableDisabled) {
+                    if (item.disabled) {
                       this.options.onExit()
                       return true
                     }
                     currentEditor.chain().focus().deleteRange(currentRange).run()
-                    
-                    // Check if it's a math command
-                    if (item.mathType && this.options.onMathDialog) {
-                      this.options.onMathDialog(item.mathType, '', (latex) => {
-                        if (item.mathType === 'inline') {
-                          currentEditor.chain().focus().insertInlineMath({ latex }).run()
-                        } else {
-                          currentEditor.chain().focus().insertBlockMath({ latex }).run()
-                        }
-                      })
-                    } else if (item.imageUpload && this.options.onImageUpload) {
-                      // Handle image upload
-                      this.options.onImageUpload((src, alt) => {
-                        currentEditor.chain().focus().setImage({ src, alt }).run()
-                      })
-                    } else if (item.videoUpload && this.options.onVideoUpload) {
-                      // Handle video upload
-                      this.options.onVideoUpload((src, title) => {
-                        currentEditor.chain().focus().setVideo({ src, title }).run()
-                      })
-                    } else if (item.fileAttachment && this.options.onFileUpload) {
-                      // Handle file attachment upload
-                      this.options.onFileUpload((url, name) => {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- custom command insertFileAttachment
-                        (currentEditor as any).chain().focus().insertFileAttachment({ url, name }).run()
-                      })
-                    } else {
-                      item.command({ editor: currentEditor })
-                    }
-                    // Close the command menu after executing command
+                    this.options.onCommand(item)
                     this.options.onExit()
                   }
                   return true

@@ -31,14 +31,24 @@
 
 .editor-wrapper .ProseMirror pre {
   position: relative;
-  background: var(--code-block-bg);
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: color-mix(in oklab, var(--ui-bg-subtle) 72%, var(--ui-bg-selected) 28%);
+  border: none;
   color: var(--code-block-fg);
   font-family: var(--code-font-family);
   font-size: 0.9375rem;
   line-height: 1.6;
-  padding: 1em;
-  border-radius: 8px;
+  padding: 0.875em;
+  border-radius: 6px;
   overflow-x: auto;
+}
+
+.dark .editor-wrapper .ProseMirror pre,
+.zt-tiptap-theme.dark .editor-wrapper .ProseMirror pre {
+  background: color-mix(in oklab, var(--ui-bg-subtle) 76%, var(--ui-bg-selected) 24%);
+  border: none;
 }
 
 .editor-wrapper .ProseMirror pre code {

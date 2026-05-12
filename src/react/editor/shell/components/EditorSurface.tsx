@@ -18,7 +18,7 @@ import { cn } from "@/shared/utils/utils";
 
 interface CommandMenuState {
   showCommandMenu: boolean;
-  filteredCommands: CommandItem[];
+  commandItems: CommandItem[];
   selectedIndex: number;
   menuPositionContext: EditorFloatingOverlayPositionContext | null;
   setShowCommandMenu: (value: boolean) => void;
@@ -199,14 +199,13 @@ export default function EditorSurface({
           !disabled &&
           commandMenu.menuPositionContext && (
             <CommandMenu
-              items={commandMenu.filteredCommands}
+              items={commandMenu.commandItems}
               command={onHandleCommand}
               locale={locale}
               selectedIndex={commandMenu.selectedIndex}
               positionContext={commandMenu.menuPositionContext}
               maxHeight={commandMenuMaxHeight}
               minHeight={commandMenuMinHeight}
-              editor={editor}
               portalContainer={portalContainer}
             />
           )}
