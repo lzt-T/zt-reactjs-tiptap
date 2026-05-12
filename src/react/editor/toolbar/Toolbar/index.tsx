@@ -11,6 +11,7 @@ import { TextSelection } from "@tiptap/pm/state";
 import { Highlighter, Palette } from "lucide-react";
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
+import { isInlineCodeMarkControlDisabled } from "@/react/editor/toolbar/shared/markDisableRules";
 import type { EditorActionContext } from "@/react/editor/customization";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
@@ -323,7 +324,14 @@ const Toolbar = ({
   };
 
   const isHeadingDisabled = isFocusNodeOnly || isInsideCodeBlock;
-  const isColorDisabled = isToolbarLocked || isInsideCode;
+  const isHighlightDisabled =
+    isToolbarLocked ||
+    isInlineCodeMarkControlDisabled(isInsideCode, "highlight");
+  const isTextColorDisabled =
+    isToolbarLocked ||
+    isInlineCodeMarkControlDisabled(isInsideCode, "textColor");
+  const isLinkDisabled =
+    isToolbarLocked || isInlineCodeMarkControlDisabled(isInsideCode, "link");
   const isInsertTableDisabled = isInsideTable || isToolbarLocked;
 
   const renderContext: ToolbarRenderContext = {
@@ -362,7 +370,7 @@ const Toolbar = ({
           options={highlightColorOptions}
           selectedColor={editor.getAttributes("highlight").color}
           active={showActiveState && editor.isActive("highlight")}
-          disabled={isColorDisabled}
+          disabled={isHighlightDisabled}
           open={showColorPicker === "highlight"}
           onOpenChange={handleHighlightColorPickerOpenChange}
           onColorSelect={onHighlightColorSelect}
@@ -383,7 +391,7 @@ const Toolbar = ({
           options={textColorOptions}
           selectedColor={editor.getAttributes("textStyle").color}
           active={showActiveState && !!editor.getAttributes("textStyle").color}
-          disabled={isColorDisabled}
+          disabled={isTextColorDisabled}
           open={showColorPicker === "text"}
           onOpenChange={handleTextColorPickerOpenChange}
           onColorSelect={onTextColorSelect}
@@ -491,7 +499,7 @@ const Toolbar = ({
         <Popover
           open={showLinkEditor}
           onOpenChange={(open) => {
-            if (open && (isToolbarLocked || isInsideCode)) return;
+            if (open && isLinkDisabled) return;
             if (open) {
               openLinkEditor();
               return;

@@ -287,6 +287,8 @@ export const SlashCommands = Extension.create<SlashCommandsOptions>({
       Suggestion({
         editor: this.editor,
         char: '/',
+        // 代码语境内保留 "/" 原始输入，不触发斜杠菜单。
+        allow: ({ editor }) => !editor.isActive("codeBlock") && !editor.isActive("code"),
         items: ({ query }: { query: string }) => {
           const insideTable = this.editor.isActive('table')
           const commands = resolveCommands()

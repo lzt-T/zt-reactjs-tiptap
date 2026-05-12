@@ -33,6 +33,7 @@ import {
   BuiltinToolbarItemKey,
   type ToolbarItemConfig,
 } from "@/react/editor/customization";
+import { isInlineCodeMarkControlDisabled } from "@/react/editor/toolbar/shared/markDisableRules";
 import type { RenderedToolbarItem, ToolbarRenderContext } from "../types";
 import { BUILTIN_GROUP_MAP } from "../constants";
 
@@ -334,7 +335,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Bold:
+    case BuiltinToolbarItemKey.Bold: {
+      // inline code 内禁用加粗等互斥 mark。
+      const isBoldDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "bold");
       return {
         key: item.key,
         group,
@@ -344,10 +349,10 @@ export function renderToolbarItem(
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState && ctx.editor.isActive("bold") && "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isBoldDisabled && "is-disabled",
             )}
             onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
+              if (isBoldDisabled) return;
               ctx.runToolbarAction(() => ctx.actionContext.format.toggleBold());
             }}
             title={ctx.locale.toolbar.bold}
@@ -356,7 +361,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Italic:
+    }
+    case BuiltinToolbarItemKey.Italic: {
+      const isItalicDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "italic");
       return {
         key: item.key,
         group,
@@ -366,10 +375,10 @@ export function renderToolbarItem(
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState && ctx.editor.isActive("italic") && "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isItalicDisabled && "is-disabled",
             )}
             onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
+              if (isItalicDisabled) return;
               ctx.runToolbarAction(() => ctx.actionContext.format.toggleItalic());
             }}
             title={ctx.locale.toolbar.italic}
@@ -378,7 +387,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Underline:
+    }
+    case BuiltinToolbarItemKey.Underline: {
+      const isUnderlineDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "underline");
       return {
         key: item.key,
         group,
@@ -390,10 +403,10 @@ export function renderToolbarItem(
               ctx.showActiveState &&
                 ctx.editor.isActive("underline") &&
                 "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isUnderlineDisabled && "is-disabled",
             )}
             onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
+              if (isUnderlineDisabled) return;
               ctx.runToolbarAction(() => ctx.actionContext.format.toggleUnderline());
             }}
             title={ctx.locale.toolbar.underline}
@@ -402,7 +415,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Strikethrough:
+    }
+    case BuiltinToolbarItemKey.Strikethrough: {
+      const isStrikethroughDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "strikethrough");
       return {
         key: item.key,
         group,
@@ -412,10 +429,10 @@ export function renderToolbarItem(
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState && ctx.editor.isActive("strike") && "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isStrikethroughDisabled && "is-disabled",
             )}
             onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
+              if (isStrikethroughDisabled) return;
               ctx.runToolbarAction(() => ctx.actionContext.format.toggleStrike());
             }}
             title={ctx.locale.toolbar.strikethrough}
@@ -424,7 +441,8 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.InlineCode:
+    }
+    case BuiltinToolbarItemKey.InlineCode: {
       return {
         key: item.key,
         group,
@@ -446,7 +464,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Link:
+    }
+    case BuiltinToolbarItemKey.Link: {
+      const isLinkDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "link");
       return {
         key: item.key,
         group,
@@ -456,7 +478,7 @@ export function renderToolbarItem(
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState && ctx.editor.isActive("link") && "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isLinkDisabled && "is-disabled",
             )}
             title={ctx.locale.toolbar.link}
           >
@@ -464,6 +486,7 @@ export function renderToolbarItem(
           </button>
         ),
       };
+    }
     case BuiltinToolbarItemKey.Video:
       return {
         key: item.key,
@@ -488,7 +511,10 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Highlight:
+    case BuiltinToolbarItemKey.Highlight: {
+      const isHighlightDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "highlight");
       return {
         key: item.key,
         group,
@@ -498,7 +524,7 @@ export function renderToolbarItem(
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState && ctx.editor.isActive("highlight") && "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isHighlightDisabled && "is-disabled",
             )}
             title={ctx.locale.toolbar.highlight}
           >
@@ -506,7 +532,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.TextColor:
+    }
+    case BuiltinToolbarItemKey.TextColor: {
+      const isTextColorDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "textColor");
       return {
         key: item.key,
         group,
@@ -518,7 +548,7 @@ export function renderToolbarItem(
               ctx.showActiveState &&
                 !!ctx.editor.getAttributes("textStyle").color &&
                 "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isTextColorDisabled && "is-disabled",
             )}
             title={ctx.locale.toolbar.textColor}
           >
@@ -526,7 +556,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Superscript:
+    }
+    case BuiltinToolbarItemKey.Superscript: {
+      const isSuperscriptDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "superscript");
       return {
         key: item.key,
         group,
@@ -538,10 +572,10 @@ export function renderToolbarItem(
               ctx.showActiveState &&
                 ctx.editor.isActive("superscript") &&
                 "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isSuperscriptDisabled && "is-disabled",
             )}
             onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
+              if (isSuperscriptDisabled) return;
               ctx.runToolbarAction(() => ctx.actionContext.format.toggleSuperscript());
             }}
             title={ctx.locale.toolbar.superscript}
@@ -550,7 +584,11 @@ export function renderToolbarItem(
           </button>
         ),
       };
-    case BuiltinToolbarItemKey.Subscript:
+    }
+    case BuiltinToolbarItemKey.Subscript: {
+      const isSubscriptDisabled =
+        ctx.isToolbarLocked ||
+        isInlineCodeMarkControlDisabled(ctx.isInsideCode, "subscript");
       return {
         key: item.key,
         group,
@@ -560,10 +598,10 @@ export function renderToolbarItem(
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState && ctx.editor.isActive("subscript") && "is-active",
-              (ctx.isToolbarLocked || ctx.isInsideCode) && "is-disabled",
+              isSubscriptDisabled && "is-disabled",
             )}
             onClick={() => {
-              if (ctx.isToolbarLocked || ctx.isInsideCode) return;
+              if (isSubscriptDisabled) return;
               ctx.runToolbarAction(() => ctx.actionContext.format.toggleSubscript());
             }}
             title={ctx.locale.toolbar.subscript}
@@ -572,6 +610,7 @@ export function renderToolbarItem(
           </button>
         ),
       };
+    }
     case BuiltinToolbarItemKey.AlignLeft:
       return {
         key: item.key,

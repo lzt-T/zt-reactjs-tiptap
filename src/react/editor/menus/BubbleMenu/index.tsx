@@ -25,6 +25,7 @@ import {
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
+import { isInlineCodeMarkControlDisabled } from "@/react/editor/toolbar/shared/markDisableRules";
 import {
   Popover,
   PopoverContent,
@@ -70,6 +71,39 @@ const BubbleMenu = ({
   const [linkDraft, setLinkDraft] = useState("");
 
   const { format, block } = useEditorCommands(editor, {});
+  /** 当前选区是否在 inline code（code mark）内。 */
+  const isInsideCode = editor.isActive("code");
+  /** inline code 下禁用的气泡菜单按钮状态。 */
+  const isBoldDisabled = isInlineCodeMarkControlDisabled(isInsideCode, "bold");
+  const isItalicDisabled = isInlineCodeMarkControlDisabled(
+    isInsideCode,
+    "italic",
+  );
+  const isUnderlineDisabled = isInlineCodeMarkControlDisabled(
+    isInsideCode,
+    "underline",
+  );
+  const isStrikethroughDisabled = isInlineCodeMarkControlDisabled(
+    isInsideCode,
+    "strikethrough",
+  );
+  const isLinkDisabled = isInlineCodeMarkControlDisabled(isInsideCode, "link");
+  const isHighlightDisabled = isInlineCodeMarkControlDisabled(
+    isInsideCode,
+    "highlight",
+  );
+  const isTextColorDisabled = isInlineCodeMarkControlDisabled(
+    isInsideCode,
+    "textColor",
+  );
+  const isSuperscriptDisabled = isInlineCodeMarkControlDisabled(
+    isInsideCode,
+    "superscript",
+  );
+  const isSubscriptDisabled = isInlineCodeMarkControlDisabled(
+    isInsideCode,
+    "subscript",
+  );
   // 减少缩进按钮是否不可用。
   const isDecreaseIndentDisabled = !block.canDecreaseIndent();
   // 增加缩进按钮是否不可用。
@@ -213,46 +247,74 @@ const BubbleMenu = ({
         }}
       >
         <button
-          onClick={() => format.toggleBold()}
+          onClick={() => {
+            if (isBoldDisabled) return;
+            format.toggleBold();
+          }}
           className={
-            editor.isActive("bold")
+            editor.isActive("bold") && !isBoldDisabled
               ? "bubble-menu-btn is-active"
-              : "bubble-menu-btn"
+              : isBoldDisabled
+                ? "bubble-menu-btn is-disabled"
+                : "bubble-menu-btn"
           }
           title={locale.bubbleMenu.bold}
+          disabled={isBoldDisabled}
+          aria-disabled={isBoldDisabled}
         >
           <Bold size={16} />
         </button>
         <button
-          onClick={() => format.toggleItalic()}
+          onClick={() => {
+            if (isItalicDisabled) return;
+            format.toggleItalic();
+          }}
           className={
-            editor.isActive("italic")
+            editor.isActive("italic") && !isItalicDisabled
               ? "bubble-menu-btn is-active"
-              : "bubble-menu-btn"
+              : isItalicDisabled
+                ? "bubble-menu-btn is-disabled"
+                : "bubble-menu-btn"
           }
           title={locale.bubbleMenu.italic}
+          disabled={isItalicDisabled}
+          aria-disabled={isItalicDisabled}
         >
           <Italic size={16} />
         </button>
         <button
-          onClick={() => format.toggleUnderline()}
+          onClick={() => {
+            if (isUnderlineDisabled) return;
+            format.toggleUnderline();
+          }}
           className={
-            editor.isActive("underline")
+            editor.isActive("underline") && !isUnderlineDisabled
               ? "bubble-menu-btn is-active"
-              : "bubble-menu-btn"
+              : isUnderlineDisabled
+                ? "bubble-menu-btn is-disabled"
+                : "bubble-menu-btn"
           }
           title={locale.bubbleMenu.underline}
+          disabled={isUnderlineDisabled}
+          aria-disabled={isUnderlineDisabled}
         >
           <Underline size={16} />
         </button>
         <button
-          onClick={() => format.toggleStrike()}
+          onClick={() => {
+            if (isStrikethroughDisabled) return;
+            format.toggleStrike();
+          }}
           className={
-            editor.isActive("strike")
+            editor.isActive("strike") && !isStrikethroughDisabled
               ? "bubble-menu-btn is-active"
-              : "bubble-menu-btn"
+              : isStrikethroughDisabled
+                ? "bubble-menu-btn is-disabled"
+                : "bubble-menu-btn"
           }
           title={locale.bubbleMenu.strikethrough}
+          disabled={isStrikethroughDisabled}
+          aria-disabled={isStrikethroughDisabled}
         >
           <Strikethrough size={16} />
         </button>
@@ -271,6 +333,7 @@ const BubbleMenu = ({
           open={showLinkEditor}
           onOpenChange={(open) => {
             if (open) {
+              if (isLinkDisabled) return;
               openLinkEditor();
               return;
             }
@@ -280,11 +343,15 @@ const BubbleMenu = ({
           <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
             <button
               className={
-                editor.isActive("link")
+                editor.isActive("link") && !isLinkDisabled
                   ? "bubble-menu-btn is-active"
-                  : "bubble-menu-btn"
+                  : isLinkDisabled
+                    ? "bubble-menu-btn is-disabled"
+                    : "bubble-menu-btn"
               }
               title={locale.bubbleMenu.link}
+              disabled={isLinkDisabled}
+              aria-disabled={isLinkDisabled}
             >
               <LinkIcon size={16} />
             </button>
@@ -317,6 +384,7 @@ const BubbleMenu = ({
           options={highlightColorOptions}
           selectedColor={editor.getAttributes("highlight").color}
           active={editor.isActive("highlight")}
+          disabled={isHighlightDisabled}
           open={showColorPicker === "highlight"}
           onOpenChange={handleHighlightColorPickerOpenChange}
           onColorSelect={onHighlightColorSelect}
@@ -333,6 +401,7 @@ const BubbleMenu = ({
           options={textColorOptions}
           selectedColor={editor.getAttributes("textStyle").color}
           active={!!editor.getAttributes("textStyle").color}
+          disabled={isTextColorDisabled}
           open={showColorPicker === "text"}
           onOpenChange={handleTextColorPickerOpenChange}
           onColorSelect={onTextColorSelect}
@@ -375,29 +444,39 @@ const BubbleMenu = ({
             <div className="more-menu">
               <button
                 onClick={() => {
+                  if (isSuperscriptDisabled) return;
                   format.toggleSuperscript();
                   setShowMoreMenu(false);
                 }}
                 className={
-                  editor.isActive("superscript")
+                  editor.isActive("superscript") && !isSuperscriptDisabled
                     ? "bubble-menu-btn is-active"
-                    : "bubble-menu-btn"
+                    : isSuperscriptDisabled
+                      ? "bubble-menu-btn is-disabled"
+                      : "bubble-menu-btn"
                 }
                 title={locale.bubbleMenu.superscript}
+                disabled={isSuperscriptDisabled}
+                aria-disabled={isSuperscriptDisabled}
               >
                 <Superscript size={16} />
               </button>
               <button
                 onClick={() => {
+                  if (isSubscriptDisabled) return;
                   format.toggleSubscript();
                   setShowMoreMenu(false);
                 }}
                 className={
-                  editor.isActive("subscript")
+                  editor.isActive("subscript") && !isSubscriptDisabled
                     ? "bubble-menu-btn is-active"
-                    : "bubble-menu-btn"
+                    : isSubscriptDisabled
+                      ? "bubble-menu-btn is-disabled"
+                      : "bubble-menu-btn"
                 }
                 title={locale.bubbleMenu.subscript}
+                disabled={isSubscriptDisabled}
+                aria-disabled={isSubscriptDisabled}
               >
                 <Subscript size={16} />
               </button>
