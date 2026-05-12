@@ -34,6 +34,11 @@ interface FileAttachmentChain {
   };
 }
 
+interface CommandItemDispatcher {
+  enabled: boolean;
+  run: () => void;
+}
+
 /** 向编辑器中插入附件节点，使用类型收窄避免 any。 */
 function runInsertFileAttachment(
   editor: Editor,
@@ -224,21 +229,44 @@ export function useEditorCommands(
             editor.chain().focus().insertBlockMath({ latex }).run();
           }
         });
-      } else if (item.imageUpload && onOpenImageDialog) {
-        onOpenImageDialog((src, alt) => {
-          editor.chain().focus().setImage({ src, alt }).run();
-        });
-      } else if (item.videoUpload && onOpenVideoDialog) {
-        onOpenVideoDialog((src, title) => {
-          editor.chain().focus().setVideo({ src, title }).run();
-        });
-      } else if (item.fileAttachment && onOpenFileUploadDialog) {
-        onOpenFileUploadDialog((url, name) => {
-          runInsertFileAttachment(editor, { url, name });
-        });
-      } else {
-        item.command({ editor });
+        return;
       }
+
+      /** 斜杠命令的上传类动作分发表：命中第一个可用动作即执行。 */
+      const dispatchers: CommandItemDispatcher[] = [
+        {
+          enabled: Boolean(item.imageUpload && onOpenImageDialog),
+          run: () => {
+            onOpenImageDialog?.((src, alt) => {
+              editor.chain().focus().setImage({ src, alt }).run();
+            });
+          },
+        },
+        {
+          enabled: Boolean(item.videoUpload && onOpenVideoDialog),
+          run: () => {
+            onOpenVideoDialog?.((src, title) => {
+              editor.chain().focus().setVideo({ src, title }).run();
+            });
+          },
+        },
+        {
+          enabled: Boolean(item.fileAttachment && onOpenFileUploadDialog),
+          run: () => {
+            onOpenFileUploadDialog?.((url, name) => {
+              runInsertFileAttachment(editor, { url, name });
+            });
+          },
+        },
+      ];
+
+      const matchedDispatcher = dispatchers.find((dispatcher) => dispatcher.enabled);
+      if (matchedDispatcher) {
+        matchedDispatcher.run();
+        return;
+      }
+
+      item.command({ editor });
     },
     [editor, onOpenMathDialog, onOpenImageDialog, onOpenVideoDialog, onOpenFileUploadDialog]
   );

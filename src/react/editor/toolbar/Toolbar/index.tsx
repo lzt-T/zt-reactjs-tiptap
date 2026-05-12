@@ -4,6 +4,7 @@ import {
   useMemo,
   useState,
   useCallback,
+  type ReactNode,
   type MouseEvent,
 } from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
@@ -360,9 +361,11 @@ const Toolbar = ({
     .map((item) => renderToolbarItem(item, renderContext))
     .filter((item): item is RenderedToolbarItem => item !== null);
 
-  const renderItemElement = (item: RenderedToolbarItem) => {
-    if (item.key === BuiltinToolbarItemKey.Highlight) {
-      return (
+  type ToolbarItemRenderer = (item: RenderedToolbarItem) => ReactNode;
+
+  /** 特殊工具栏项渲染分发表：仅覆盖需要弹层/特殊交互的内建按钮。 */
+  const toolbarItemRenderers: Partial<Record<BuiltinToolbarItemKey, ToolbarItemRenderer>> = {
+    [BuiltinToolbarItemKey.Highlight]: () => (
         <ColorPopoverPicker
           icon={<Highlighter size={16} />}
           title={locale.toolbar.highlight}
@@ -379,11 +382,8 @@ const Toolbar = ({
           popoverClassName="editor-toolbar-popover-panel"
           triggerClassName="editor-toolbar-btn"
         />
-      );
-    }
-
-    if (item.key === BuiltinToolbarItemKey.TextColor) {
-      return (
+    ),
+    [BuiltinToolbarItemKey.TextColor]: () => (
         <ColorPopoverPicker
           icon={<Palette size={16} />}
           title={locale.toolbar.textColor}
@@ -400,11 +400,8 @@ const Toolbar = ({
           popoverClassName="editor-toolbar-popover-panel"
           triggerClassName="editor-toolbar-btn"
         />
-      );
-    }
-
-    if (item.key === BuiltinToolbarItemKey.Heading) {
-      return (
+    ),
+    [BuiltinToolbarItemKey.Heading]: (item) => (
         <Popover
           open={showHeadingMenu}
           onOpenChange={(open) => {
@@ -450,11 +447,8 @@ const Toolbar = ({
             ))}
           </PopoverContent>
         </Popover>
-      );
-    }
-
-    if (item.key === BuiltinToolbarItemKey.InsertTable) {
-      return (
+    ),
+    [BuiltinToolbarItemKey.InsertTable]: (item) => (
         <Popover
           open={showTableSizePicker}
           onOpenChange={(open) => {
@@ -491,11 +485,8 @@ const Toolbar = ({
             />
           </PopoverContent>
         </Popover>
-      );
-    }
-
-    if (item.key === BuiltinToolbarItemKey.Link) {
-      return (
+    ),
+    [BuiltinToolbarItemKey.Link]: (item) => (
         <Popover
           open={showLinkEditor}
           onOpenChange={(open) => {
@@ -529,8 +520,12 @@ const Toolbar = ({
             />
           </PopoverContent>
         </Popover>
-      );
-    }
+    ),
+  };
+
+  const renderItemElement = (item: RenderedToolbarItem) => {
+    const renderer = toolbarItemRenderers[item.key as BuiltinToolbarItemKey];
+    if (renderer) return renderer(item);
 
     return item.element;
   };
