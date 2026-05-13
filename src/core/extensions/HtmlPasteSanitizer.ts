@@ -1,5 +1,6 @@
 import { Extension } from "@tiptap/core";
 import { Plugin } from "@tiptap/pm/state";
+import DOMPurify from "dompurify";
 
 type PasteErrorEvent = {
   source: "paste";
@@ -32,6 +33,9 @@ const BLOCKED_TAGS = new Set([
   "audio",
 ]);
 
+// 传给 DOMPurify 的黑名单标签列表。
+const FORBID_TAGS = Array.from(BLOCKED_TAGS);
+
 // 过滤 Office 污染 class（如 Mso*），保留其他 class。
 function sanitizeClassName(value: string): string {
   return value
@@ -52,8 +56,8 @@ function unwrapNode(element: Element) {
   parent.removeChild(element);
 }
 
-// 清洗 DOM 节点属性与无效包裹元素。
-function sanitizeElement(root: Element) {
+// 后处理 DOM 节点属性与无效包裹元素，保持与历史行为一致。
+function sanitizePostProcess(root: Element) {
   const elements = Array.from(root.querySelectorAll("*"));
 
   elements.forEach((element) => {
@@ -95,9 +99,14 @@ function sanitizeElement(root: Element) {
 
 // 将 HTML 字符串转换为安全且更干净的 HTML。
 function sanitizeHtml(html: string): string {
+  const purifiedHtml = DOMPurify.sanitize(html, {
+    FORBID_TAGS,
+    FORBID_ATTR: ["style"],
+  });
+
   const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  sanitizeElement(doc.body);
+  const doc = parser.parseFromString(purifiedHtml, "text/html");
+  sanitizePostProcess(doc.body);
   return doc.body.innerHTML.replace(/\u00a0/g, " ").trim();
 }
 
