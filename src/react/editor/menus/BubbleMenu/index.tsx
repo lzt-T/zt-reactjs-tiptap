@@ -1,7 +1,11 @@
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
-import { NodeSelection } from "@tiptap/pm/state";
-import { useEffect, useState, type MouseEvent } from "react";
+import {
+  NodeSelection,
+  type EditorState,
+  type Transaction,
+} from "@tiptap/pm/state";
+import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { config, type ColorOption } from "@/shared/config";
 import {
   Bold,
@@ -79,19 +83,30 @@ const BubbleMenu = ({
   /** 链接输入框草稿值。 */
   const [linkDraft, setLinkDraft] = useState("");
 
+  /** 刷新选区版本，驱动按钮激活态按最新 editor state 重算。 */
+  const refreshSelectionKey = useCallback(() => {
+    setSelectionKey((key) => key + 1);
+  }, []);
+
   useEffect(() => {
     /** 选区或事务变化后触发一次重渲染，避免按钮激活态偶发滞后。 */
-    const onSelectionUpdate = () => {
-      setSelectionKey((key) => key + 1);
+    const onSelectionUpdate = refreshSelectionKey;
+    /** 仅在文档或选区真实变化时刷新，避免 BubbleMenu updateOptions 自激循环。 */
+    const onTransaction = ({ transaction }: { transaction: Transaction }) => {
+      // BubbleMenu 插件自身的配置更新事务。
+      const bubbleMenuMeta = transaction.getMeta("bubbleMenu");
+      if (bubbleMenuMeta?.type === "updateOptions") return;
+      if (!transaction.docChanged && !transaction.selectionSet) return;
+      refreshSelectionKey();
     };
 
     editor.on("selectionUpdate", onSelectionUpdate);
-    editor.on("transaction", onSelectionUpdate);
+    editor.on("transaction", onTransaction);
     return () => {
       editor.off("selectionUpdate", onSelectionUpdate);
-      editor.off("transaction", onSelectionUpdate);
+      editor.off("transaction", onTransaction);
     };
-  }, [editor]);
+  }, [editor, refreshSelectionKey]);
 
   const { format, block } = useEditorCommands(editor, {});
   /** 当前选区是否在 inline code（code mark）内。 */
@@ -207,6 +222,23 @@ const BubbleMenu = ({
     handleLinkEditorOpenChange(false);
   };
 
+  /** 判断 BubbleMenu 是否展示，保持函数引用稳定以避免 TipTap 重复派发 updateOptions。 */
+  const shouldShowBubbleMenu = useCallback(
+    ({ state }: { state: EditorState }) => {
+      // 颜色 Popover 打开时保活锚点，关闭后立即回到选区驱动显示逻辑。
+      if (showColorPicker !== null || showLinkEditor) return true;
+      const { selection } = state;
+      // NodeSelection（图片、公式、整个表格节点等）不显示
+      if (selection instanceof NodeSelection) return false;
+      // CellSelection（表格多单元格选中）不显示，$anchorCell 是 CellSelection 的专有属性
+      if ("$anchorCell" in selection) return false;
+      // 代码块内不显示气泡菜单（NotionLike 模式下避免与代码语言菜单重叠）
+      if (editor.isActive("codeBlock")) return false;
+      return !selection.empty;
+    },
+    [editor, showColorPicker, showLinkEditor],
+  );
+
   if (!editor) {
     return null;
   }
@@ -224,18 +256,7 @@ const BubbleMenu = ({
         editor={editor}
         className="bubble-menu"
         onMouseDown={handleBubbleMenuMouseDown}
-        shouldShow={({ state }) => {
-          // 颜色 Popover 打开时保活锚点，关闭后立即回到选区驱动显示逻辑。
-          if (showColorPicker !== null || showLinkEditor) return true;
-          const { selection } = state;
-          // NodeSelection（图片、公式、整个表格节点等）不显示
-          if (selection instanceof NodeSelection) return false;
-          // CellSelection（表格多单元格选中）不显示，$anchorCell 是 CellSelection 的专有属性
-          if ("$anchorCell" in selection) return false;
-          // 代码块内不显示气泡菜单（NotionLike 模式下避免与代码语言菜单重叠）
-          if (editor.isActive("codeBlock")) return false;
-          return !selection.empty;
-        }}
+        shouldShow={shouldShowBubbleMenu}
       >
         <button
           onClick={() => {
