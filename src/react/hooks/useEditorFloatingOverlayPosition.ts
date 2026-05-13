@@ -5,6 +5,10 @@ import {
   type RefCallback,
 } from "react";
 import { MenuPlacement } from "@/react/editor/types";
+import {
+  subscribeGlobalResize,
+  subscribeGlobalScroll,
+} from "@/shared/utils/subscribeGlobalViewport";
 
 /** 编辑器浮层可使用的锚点。 */
 export type EditorFloatingOverlayAnchor = DOMRect | HTMLElement;
@@ -420,18 +424,16 @@ export function useEditorFloatingOverlayPosition({
     /** 请求浮层重定位。 */
     const handleReposition = () => scheduler.schedule();
 
-    window.addEventListener("resize", handleReposition);
-    document.addEventListener("scroll", handleReposition, {
-      capture: true,
-      passive: true,
-    });
+    // 分别订阅全局 scroll 与 resize。
+    const unsubscribeGlobalScroll = subscribeGlobalScroll(handleReposition);
+    const unsubscribeGlobalResize = subscribeGlobalResize(handleReposition);
     wrapper.addEventListener("scroll", handleReposition, { passive: true });
     scheduler.schedule();
 
     return () => {
       scheduler.cancel();
-      window.removeEventListener("resize", handleReposition);
-      document.removeEventListener("scroll", handleReposition, true);
+      unsubscribeGlobalScroll();
+      unsubscribeGlobalResize();
       wrapper.removeEventListener("scroll", handleReposition);
     };
   }, [context, enabled, updatePosition]);

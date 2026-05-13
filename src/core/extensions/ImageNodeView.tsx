@@ -4,6 +4,7 @@ import { AlignCenter, AlignLeft, AlignRight, Captions, ImageOff, Trash2 } from "
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
 import type { EditorLocale } from "@/shared/locales";
+import { subscribeGlobalResize } from "@/shared/utils/subscribeGlobalViewport";
 import { ImageCaptionInput } from "./ImageCaptionInput";
 import type { ImageAlign, ImageAttrs } from "./imageAttributes";
 import {
@@ -117,11 +118,13 @@ export function ImageNodeView({
     // 编辑器滚动容器。
     const editorWrapper = wrapperRef.current?.closest(".editor-wrapper");
     editorWrapper?.addEventListener("scroll", updateAlignMenuPlacement);
-    window.addEventListener("resize", updateAlignMenuPlacement);
+    // 仅订阅全局 resize，scroll 保持容器级监听。
+    const unsubscribeGlobalResize =
+      subscribeGlobalResize(updateAlignMenuPlacement);
 
     return () => {
       editorWrapper?.removeEventListener("scroll", updateAlignMenuPlacement);
-      window.removeEventListener("resize", updateAlignMenuPlacement);
+      unsubscribeGlobalResize();
     };
   }, [selected]);
 
