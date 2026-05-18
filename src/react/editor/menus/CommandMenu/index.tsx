@@ -142,6 +142,14 @@ const CommandMenu = ({
             const commandItems = group.items.map(({ item, index }) => {
               // 当前命令图标。
               const Icon = item.icon;
+              // 当前命令文本图标。
+              const iconLabel = item.iconLabel;
+              // 文本图标对应的标题样式标记。
+              const headingStyle = iconLabel
+                ? iconLabel.toLowerCase() === "p"
+                  ? "paragraph"
+                  : iconLabel.toLowerCase()
+                : undefined;
               // 最终禁用状态由 TipTap Suggestion 层统一计算。
               const disabled = !!item.disabled;
               return (
@@ -150,6 +158,7 @@ const CommandMenu = ({
                   ref={index === selectedIndex ? selectedRef : null}
                   value={item.title}
                   disabled={disabled}
+                  data-heading-style={headingStyle}
                   onSelect={() => {
                     if (disabled) return;
                     command(item);
@@ -159,7 +168,10 @@ const CommandMenu = ({
                   )}
                 >
                   {Icon && <Icon className="mr-1 h-4 w-4" />}
-                  {item.title}
+                  {!Icon && iconLabel && (
+                    <span className="command-menu-text-icon">{iconLabel}</span>
+                  )}
+                  <span className="command-menu-item-title">{item.title}</span>
                 </CommandItem>
               );
             });

@@ -91,7 +91,9 @@ export function renderToolbarItem(
             className={cn(
               "editor-toolbar-btn",
               ctx.showActiveState &&
-                (ctx.showHeadingMenu || ctx.currentHeadingLevel !== null) &&
+                (ctx.showHeadingMenu ||
+                  ctx.currentHeadingLevel !== null ||
+                  ctx.editor.isActive("paragraph")) &&
                 "is-active",
               ctx.isToolbarLocked && "is-disabled",
             )}

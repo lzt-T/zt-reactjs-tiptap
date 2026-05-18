@@ -3,6 +3,7 @@ import type { AnyExtension } from "@tiptap/core";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { EditorLocale } from "@/shared/locales";
+import type { HeadingLevel } from "@/core/commands/editorCommands";
 import { BuiltinSlashCommandKey as CoreBuiltinSlashCommandKeyValue } from "@/core/extensions/SlashCommands";
 import type { BuiltinSlashCommandKey as CoreBuiltinSlashCommandKey } from "@/core/extensions/SlashCommands";
 
@@ -69,8 +70,9 @@ export interface EditorActionContext {
     unsetHighlight: () => void;
   };
   block: {
-    setHeading: (level: 1 | 2 | 3) => void;
-    toggleHeading: (level: 1 | 2 | 3) => void;
+    setHeading: (level: HeadingLevel) => void;
+    setParagraph: () => void;
+    toggleHeading: (level: HeadingLevel) => void;
     toggleCodeBlock: () => void;
     toggleBlockquote: () => void;
     setCodeBlockLanguage: (language: string) => void;
@@ -178,9 +180,13 @@ export function createDefaultToolbarItems(locale: EditorLocale): ToolbarItemConf
 export function createDefaultSlashCommands(locale: EditorLocale): SlashCommandConfig[] {
   void locale;
   return [
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Paragraph, group: "heading" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading1, group: "heading" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading2, group: "heading" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading3, group: "heading" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading4, group: "heading" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading5, group: "heading" },
+    { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.Heading6, group: "heading" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.BulletList, group: "list" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.NumberedList, group: "list" },
     { type: "builtin", key: CoreBuiltinSlashCommandKeyValue.TaskList, group: "list" },

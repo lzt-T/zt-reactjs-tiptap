@@ -6,9 +6,13 @@ const enUS: EditorLocale = {
     headless: 'Start typing...',
   },
   slashCommands: {
+    paragraph: { title: 'Paragraph', description: 'Plain text' },
     heading1: { title: 'Heading 1', description: 'Large heading' },
     heading2: { title: 'Heading 2', description: 'Medium heading' },
     heading3: { title: 'Heading 3', description: 'Small heading' },
+    heading4: { title: 'Heading 4', description: 'Fourth-level heading' },
+    heading5: { title: 'Heading 5', description: 'Fifth-level heading' },
+    heading6: { title: 'Heading 6', description: 'Sixth-level heading' },
     bulletList: { title: 'Bullet List', description: 'Bullet list' },
     numberedList: { title: 'Numbered List', description: 'Numbered list' },
     taskList: { title: 'Task List', description: 'Todo list with checkboxes' },
@@ -65,6 +69,7 @@ const enUS: EditorLocale = {
     justify: 'Justify',
     decreaseIndent: 'Decrease indent',
     increaseIndent: 'Increase indent',
+    paragraph: 'Paragraph',
     headingLevel: (level) => `Heading ${level}`,
   },
   bubbleMenu: {

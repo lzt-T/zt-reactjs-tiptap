@@ -6,9 +6,13 @@ const zhCN: EditorLocale = {
     headless: '开始输入...',
   },
   slashCommands: {
+    paragraph: { title: '段落', description: '普通文本' },
     heading1: { title: '标题 1', description: '大标题' },
     heading2: { title: '标题 2', description: '中标题' },
     heading3: { title: '标题 3', description: '小标题' },
+    heading4: { title: '标题 4', description: '四级标题' },
+    heading5: { title: '标题 5', description: '五级标题' },
+    heading6: { title: '标题 6', description: '六级标题' },
     bulletList: { title: '无序列表', description: '创建无序列表' },
     numberedList: { title: '有序列表', description: '创建有序列表' },
     taskList: { title: '任务列表', description: '带勾选框的待办列表' },
@@ -62,6 +66,7 @@ const zhCN: EditorLocale = {
     justify: '两端对齐',
     decreaseIndent: '减少缩进',
     increaseIndent: '增加缩进',
+    paragraph: '段落',
     headingLevel: (level) => `标题 ${level}`,
   },
   bubbleMenu: {

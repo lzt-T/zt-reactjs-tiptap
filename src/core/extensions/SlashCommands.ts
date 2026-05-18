@@ -3,6 +3,7 @@ import Suggestion from '@tiptap/suggestion'
 import type { SuggestionProps } from '@tiptap/suggestion'
 import type { Editor } from '@tiptap/react'
 import {
+  setParagraph,
   setHeading,
   toggleBulletList,
   toggleOrderedList,
@@ -13,9 +14,6 @@ import {
   insertTable,
 } from '@/core/commands/editorCommands'
 import {
-  Heading1,
-  Heading2,
-  Heading3,
   List,
   ListOrdered,
   ListTodo,
@@ -33,15 +31,24 @@ import {
 import type { EditorLocale } from '@/shared/locales'
 import { DEFAULT_CODE_BLOCK_LANGUAGE } from "@/shared/config";
 import { resolveCodeBlockLanguage } from "./codeBlockLowlight";
+import type { HeadingLevel } from "@/core/commands/editorCommands";
 
 // 斜杠命令内置项 Key。
 export const BuiltinSlashCommandKey = {
+  // 普通段落。
+  Paragraph: "paragraph",
   // 一级标题。
   Heading1: "heading1",
   // 二级标题。
   Heading2: "heading2",
   // 三级标题。
   Heading3: "heading3",
+  // 四级标题。
+  Heading4: "heading4",
+  // 五级标题。
+  Heading5: "heading5",
+  // 六级标题。
+  Heading6: "heading6",
   // 无序列表。
   BulletList: "bulletList",
   // 有序列表。
@@ -82,6 +89,8 @@ export interface CommandItem {
   /** 菜单分组，用于渲染分类标题。 */
   group?: string
   icon?: LucideIcon
+  /** 文本型图标，用于标题等无对应统一 SVG 的命令。 */
+  iconLabel?: string
   command: ({ editor }: { editor: Editor }) => void
   mathType?: 'inline' | 'block'
   imageUpload?: boolean
@@ -109,6 +118,20 @@ export interface SlashCommandsOptions {
   commands: CommandItem[]
 }
 
+// 标题命令级别配置。
+const HEADING_COMMANDS: Array<{
+  level: HeadingLevel;
+  key: SlashCommandKey;
+  iconLabel: string;
+}> = [
+  { level: 1, key: SlashCommandKey.Heading1, iconLabel: "H1" },
+  { level: 2, key: SlashCommandKey.Heading2, iconLabel: "H2" },
+  { level: 3, key: SlashCommandKey.Heading3, iconLabel: "H3" },
+  { level: 4, key: SlashCommandKey.Heading4, iconLabel: "H4" },
+  { level: 5, key: SlashCommandKey.Heading5, iconLabel: "H5" },
+  { level: 6, key: SlashCommandKey.Heading6, iconLabel: "H6" },
+];
+
 function findFirstEnabledIndex(items: CommandItem[]): number {
   const i = items.findIndex((item) => !item.disabled)
   return i >= 0 ? i : 0
@@ -121,26 +144,23 @@ export function createDefaultCommands(
 ): CommandItem[] {
   return [
     {
-      key: SlashCommandKey.Heading1,
-      title: locale.slashCommands.heading1.title,
-      description: locale.slashCommands.heading1.description,
-      icon: Heading1,
-      command: ({ editor }) => setHeading(editor, 1),
+      key: SlashCommandKey.Paragraph,
+      title: locale.slashCommands.paragraph.title,
+      description: locale.slashCommands.paragraph.description,
+      iconLabel: "P",
+      command: ({ editor }) => setParagraph(editor),
     },
-    {
-      key: SlashCommandKey.Heading2,
-      title: locale.slashCommands.heading2.title,
-      description: locale.slashCommands.heading2.description,
-      icon: Heading2,
-      command: ({ editor }) => setHeading(editor, 2),
-    },
-    {
-      key: SlashCommandKey.Heading3,
-      title: locale.slashCommands.heading3.title,
-      description: locale.slashCommands.heading3.description,
-      icon: Heading3,
-      command: ({ editor }) => setHeading(editor, 3),
-    },
+    ...HEADING_COMMANDS.map<CommandItem>(({ level, key, iconLabel }) => {
+      // 当前标题级别对应的语言包字段名。
+      const localeKey = `heading${level}` as const;
+      return {
+        key,
+        title: locale.slashCommands[localeKey].title,
+        description: locale.slashCommands[localeKey].description,
+        iconLabel,
+        command: ({ editor }) => setHeading(editor, level),
+      };
+    }),
     {
       key: SlashCommandKey.BulletList,
       title: locale.slashCommands.bulletList.title,

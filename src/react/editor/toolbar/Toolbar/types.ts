@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import type { ReactElement } from "react";
+import type { HeadingLevel } from "@/core/commands/editorCommands";
 import type { ColorOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import type {
@@ -59,7 +60,7 @@ export interface ToolbarRenderContext {
   isInsideTable: boolean;
   isFocusNodeOnly: boolean;
   isInsideCodeBlock: boolean;
-  currentHeadingLevel: 1 | 2 | 3 | null;
+  currentHeadingLevel: HeadingLevel | null;
   showHeadingMenu: boolean;
   showColorPicker: "text" | "highlight" | null;
   canUseMathDialog: boolean;

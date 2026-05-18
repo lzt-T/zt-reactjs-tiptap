@@ -2,6 +2,7 @@ import type { Editor } from "@tiptap/react";
 import { resolveCodeBlockLanguage } from "@/core/extensions/codeBlockLowlight";
 
 export type TextAlignValue = "left" | "center" | "right" | "justify";
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 export function toggleBold(editor: Editor): void {
   editor.chain().focus().toggleBold().run();
@@ -88,9 +89,14 @@ export function unsetHighlight(editor: Editor): void {
 
 export function setHeading(
   editor: Editor,
-  level: 1 | 2 | 3
+  level: HeadingLevel
 ): void {
   editor.chain().focus().setNode("heading", { level }).run();
+}
+
+/** 将当前块设置为普通段落。 */
+export function setParagraph(editor: Editor): void {
+  editor.chain().focus().setNode("paragraph").run();
 }
 
 /**
@@ -99,7 +105,7 @@ export function setHeading(
  */
 export function toggleHeading(
   editor: Editor,
-  level: 1 | 2 | 3
+  level: HeadingLevel
 ): void {
   if (editor.isActive("heading", { level })) {
     editor.chain().focus().setNode("paragraph").run();

@@ -125,6 +125,66 @@
   min-width: 1.5em;
 }
 
+.editor-toolbar-heading-label {
+  line-height: 1.2;
+}
+
+.editor-toolbar-heading-item[data-heading-style="paragraph"]
+  .editor-toolbar-heading-num,
+.editor-toolbar-heading-item[data-heading-style="paragraph"]
+  .editor-toolbar-heading-label {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.editor-toolbar-heading-item[data-heading-style="h1"]
+  .editor-toolbar-heading-num,
+.editor-toolbar-heading-item[data-heading-style="h1"]
+  .editor-toolbar-heading-label {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.editor-toolbar-heading-item[data-heading-style="h2"]
+  .editor-toolbar-heading-num,
+.editor-toolbar-heading-item[data-heading-style="h2"]
+  .editor-toolbar-heading-label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.editor-toolbar-heading-item[data-heading-style="h3"]
+  .editor-toolbar-heading-num,
+.editor-toolbar-heading-item[data-heading-style="h3"]
+  .editor-toolbar-heading-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.editor-toolbar-heading-item[data-heading-style="h4"]
+  .editor-toolbar-heading-num,
+.editor-toolbar-heading-item[data-heading-style="h4"]
+  .editor-toolbar-heading-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.editor-toolbar-heading-item[data-heading-style="h5"]
+  .editor-toolbar-heading-num,
+.editor-toolbar-heading-item[data-heading-style="h5"]
+  .editor-toolbar-heading-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.editor-toolbar-heading-item[data-heading-style="h6"]
+  .editor-toolbar-heading-num,
+.editor-toolbar-heading-item[data-heading-style="h6"]
+  .editor-toolbar-heading-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .editor-toolbar-popover-panel {
   width: auto;
   padding: 0;

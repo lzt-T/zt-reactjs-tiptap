@@ -10,6 +10,7 @@ import {
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
 import { Highlighter, Palette } from "lucide-react";
+import type { HeadingLevel } from "@/core/commands/editorCommands";
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
@@ -37,6 +38,9 @@ import type {
 } from "./types";
 import { useToolbarUIState } from "./hooks/useToolbarUIState";
 import "./Toolbar.css";
+
+// 工具栏可选标题级别。
+const HEADING_LEVELS: HeadingLevel[] = [1, 2, 3, 4, 5, 6];
 
 /** 判断 mousedown 事件是否来自允许交互的浮层内容。 */
 function isFromColorPopoverContent(target: EventTarget | null): boolean {
@@ -223,13 +227,8 @@ const Toolbar = ({
 
   const currentHeadingLevel = !isEditorFocused
     ? null
-    : editor.isActive("heading", { level: 1 })
-      ? 1
-      : editor.isActive("heading", { level: 2 })
-        ? 2
-        : editor.isActive("heading", { level: 3 })
-          ? 3
-          : null;
+    : HEADING_LEVELS.find((level) => editor.isActive("heading", { level })) ??
+      null;
 
   /** 失焦点击工具栏时，将命令锚点移动到文末，避免污染旧选区。 */
   const prepareEndAnchorWhenBlurred = () => {
@@ -290,7 +289,14 @@ const Toolbar = ({
     );
   };
 
-  const onHeadingSelect = (level: 1 | 2 | 3) => {
+  /** 工具栏段落项点击后恢复普通段落。 */
+  const onParagraphSelect = () => {
+    runToolbarAction(() => block.setParagraph());
+    setShowHeadingMenu(false);
+  };
+
+  /** 工具栏标题项点击后切换对应标题级别。 */
+  const onHeadingSelect = (level: HeadingLevel) => {
     runToolbarAction(() => block.toggleHeading(level));
     setShowHeadingMenu(false);
   };
@@ -423,7 +429,23 @@ const Toolbar = ({
             // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
-            {([1, 2, 3] as const).map((level) => (
+            <button
+              type="button"
+              className={`editor-toolbar-heading-item ${
+                showActiveState && editor.isActive("paragraph")
+                  ? "is-active"
+                  : ""
+              }`}
+              data-heading-style="paragraph"
+              onClick={onParagraphSelect}
+              title={locale.toolbar.paragraph}
+            >
+              <span className="editor-toolbar-heading-num">P</span>
+              <span className="editor-toolbar-heading-label">
+                {locale.toolbar.paragraph}
+              </span>
+            </button>
+            {HEADING_LEVELS.map((level) => (
               <button
                 key={level}
                 type="button"
@@ -432,13 +454,16 @@ const Toolbar = ({
                     ? "is-active"
                     : ""
                 }`}
+                data-heading-style={`h${level}`}
                 onClick={() => onHeadingSelect(level)}
                 title={locale.toolbar.headingLevel(level)}
               >
                 <span className="editor-toolbar-heading-num">
-                  H{["₁", "₂", "₃"][level - 1]}
+                  H{level}
                 </span>
-                <span>{locale.toolbar.headingLevel(level)}</span>
+                <span className="editor-toolbar-heading-label">
+                  {locale.toolbar.headingLevel(level)}
+                </span>
               </button>
             ))}
           </PopoverContent>

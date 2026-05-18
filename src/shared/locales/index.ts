@@ -17,9 +17,13 @@ export interface EditorLocale {
     headless: string;
   };
   slashCommands: {
+    paragraph: { title: string; description: string };
     heading1: { title: string; description: string };
     heading2: { title: string; description: string };
     heading3: { title: string; description: string };
+    heading4: { title: string; description: string };
+    heading5: { title: string; description: string };
+    heading6: { title: string; description: string };
     bulletList: { title: string; description: string };
     numberedList: { title: string; description: string };
     taskList: { title: string; description: string };
@@ -73,7 +77,8 @@ export interface EditorLocale {
     justify: string;
     decreaseIndent: string;
     increaseIndent: string;
-    headingLevel: (level: 1 | 2 | 3) => string;
+    paragraph: string;
+    headingLevel: (level: 1 | 2 | 3 | 4 | 5 | 6) => string;
   };
   bubbleMenu: {
     bold: string;

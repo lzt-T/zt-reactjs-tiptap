@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import type { Editor } from "@tiptap/react";
 import * as cmd from "@/core/commands/editorCommands";
 import type {
+  HeadingLevel,
   TextAlignValue,
   InsertTableOptions,
 } from "@/core/commands/editorCommands";
@@ -128,8 +129,9 @@ export function useEditorCommands(
     () =>
       !editor
         ? {
-            setHeading: noop as (level: 1 | 2 | 3) => void,
-            toggleHeading: noop as (level: 1 | 2 | 3) => void,
+            setHeading: noop as (level: HeadingLevel) => void,
+            setParagraph: noop,
+            toggleHeading: noop as (level: HeadingLevel) => void,
             toggleCodeBlock: noop,
             toggleBlockquote: noop,
             setCodeBlockLanguage: noopStr,
@@ -143,8 +145,9 @@ export function useEditorCommands(
             insertTable: noop as (options?: InsertTableOptions) => void,
           }
         : {
-            setHeading: (level: 1 | 2 | 3) => cmd.setHeading(editor, level),
-            toggleHeading: (level: 1 | 2 | 3) => cmd.toggleHeading(editor, level),
+            setHeading: (level: HeadingLevel) => cmd.setHeading(editor, level),
+            setParagraph: () => cmd.setParagraph(editor),
+            toggleHeading: (level: HeadingLevel) => cmd.toggleHeading(editor, level),
             toggleCodeBlock: () => cmd.toggleCodeBlock(editor),
             toggleBlockquote: () => cmd.toggleBlockquote(editor),
             setCodeBlockLanguage: (language: string) =>
