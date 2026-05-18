@@ -18,6 +18,12 @@ import {
   ListOrdered,
   ListTodo,
   Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
   MessageSquareQuote,
   SquareCode,
   Table,
@@ -26,6 +32,7 @@ import {
   Image,
   Video,
   FileUp,
+  Type as TextIcon,
   type LucideIcon,
 } from 'lucide-react'
 import type { EditorLocale } from '@/shared/locales'
@@ -122,14 +129,14 @@ export interface SlashCommandsOptions {
 const HEADING_COMMANDS: Array<{
   level: HeadingLevel;
   key: SlashCommandKey;
-  iconLabel: string;
+  icon: LucideIcon;
 }> = [
-  { level: 1, key: SlashCommandKey.Heading1, iconLabel: "H1" },
-  { level: 2, key: SlashCommandKey.Heading2, iconLabel: "H2" },
-  { level: 3, key: SlashCommandKey.Heading3, iconLabel: "H3" },
-  { level: 4, key: SlashCommandKey.Heading4, iconLabel: "H4" },
-  { level: 5, key: SlashCommandKey.Heading5, iconLabel: "H5" },
-  { level: 6, key: SlashCommandKey.Heading6, iconLabel: "H6" },
+  { level: 1, key: SlashCommandKey.Heading1, icon: Heading1 },
+  { level: 2, key: SlashCommandKey.Heading2, icon: Heading2 },
+  { level: 3, key: SlashCommandKey.Heading3, icon: Heading3 },
+  { level: 4, key: SlashCommandKey.Heading4, icon: Heading4 },
+  { level: 5, key: SlashCommandKey.Heading5, icon: Heading5 },
+  { level: 6, key: SlashCommandKey.Heading6, icon: Heading6 },
 ];
 
 function findFirstEnabledIndex(items: CommandItem[]): number {
@@ -147,17 +154,17 @@ export function createDefaultCommands(
       key: SlashCommandKey.Paragraph,
       title: locale.slashCommands.paragraph.title,
       description: locale.slashCommands.paragraph.description,
-      iconLabel: "P",
+      icon: TextIcon,
       command: ({ editor }) => setParagraph(editor),
     },
-    ...HEADING_COMMANDS.map<CommandItem>(({ level, key, iconLabel }) => {
+    ...HEADING_COMMANDS.map<CommandItem>(({ level, key, icon }) => {
       // 当前标题级别对应的语言包字段名。
       const localeKey = `heading${level}` as const;
       return {
         key,
         title: locale.slashCommands[localeKey].title,
         description: locale.slashCommands[localeKey].description,
-        iconLabel,
+        icon,
         command: ({ editor }) => setHeading(editor, level),
       };
     }),

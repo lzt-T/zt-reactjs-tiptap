@@ -81,6 +81,14 @@ export interface EditorLocale {
     headingLevel: (level: 1 | 2 | 3 | 4 | 5 | 6) => string;
   };
   bubbleMenu: {
+    turnInto: string;
+    paragraph: string;
+    headingLevel: (level: 1 | 2 | 3 | 4 | 5 | 6) => string;
+    bulletList: string;
+    orderedList: string;
+    taskList: string;
+    blockquote: string;
+    codeBlock: string;
     bold: string;
     italic: string;
     underline: string;

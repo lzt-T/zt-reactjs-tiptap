@@ -5,14 +5,27 @@ import {
   type EditorState,
   type Transaction,
 } from "@tiptap/pm/state";
-import { useCallback, useEffect, useState, type MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { config, type ColorOption } from "@/shared/config";
 import {
   Bold,
+  ChevronDown,
   Italic,
   Underline,
   Strikethrough,
   Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
   Highlighter,
   Palette,
   MoreHorizontal,
@@ -24,8 +37,15 @@ import {
   AlignJustify,
   ListIndentDecrease,
   ListIndentIncrease,
+  List,
+  ListOrdered,
+  ListTodo,
   Link as LinkIcon,
+  MessageSquareQuote,
+  SquareCode,
+  Type as TextIcon,
 } from "lucide-react";
+import type { HeadingLevel } from "@/core/commands/editorCommands";
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
@@ -55,11 +75,64 @@ interface BubbleMenuProps {
   onOverlayCloseOutside?: () => void;
 }
 
+// 气泡菜单支持切换的标题级别。
+const HEADING_LEVELS: HeadingLevel[] = [1, 2, 3, 4, 5, 6];
+// 标题级别对应的图标。
+const HEADING_ICONS: Record<HeadingLevel, ReactNode> = {
+  1: <Heading1 size={16} />,
+  2: <Heading2 size={16} />,
+  3: <Heading3 size={16} />,
+  4: <Heading4 size={16} />,
+  5: <Heading5 size={16} />,
+  6: <Heading6 size={16} />,
+};
+
+interface BlockMenuItem {
+  key: string;
+  label: string;
+  icon: ReactNode;
+  active: boolean;
+  run: () => void;
+}
+
 /** 判断 mousedown 事件是否来自 BubbleMenu 的颜色面板内容。 */
 function isFromColorPopoverContent(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
   return Boolean(
     target.closest(".color-picker") || target.closest(".editor-link-panel"),
+  );
+}
+
+/** 解析当前选区所在块的展示文案。 */
+function resolveCurrentBlockLabel(
+  editor: Editor,
+  locale: EditorLocale,
+): string {
+  // 当前命中的标题级别。
+  const headingLevel = HEADING_LEVELS.find((level) =>
+    editor.isActive("heading", { level }),
+  );
+  if (headingLevel) return locale.bubbleMenu.headingLevel(headingLevel);
+
+  // 块类型文案分发表，按优先级返回第一个命中的状态。
+  const blockLabelResolvers = [
+    {
+      active: editor.isActive("bulletList"),
+      label: locale.bubbleMenu.bulletList,
+    },
+    {
+      active: editor.isActive("orderedList"),
+      label: locale.bubbleMenu.orderedList,
+    },
+    { active: editor.isActive("taskList"), label: locale.bubbleMenu.taskList },
+    { active: editor.isActive("blockquote"), label: locale.bubbleMenu.blockquote },
+    { active: editor.isActive("codeBlock"), label: locale.bubbleMenu.codeBlock },
+    { active: editor.isActive("paragraph"), label: locale.bubbleMenu.paragraph },
+  ];
+
+  return (
+    blockLabelResolvers.find((resolver) => resolver.active)?.label ??
+    locale.bubbleMenu.paragraph
   );
 }
 
@@ -78,6 +151,8 @@ const BubbleMenu = ({
     "text" | "highlight" | null
   >(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  /** 块类型下拉菜单开关。 */
+  const [showBlockMenu, setShowBlockMenu] = useState(false);
   /** 链接编辑面板开关。 */
   const [showLinkEditor, setShowLinkEditor] = useState(false);
   /** 链接输入框草稿值。 */
@@ -139,6 +214,7 @@ const BubbleMenu = ({
       isActive: showColorPicker === "highlight",
       setActive: (active) => {
         if (active) {
+          setShowBlockMenu(false);
           setShowMoreMenu(false);
           setShowColorPicker("highlight");
           return;
@@ -159,6 +235,7 @@ const BubbleMenu = ({
       isActive: showColorPicker === "text",
       setActive: (active) => {
         if (active) {
+          setShowBlockMenu(false);
           setShowMoreMenu(false);
           setShowColorPicker("text");
           return;
@@ -178,6 +255,7 @@ const BubbleMenu = ({
       isActive: showLinkEditor,
       setActive: (active) => {
         if (active) {
+          setShowBlockMenu(false);
           setShowMoreMenu(false);
           setShowColorPicker(null);
           setShowLinkEditor(true);
@@ -222,11 +300,68 @@ const BubbleMenu = ({
     handleLinkEditorOpenChange(false);
   };
 
+  // 当前块类型按钮展示文案。
+  const currentBlockLabel = resolveCurrentBlockLabel(editor, locale);
+  // BubbleMenu 块类型菜单配置。
+  const blockMenuItems: BlockMenuItem[] = [
+    {
+      key: "paragraph",
+      label: locale.bubbleMenu.paragraph,
+      icon: <TextIcon size={16} />,
+      active: editor.isActive("paragraph"),
+      run: block.setParagraph,
+    },
+    ...HEADING_LEVELS.map((level) => ({
+      key: `heading-${level}`,
+      label: locale.bubbleMenu.headingLevel(level),
+      icon: HEADING_ICONS[level],
+      active: editor.isActive("heading", { level }),
+      run: () => block.toggleHeading(level),
+    })),
+    {
+      key: "bullet-list",
+      label: locale.bubbleMenu.bulletList,
+      icon: <List size={16} />,
+      active: editor.isActive("bulletList"),
+      run: block.toggleBulletList,
+    },
+    {
+      key: "ordered-list",
+      label: locale.bubbleMenu.orderedList,
+      icon: <ListOrdered size={16} />,
+      active: editor.isActive("orderedList"),
+      run: block.toggleOrderedList,
+    },
+    {
+      key: "task-list",
+      label: locale.bubbleMenu.taskList,
+      icon: <ListTodo size={16} />,
+      active: editor.isActive("taskList"),
+      run: block.toggleTaskList,
+    },
+    {
+      key: "blockquote",
+      label: locale.bubbleMenu.blockquote,
+      icon: <MessageSquareQuote size={16} />,
+      active: editor.isActive("blockquote"),
+      run: block.toggleBlockquote,
+    },
+    {
+      key: "code-block",
+      label: locale.bubbleMenu.codeBlock,
+      icon: <SquareCode size={16} />,
+      active: editor.isActive("codeBlock"),
+      run: block.toggleCodeBlock,
+    },
+  ];
+
   /** 判断 BubbleMenu 是否展示，保持函数引用稳定以避免 TipTap 重复派发 updateOptions。 */
   const shouldShowBubbleMenu = useCallback(
     ({ state }: { state: EditorState }) => {
       // 颜色 Popover 打开时保活锚点，关闭后立即回到选区驱动显示逻辑。
-      if (showColorPicker !== null || showLinkEditor) return true;
+      if (showColorPicker !== null || showLinkEditor || showBlockMenu) {
+        return true;
+      }
       const { selection } = state;
       // NodeSelection（图片、公式、整个表格节点等）不显示
       if (selection instanceof NodeSelection) return false;
@@ -236,7 +371,7 @@ const BubbleMenu = ({
       if (editor.isActive("codeBlock")) return false;
       return !selection.empty;
     },
-    [editor, showColorPicker, showLinkEditor],
+    [editor, showBlockMenu, showColorPicker, showLinkEditor],
   );
 
   if (!editor) {
@@ -258,6 +393,71 @@ const BubbleMenu = ({
         onMouseDown={handleBubbleMenuMouseDown}
         shouldShow={shouldShowBubbleMenu}
       >
+        <Popover
+          open={showBlockMenu}
+          onOpenChange={(open) => {
+            if (open) {
+              setShowColorPicker(null);
+              setShowMoreMenu(false);
+              setShowLinkEditor(false);
+            }
+            setShowBlockMenu(open);
+          }}
+        >
+          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
+            <button
+              type="button"
+              className={
+                showBlockMenu
+                  ? "bubble-block-trigger is-active"
+                  : "bubble-block-trigger"
+              }
+              title={locale.bubbleMenu.turnInto}
+            >
+              <span className="bubble-block-trigger-label">
+                {currentBlockLabel}
+              </span>
+              <ChevronDown size={14} />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            container={portalContainer ?? undefined}
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="bubble-menu-popover-panel"
+            onMouseDown={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <div className="bubble-block-menu">
+              <div className="bubble-block-menu-title">
+                {locale.bubbleMenu.turnInto}
+              </div>
+              {blockMenuItems.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={
+                    item.active
+                      ? "bubble-block-menu-item is-active"
+                      : "bubble-block-menu-item"
+                  }
+                  onClick={() => {
+                    item.run();
+                    setShowBlockMenu(false);
+                  }}
+                  title={item.label}
+                >
+                  <span className="bubble-block-menu-icon">{item.icon}</span>
+                  <span className="bubble-block-menu-label">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+        <span className="separator" />
         <button
           onClick={() => {
             if (isBoldDisabled) return;
@@ -423,6 +623,7 @@ const BubbleMenu = ({
           open={showMoreMenu}
           onOpenChange={(open) => {
             if (open) {
+              setShowBlockMenu(false);
               setShowColorPicker(null);
             }
             setShowMoreMenu(open);

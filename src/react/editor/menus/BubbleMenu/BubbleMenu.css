@@ -102,6 +102,79 @@
   align-self: stretch;
 }
 
+.bubble-block-trigger {
+  width: max-content;
+  min-width: 88px;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.bubble-block-trigger-label {
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.bubble-block-menu {
+  width: max-content;
+  min-width: 156px;
+  background: var(--ui-text-inverse);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: var(--ui-shadow-xl);
+  display: flex;
+  flex-direction: column;
+}
+
+.bubble-block-menu-title {
+  padding: 6px 10px 4px;
+  color: var(--ui-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.bubble-block-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ui-text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.bubble-block-menu-item:hover {
+  background: var(--ui-bg-hover-soft);
+  color: var(--ui-text-strong);
+}
+
+.bubble-block-menu-item.is-active {
+  background: var(--ui-bg-selected);
+  color: var(--ui-text-link);
+}
+
+.bubble-block-menu-icon {
+  width: 20px;
+  flex: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bubble-block-menu-label {
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 /* 更多菜单样式 */
 .more-menu {
   background: var(--ui-text-inverse);
@@ -162,6 +235,10 @@
   border: none;
   background: transparent;
   box-shadow: none;
+}
+
+[data-slot="popover-content"].bubble-menu-popover-panel {
+  width: auto;
 }
 
 .bubble-menu-color-popover-no-animation {

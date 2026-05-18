@@ -9,7 +9,18 @@ import {
 } from "react";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { TextSelection } from "@tiptap/pm/state";
-import { Highlighter, Palette } from "lucide-react";
+import {
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  Highlighter,
+  Palette,
+  Type as TextIcon,
+  type LucideIcon,
+} from "lucide-react";
 import type { HeadingLevel } from "@/core/commands/editorCommands";
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
@@ -41,6 +52,15 @@ import "./Toolbar.css";
 
 // 工具栏可选标题级别。
 const HEADING_LEVELS: HeadingLevel[] = [1, 2, 3, 4, 5, 6];
+// 标题级别对应的图标。
+const HEADING_ICONS: Record<HeadingLevel, LucideIcon> = {
+  1: Heading1,
+  2: Heading2,
+  3: Heading3,
+  4: Heading4,
+  5: Heading5,
+  6: Heading6,
+};
 
 /** 判断 mousedown 事件是否来自允许交互的浮层内容。 */
 function isFromColorPopoverContent(target: EventTarget | null): boolean {
@@ -440,32 +460,38 @@ const Toolbar = ({
               onClick={onParagraphSelect}
               title={locale.toolbar.paragraph}
             >
-              <span className="editor-toolbar-heading-num">P</span>
+              <span className="editor-toolbar-heading-num">
+                <TextIcon size={16} />
+              </span>
               <span className="editor-toolbar-heading-label">
                 {locale.toolbar.paragraph}
               </span>
             </button>
-            {HEADING_LEVELS.map((level) => (
-              <button
-                key={level}
-                type="button"
-                className={`editor-toolbar-heading-item ${
-                  showActiveState && currentHeadingLevel === level
-                    ? "is-active"
-                    : ""
-                }`}
-                data-heading-style={`h${level}`}
-                onClick={() => onHeadingSelect(level)}
-                title={locale.toolbar.headingLevel(level)}
-              >
-                <span className="editor-toolbar-heading-num">
-                  H{level}
-                </span>
-                <span className="editor-toolbar-heading-label">
-                  {locale.toolbar.headingLevel(level)}
-                </span>
-              </button>
-            ))}
+            {HEADING_LEVELS.map((level) => {
+              // 当前标题级别对应的图标。
+              const HeadingIcon = HEADING_ICONS[level];
+              return (
+                <button
+                  key={level}
+                  type="button"
+                  className={`editor-toolbar-heading-item ${
+                    showActiveState && currentHeadingLevel === level
+                      ? "is-active"
+                      : ""
+                  }`}
+                  data-heading-style={`h${level}`}
+                  onClick={() => onHeadingSelect(level)}
+                  title={locale.toolbar.headingLevel(level)}
+                >
+                  <span className="editor-toolbar-heading-num">
+                    <HeadingIcon size={16} />
+                  </span>
+                  <span className="editor-toolbar-heading-label">
+                    {locale.toolbar.headingLevel(level)}
+                  </span>
+                </button>
+              );
+            })}
           </PopoverContent>
         </Popover>
     ),
