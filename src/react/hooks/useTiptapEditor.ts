@@ -29,6 +29,7 @@ import { createCodeBlockLowlightExtension } from "@/core/extensions/codeBlockLow
 import { SlashCommands } from "@/core/extensions/SlashCommands";
 import { SelectionMirror } from "@/core/extensions/SelectionMirror";
 import { Indent } from "@/core/extensions/Indent";
+import { IndentKeyboardHandler } from "@/core/extensions/IndentKeyboardHandler";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
 import { TableBackspaceHandler } from "@/core/extensions/TableBackspaceHandler";
 import { CodeBlockKeyboardHandler } from "@/core/extensions/CodeBlockKeyboardHandler";
@@ -195,6 +196,7 @@ export function useTiptapEditor({
       TaskItemWithIcon.configure({
         nested: true,
       }),
+      IndentKeyboardHandler,
       Placeholder.configure({
         placeholder,
       }),

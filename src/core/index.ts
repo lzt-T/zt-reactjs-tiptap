@@ -12,3 +12,4 @@ export * from "./extensions/TableBackspaceHandler";
 export * from "./extensions/editorCallbackRegistry";
 export * from "./extensions/HtmlPasteSanitizer";
 export * from "./extensions/Indent";
+export * from "./extensions/IndentKeyboardHandler";
