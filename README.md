@@ -412,6 +412,37 @@ const toolbarItems: ToolbarItemConfig[] = [
 <ReactTiptapEditor toolbarItems={toolbarItems} hideDefaultToolbarItems />
 ```
 
+### 可选接入：导出 PDF（独立 npm 包）
+
+`zt-reactjs-tiptap` 默认不内置 PDF 导出能力。你可以按需安装独立包 `zt-tiptap-export-pdf`，并通过 `toolbarItems` 自定义按钮接入。
+
+```tsx
+import { Download } from 'lucide-react'
+import {
+  ReactTiptapEditor,
+  type ToolbarItemConfig,
+} from 'zt-reactjs-tiptap'
+import { exportEditorToPdf } from 'zt-tiptap-export-pdf'
+import 'zt-reactjs-tiptap/style.css'
+
+const toolbarItems: ToolbarItemConfig[] = [
+  {
+    type: 'custom',
+    key: 'export-pdf',
+    title: '导出 PDF',
+    group: 'custom',
+    icon: <Download size={16} />,
+    onClick: async ({ editor }) => {
+      // 使用编辑器根 DOM 作为导出源。
+      const root = editor.view.dom as HTMLElement
+      await exportEditorToPdf(root, { filename: 'editor.pdf' })
+    },
+  },
+]
+
+<ReactTiptapEditor toolbarItems={toolbarItems} />
+```
+
 ### Slash 命令自定义（保留默认 + 追加自定义命令）
 
 ```tsx
