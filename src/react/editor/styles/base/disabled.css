@@ -30,8 +30,28 @@
   display: none;
 }
 
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper .image-resize-handle,
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper .image-align-menu {
+  display: none;
+}
+
+.editor-container.is-disabled .editor-wrapper .ProseMirror .image-node-wrapper {
+  cursor: default;
+}
+
 .editor-container.is-disabled .editor-wrapper .ProseMirror .ProseMirror-selectednode video {
   outline: none;
+}
+
+.editor-container.is-disabled .editor-wrapper .ProseMirror .video-node-wrapper .video-delete-btn,
+.editor-container.is-disabled .editor-wrapper .ProseMirror .video-node-wrapper .video-resize-handle,
+.editor-container.is-disabled .editor-wrapper .ProseMirror .video-node-wrapper .video-align-menu {
+  display: none;
+}
+
+.editor-container.is-disabled .editor-wrapper .ProseMirror .video-node-wrapper,
+.editor-container.is-disabled .editor-wrapper .ProseMirror .video-node-wrapper video {
+  cursor: default;
 }
 
 /* Disabled: 任务列表复选框不用指针样式 */

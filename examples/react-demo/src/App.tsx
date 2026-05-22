@@ -128,20 +128,46 @@ function App() {
     }, 2000);
   }, []);
 
+  // 当前是否为 headless 模式。
+  const isHeadlessMode = editorMode === EditorMode.Headless;
+  // 当前是否为 disabled 状态。
+  const isEditorDisabled = disabled;
+  // 当前是否为浅色主题。
+  const isLightTheme = editorTheme === EditorTheme.Light;
+
+  // 模式按钮展示文案。
+  const modeLabel = `模式：${isHeadlessMode ? "headless" : "notionLike"}`;
+  // disabled 按钮展示文案。
+  const disabledLabel = `disabled：${isEditorDisabled ? "开" : "关"}`;
+  // 主题按钮展示文案。
+  const themeLabel = `主题：${isLightTheme ? "light" : "dark"}`;
+
   return (
     <div
       className={`app ${editorTheme === EditorTheme.Dark ? "app-dark" : "app-light"}`}
     >
       <h1>Tiptap Markdown Editor</h1>
       <div className="demo-actions">
-        <button type="button" onClick={handleToggleMode}>
-          切换模式
+        <button
+          type="button"
+          onClick={handleToggleMode}
+          className={`demo-action-btn ${isHeadlessMode ? "is-active" : ""}`}
+        >
+          {modeLabel}
         </button>
-        <button type="button" onClick={handleToggleDisabled}>
-          切换disabled
+        <button
+          type="button"
+          onClick={handleToggleDisabled}
+          className={`demo-action-btn ${isEditorDisabled ? "is-active" : ""}`}
+        >
+          {disabledLabel}
         </button>
-        <button type="button" onClick={handleToggleTheme}>
-          切换主题（{editorTheme}）
+        <button
+          type="button"
+          onClick={handleToggleTheme}
+          className={`demo-action-btn ${!isLightTheme ? "is-active" : ""}`}
+        >
+          {themeLabel}
         </button>
       </div>
       {/*<div onClick={() => setDisabled(true)}>disabled</div>
