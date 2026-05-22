@@ -13,7 +13,7 @@ import type {
   TableCellTextAlign,
   TableCellVerticalAlign,
 } from '@/core/extensions/TableCellAlignment'
-import './TableAlignmentMenu.css'
+import './index.css'
 
 /** 表格对齐菜单属性。 */
 interface TableAlignmentMenuProps {

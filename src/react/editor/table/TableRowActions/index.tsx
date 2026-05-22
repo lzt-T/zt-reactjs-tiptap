@@ -23,7 +23,7 @@ import type {
   TableCellTextAlign,
   TableCellVerticalAlign,
 } from '@/core/extensions/TableCellAlignment'
-import './TableRowActions.css'
+import './index.css'
 
 export interface RowActionItem {
   top: number

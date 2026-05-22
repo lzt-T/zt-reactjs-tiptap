@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Check } from 'lucide-react'
 import type { ColorOption } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
-import './ColorPicker.css'
+import './index.css'
 
 interface ColorPickerProps {
   onColorSelect: (color: string) => void

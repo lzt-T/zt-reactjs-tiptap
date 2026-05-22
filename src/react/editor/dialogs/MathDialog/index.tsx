@@ -11,7 +11,7 @@ import { Button } from "@/react/components/ui/button";
 import { FormulaPicker } from "./FormulaPicker";
 import type { FormulaPickerCategory } from "@/shared/config/formulaCategories";
 import type { EditorLocale } from "@/shared/locales";
-import "./MathDialog.css";
+import "./index.css";
 
 interface MathDialogProps {
   isOpen: boolean;

@@ -48,7 +48,7 @@ import {
 import type { HeadingLevel } from "@/core/commands/editorCommands";
 import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
-import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
+import LinkEditorPanel from "@/react/editor/link";
 import {
   createInlineControlDisabledState,
   openLinkDraft,
@@ -63,7 +63,7 @@ import {
   PopoverTrigger,
 } from "@/react/components/ui/popover";
 import type { EditorLocale } from "@/shared/locales";
-import "./BubbleMenu.css";
+import "./index.css";
 
 interface BubbleMenuProps {
   editor: Editor;

@@ -13,7 +13,7 @@ import { formatFileSize } from "@/shared/utils/utils";
 import type { EditorLocale } from "@/shared/locales";
 import type { EditorErrorEvent } from "@/react/editor/types";
 import { useUploadDialogFlow } from "@/react/editor/dialogs/shared/useUploadDialogFlow";
-import "./FileUploadDialog.css";
+import "./index.css";
 
 const EXTENSION_MIME_MAP: Record<string, string[]> = {
   pdf: ["application/pdf"],

@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react'
 import { config } from '@/shared/config'
 import { useTableInsertRowRunAndClose } from '@/react/hooks/useTableInsertRowRunAndClose'
 import { useTableInsertColumnRunAndClose } from '@/react/hooks/useTableInsertColumnRunAndClose'
-import './TableAddRowColumnButtons.css'
+import './index.css'
 
 /** 下方/右侧加号条尺寸，与 config.TABLE_ACTION_BUTTON_SIZE 一致，供 TableRowActions 计算 scroll wrapper 用 */
 export const TABLE_ADD_BAR_SIZE = config.TABLE_ACTION_BUTTON_SIZE

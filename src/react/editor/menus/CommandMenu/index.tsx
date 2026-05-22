@@ -14,7 +14,7 @@ import {
 import { cn } from "@/shared/utils/utils";
 import { MenuPlacement } from "@/react/editor/types";
 import type { EditorLocale } from "@/shared/locales";
-import "./CommandMenu.css";
+import "./index.css";
 
 interface CommandMenuProps {
   items: SlashCommandItem[];

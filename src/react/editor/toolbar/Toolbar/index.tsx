@@ -26,7 +26,7 @@ import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
 import { BuiltinToolbarItemKey } from "@/react/editor/customization";
 import type { EditorActionContext } from "@/react/editor/customization";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
-import LinkEditorPanel from "@/react/editor/link/LinkEditorPanel";
+import LinkEditorPanel from "@/react/editor/link";
 import TableSizePicker from "@/react/editor/table/TableSizePicker";
 import {
   createInlineControlDisabledState,
@@ -48,7 +48,7 @@ import type {
   ToolbarRenderContext,
 } from "./types";
 import { useToolbarUIState } from "./hooks/useToolbarUIState";
-import "./Toolbar.css";
+import "./index.css";
 
 // 工具栏可选标题级别。
 const HEADING_LEVELS: HeadingLevel[] = [1, 2, 3, 4, 5, 6];

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { cn } from "@/shared/utils/utils";
 import type { EditorLocale } from "@/shared/locales";
-import "./TableSizePicker.css";
+import "./index.css";
 
 export interface TableSizePickerProps {
   /** 用户点击确认时回调，行、列均从 1 起 */

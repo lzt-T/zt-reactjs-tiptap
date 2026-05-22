@@ -2,7 +2,7 @@ import { Check, Trash2 } from "lucide-react";
 import type { KeyboardEvent } from "react";
 import type { EditorLocale } from "@/shared/locales";
 import { cn } from "@/shared/utils/utils";
-import "./LinkEditorPanel.css";
+import "./index.css";
 
 interface LinkEditorPanelProps {
   value: string;

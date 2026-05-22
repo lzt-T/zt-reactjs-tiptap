@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/react/components/ui/tabs'
 import { FormulaSnippetButton } from '../FormulaSnippetButton'
 import { FORMULA_CATEGORIES, type FormulaPickerCategory } from '@/shared/config/formulaCategories'
-import './FormulaPicker.css'
+import './index.css'
 
 export type { FormulaPickerCategory } from '@/shared/config/formulaCategories'
 

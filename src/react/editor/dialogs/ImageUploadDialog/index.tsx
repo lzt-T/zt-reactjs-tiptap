@@ -15,7 +15,7 @@ import { formatFileSize } from '@/shared/utils/utils'
 import type { EditorLocale } from '@/shared/locales'
 import type { EditorErrorEvent } from '@/react/editor/types'
 import { useUploadDialogFlow } from '@/react/editor/dialogs/shared/useUploadDialogFlow'
-import './ImageUploadDialog.css'
+import './index.css'
 
 interface ImageUploadDialogProps {
   isOpen: boolean
