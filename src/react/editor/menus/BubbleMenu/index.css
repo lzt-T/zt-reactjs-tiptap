@@ -8,6 +8,7 @@
   box-shadow: var(--ui-shadow-xl);
   animation: fadeIn 0.15s ease;
   position: relative;
+  z-index: 62;
 }
 
 @keyframes fadeIn {

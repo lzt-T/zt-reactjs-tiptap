@@ -165,7 +165,16 @@ const BubbleMenu = ({
 
   useEffect(() => {
     /** 选区或事务变化后触发一次重渲染，避免按钮激活态偶发滞后。 */
-    const onSelectionUpdate = refreshSelectionKey;
+    const onSelectionUpdate = () => {
+      // 选区坍塌为光标态时，统一关闭所有子弹层，避免 BubbleMenu 残留吸附。
+      if (editor.state.selection.empty) {
+        setShowBlockMenu(false);
+        setShowLinkEditor(false);
+        setShowColorPicker(null);
+        setShowMoreMenu(false);
+      }
+      refreshSelectionKey();
+    };
     /** 仅在文档或选区真实变化时刷新，避免 BubbleMenu updateOptions 自激循环。 */
     const onTransaction = ({ transaction }: { transaction: Transaction }) => {
       // BubbleMenu 插件自身的配置更新事务。
@@ -358,10 +367,6 @@ const BubbleMenu = ({
   /** 判断 BubbleMenu 是否展示，保持函数引用稳定以避免 TipTap 重复派发 updateOptions。 */
   const shouldShowBubbleMenu = useCallback(
     ({ state }: { state: EditorState }) => {
-      // 颜色 Popover 打开时保活锚点，关闭后立即回到选区驱动显示逻辑。
-      if (showColorPicker !== null || showLinkEditor || showBlockMenu) {
-        return true;
-      }
       const { selection } = state;
       // NodeSelection（图片、公式、整个表格节点等）不显示
       if (selection instanceof NodeSelection) return false;
@@ -369,9 +374,11 @@ const BubbleMenu = ({
       if ("$anchorCell" in selection) return false;
       // 代码块内不显示气泡菜单（NotionLike 模式下避免与代码语言菜单重叠）
       if (editor.isActive("codeBlock")) return false;
-      return !selection.empty;
+      // 光标态（空选区）不显示，方向键移动后立即隐藏。
+      if (selection.empty) return false;
+      return true;
     },
-    [editor, showBlockMenu, showColorPicker, showLinkEditor],
+    [editor],
   );
 
   if (!editor) {
@@ -425,7 +432,7 @@ const BubbleMenu = ({
             side="bottom"
             align="start"
             sideOffset={8}
-            className="bubble-menu-popover-panel"
+            className="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
             onMouseDown={(e) => e.preventDefault()}
             onOpenAutoFocus={(e) => e.preventDefault()}
             // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
