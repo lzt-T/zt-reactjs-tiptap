@@ -444,6 +444,37 @@ const toolbarItems: ToolbarItemConfig[] = [
 <ReactTiptapEditor toolbarItems={toolbarItems} />
 ```
 
+### 可选接入：导出 Word（独立 npm 包）
+
+`zt-reactjs-tiptap` 默认不内置 Word 导出能力。你可以按需安装独立包 `zt-tiptap-export-word`，并通过 `toolbarItems` 自定义按钮接入。
+
+```tsx
+import { Download } from 'lucide-react'
+import {
+  ReactTiptapEditor,
+  type ToolbarItemConfig,
+} from 'zt-reactjs-tiptap'
+import { exportEditorToWord } from 'zt-tiptap-export-word'
+import 'zt-reactjs-tiptap/style.css'
+
+const toolbarItems: ToolbarItemConfig[] = [
+  {
+    type: 'custom',
+    key: 'export-word',
+    title: '导出 Word',
+    group: 'custom',
+    icon: <Download size={16} />,
+    onClick: async ({ editor }) => {
+      // 使用编辑器正文 DOM 作为导出源，不包含工具栏、弹层等非正文内容。
+      const root = editor.view.dom as HTMLElement
+      await exportEditorToWord(root, { filename: 'editor.docx' })
+    },
+  },
+]
+
+<ReactTiptapEditor toolbarItems={toolbarItems} />
+```
+
 ### Slash 命令自定义（保留默认 + 追加自定义命令）
 
 ```tsx
