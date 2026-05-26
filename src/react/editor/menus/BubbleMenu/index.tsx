@@ -311,6 +311,12 @@ const BubbleMenu = ({
 
   // 当前块类型按钮展示文案。
   const currentBlockLabel = resolveCurrentBlockLabel(editor, locale);
+  // 链接草稿解析失败时，禁用提交并给出可访问性提示。
+  const resolvedLinkDraftHref = resolveLinkDraftHref(linkDraft);
+  const linkDraftError =
+    linkDraft.trim() !== "" && !resolvedLinkDraftHref
+      ? locale.toolbar.invalidLinkUrl
+      : "";
   // BubbleMenu 块类型菜单配置。
   const blockMenuItems: BlockMenuItem[] = [
     {
@@ -583,6 +589,8 @@ const BubbleMenu = ({
             <LinkEditorPanel
               value={linkDraft}
               locale={locale}
+              errorMessage={linkDraftError}
+              submitDisabled={!resolvedLinkDraftHref}
               onChange={setLinkDraft}
               onSubmit={submitLinkDraft}
               onRemove={removeLink}

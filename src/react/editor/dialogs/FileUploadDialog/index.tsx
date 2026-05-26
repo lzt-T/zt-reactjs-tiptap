@@ -13,6 +13,7 @@ import { formatFileSize } from "@/shared/utils/utils";
 import type { EditorLocale } from "@/shared/locales";
 import type { EditorErrorEvent } from "@/react/editor/types";
 import { useUploadDialogFlow } from "@/react/editor/dialogs/shared/useUploadDialogFlow";
+import { sanitizeUrlByKind } from "@/core/security/urlSecurity";
 import "./index.css";
 
 const EXTENSION_MIME_MAP: Record<string, string[]> = {
@@ -165,6 +166,9 @@ const FileUploadDialog = ({
       try {
         setIsUploading(true);
         const res = await onPreUpload(file);
+        if (!sanitizeUrlByKind(res.url, "attachment")) {
+          throw new Error(locale.fileDialog.uploadFailed);
+        }
         setResult(res);
       } catch (err) {
         setResult(null);
@@ -210,10 +214,16 @@ const FileUploadDialog = ({
 
       return;
     }
-    onConfirm(result.url, result.name);
+    // 当前确认写入编辑器的安全附件地址。
+    const safeAttachmentUrl = sanitizeUrlByKind(result.url, "attachment");
+    if (!safeAttachmentUrl) {
+      setError(locale.fileDialog.uploadFailed);
+      return;
+    }
+    onConfirm(safeAttachmentUrl, result.name);
     if (onUpload) {
       void Promise.resolve(
-        onUpload({ file: selectedFile, url: result.url, name: result.name })
+        onUpload({ file: selectedFile, url: safeAttachmentUrl, name: result.name })
       ).catch((err: unknown) => {
         onError?.({
           source: "file-upload",

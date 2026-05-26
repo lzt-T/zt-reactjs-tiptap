@@ -59,6 +59,7 @@ const enUS: EditorLocale = {
     updateLink: 'Update link',
     removeLink: 'Remove link',
     linkPlaceholder: 'Paste or type a link',
+    invalidLinkUrl: 'Please enter a valid and safe link',
     highlight: 'Highlight',
     textColor: 'Text color',
     superscript: 'Superscript',

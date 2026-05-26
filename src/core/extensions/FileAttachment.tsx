@@ -5,6 +5,7 @@ import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FileText, ExternalLink, Trash2 } from "lucide-react";
 import { getEditorCallbacks } from "./editorCallbackRegistry";
+import { sanitizeUrlByKind } from "@/core/security/urlSecurity";
 
 export interface FileAttachmentAttributes {
   url: string;
@@ -23,15 +24,17 @@ function FileAttachmentView({
   selected,
 }: FileAttachmentViewProps) {
   const { url, name } = node.attrs as FileAttachmentAttributes;
+  // 当前附件节点可安全打开的地址。
+  const safeUrl = sanitizeUrlByKind(url ?? "", "attachment");
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const onFileClick = getEditorCallbacks(editor).onFileAttachmentClick;
     if (onFileClick) {
-      onFileClick({ url: url ?? "", name: name || "Untitled" });
-    } else if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      onFileClick({ url: safeUrl ?? "", name: name || "Untitled" });
+    } else if (safeUrl) {
+      window.open(safeUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -72,7 +75,7 @@ function FileAttachmentView({
         </span>
       ) : (
         <a
-          href={url ?? undefined}
+          href={safeUrl ?? undefined}
           target="_blank"
           rel="noopener noreferrer"
           className="file-attachment-link"

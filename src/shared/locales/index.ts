@@ -67,6 +67,7 @@ export interface EditorLocale {
     updateLink: string;
     removeLink: string;
     linkPlaceholder: string;
+    invalidLinkUrl: string;
     highlight: string;
     textColor: string;
     superscript: string;

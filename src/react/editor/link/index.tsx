@@ -7,6 +7,8 @@ import "./index.css";
 interface LinkEditorPanelProps {
   value: string;
   locale: EditorLocale;
+  errorMessage?: string;
+  submitDisabled?: boolean;
   onChange: (value: string) => void;
   onSubmit: () => void;
   onRemove: () => void;
@@ -17,6 +19,8 @@ interface LinkEditorPanelProps {
 const LinkEditorPanel = ({
   value,
   locale,
+  errorMessage,
+  submitDisabled = false,
   onChange,
   onSubmit,
   onRemove,
@@ -45,15 +49,17 @@ const LinkEditorPanel = ({
         onKeyDown={handleInputKeyDown}
         placeholder={locale.toolbar.linkPlaceholder}
         aria-label={locale.toolbar.editLink}
+        aria-invalid={Boolean(errorMessage)}
       />
+      {errorMessage ? <span className="sr-only">{errorMessage}</span> : null}
       <div className="editor-link-panel-actions">
         <button
           type="button"
-          className={cn("editor-link-panel-action-btn", !value.trim() && "is-disabled")}
+          className={cn("editor-link-panel-action-btn", submitDisabled && "is-disabled")}
           onClick={onSubmit}
           title={locale.toolbar.updateLink}
-          disabled={!value.trim()}
-          aria-disabled={!value.trim()}
+          disabled={submitDisabled}
+          aria-disabled={submitDisabled}
         >
           <Check size={14} />
         </button>

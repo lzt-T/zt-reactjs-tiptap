@@ -376,9 +376,10 @@ const customLanguages: CodeBlockLanguageOption[] = [
 
 ### HTML 粘贴清洗（默认开启）
 
-- 仅对剪贴板中的 `text/html` 内容进行清洗，纯文本粘贴行为保持不变
+- HTML 安全清洗以 `DOMPurify` 为主，纯文本粘贴行为保持不变
 - 会移除高风险/无效标签（如 `script`、`style`、`iframe` 等）、内联事件属性（`on*`）、内联 `style`
-- 会清理 Office 常见污染 class（如 `Mso*`）并解包无意义 `span/font` 包裹
+- 仅保留一层很薄的编辑器后处理：清理 Office 常见污染 class（如 `Mso*`）并解包无意义 `span/font` 包裹
+- 外部传入的 HTML 内容也会在初始化与受控回写时做同样的安全清洗；手动输入的链接、图片、视频与附件地址会校验安全协议
 - 清洗异常时会回退到原生粘贴流程；若传入 `onError`，会收到 `source: 'paste'` 且 `stage: 'transform'` 的错误事件
 
 ### 工具栏自定义（重排内置项 + 新增自定义按钮）

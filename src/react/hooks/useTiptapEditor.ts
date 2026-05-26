@@ -34,6 +34,7 @@ import type { CommandItem } from "@/core/extensions/SlashCommands";
 import { TableBackspaceHandler } from "@/core/extensions/TableBackspaceHandler";
 import { CodeBlockKeyboardHandler } from "@/core/extensions/CodeBlockKeyboardHandler";
 import { HtmlPasteSanitizer } from "@/core/extensions/HtmlPasteSanitizer";
+import { sanitizeEditorHtml } from "@/core/security/htmlSecurity";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import type { Node } from "@tiptap/pm/model";
 import debounce from "lodash/debounce";
@@ -158,6 +159,12 @@ export function useTiptapEditor({
     [onChange, onChangeDebounceMs, postChangeQueue]
   );
 
+  // 外部传入 HTML 统一先做安全清洗，避免初始化与受控回写绕过粘贴清洗链路。
+  const sanitizedValue = useMemo(() => {
+    if (value === undefined) return undefined;
+    return sanitizeEditorHtml(value);
+  }, [value]);
+
   // 内置扩展集合（与历史行为保持一致）
   const builtInExtensions = useMemo<AnyExtension[]>(
     () => [
@@ -266,7 +273,7 @@ export function useTiptapEditor({
     {
       editable: !disabled,
       extensions: finalExtensions,
-      content: value || "<p></p>",
+      content: sanitizedValue || "<p></p>",
       onUpdate: ({ editor: ed }) => {
         if (isFirstUpdateRef.current) {
           isFirstUpdateRef.current = false;
@@ -318,22 +325,24 @@ export function useTiptapEditor({
   }, [debouncedOnChange]);
 
   useEffect(() => {
-    if (!editor || value === undefined) return;
+    if (!editor || sanitizedValue === undefined) return;
 
     const currentContent = editor.getHTML();
+    // 当前这一轮外部值的安全版本。
+    const nextContent = sanitizedValue;
     // 若 value 与当前内容一致，无需 setContent
-    if (currentContent === value) return;
+    if (currentContent === nextContent) return;
     // 若 value 等于我们通过 onChange 抛出的内容（父组件回传），不 setContent，避免光标跳到文末
-    if (value === lastEmittedHtmlRef.current) return;
-    // 若当前文档内容等于我们已抛出的内容，而 value 不同，说明 value 是父组件尚未同步到的旧值（防抖未触发），不应用旧 value 覆盖新内容
+    if (nextContent === lastEmittedHtmlRef.current) return;
+     // 若当前文档内容等于我们已抛出的内容，而 value 不同，说明 value 是父组件尚未同步到的旧值（防抖未触发），不应用旧 value 覆盖新内容
     if (currentContent === lastEmittedHtmlRef.current) return;
     lastEmittedHtmlRef.current = null;
     isExternalUpdateRef.current = true;
-    editor.commands.setContent(value);
+    editor.commands.setContent(nextContent);
     setTimeout(() => {
       isExternalUpdateRef.current = false;
     }, 0);
-  }, [editor, value]);
+  }, [editor, sanitizedValue]);
 
   return { editor, runAfterOnChange };
 }

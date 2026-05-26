@@ -15,6 +15,7 @@ import { formatFileSize } from '@/shared/utils/utils'
 import type { EditorLocale } from '@/shared/locales'
 import type { EditorErrorEvent } from '@/react/editor/types'
 import { useUploadDialogFlow } from '@/react/editor/dialogs/shared/useUploadDialogFlow'
+import { sanitizeUrlByKind } from "@/core/security/urlSecurity";
 import './index.css'
 
 interface ImageUploadDialogProps {
@@ -107,6 +108,9 @@ const ImageUploadDialog = ({
       try {
         setIsUploading(true)
         const url = await onPreUpload(file)
+        if (!sanitizeUrlByKind(url, "image")) {
+          throw new Error(locale.imageDialog.invalidImageUrl)
+        }
         setPreviewLoadError(false)
         setImageUrl(url)
         setIsUploading(false)
@@ -150,10 +154,9 @@ const ImageUploadDialog = ({
     setImageUrl(url)
 
     if (url) {
-      try {
-        new URL(url)
+      if (sanitizeUrlByKind(url, "image")) {
         setError('')
-      } catch {
+      } else {
         setError(locale.imageDialog.invalidImageUrl)
       }
     } else {
@@ -172,9 +175,16 @@ const ImageUploadDialog = ({
       return
     }
 
-    onConfirm(imageUrl)
+    // 当前确认写入编辑器的安全图片地址。
+    const safeImageUrl = sanitizeUrlByKind(imageUrl, "image")
+    if (!safeImageUrl) {
+      setError(locale.imageDialog.invalidImageUrl)
+      return
+    }
+
+    onConfirm(safeImageUrl)
     if (uploadType === 'file' && selectedFile && onUpload) {
-      void Promise.resolve(onUpload({ file: selectedFile, url: imageUrl })).catch((err: unknown) => {
+      void Promise.resolve(onUpload({ file: selectedFile, url: safeImageUrl })).catch((err: unknown) => {
         onError?.({
           source: 'image-upload',
           stage: 'confirm',

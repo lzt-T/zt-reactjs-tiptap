@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import { resolveCodeBlockLanguage } from "@/core/extensions/codeBlockLowlight";
+import { sanitizeUrlByKind } from "@/core/security/urlSecurity";
 
 export type TextAlignValue = "left" | "center" | "right" | "justify";
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
@@ -26,7 +27,10 @@ export function toggleCode(editor: Editor): void {
 
 /** 为当前选区设置链接。 */
 export function setLink(editor: Editor, href: string): void {
-  editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+  // 仅允许安全链接协议进入文档。
+  const sanitizedHref = sanitizeUrlByKind(href, "link");
+  if (!sanitizedHref) return;
+  editor.chain().focus().extendMarkRange("link").setLink({ href: sanitizedHref }).run();
 }
 
 /** 取消当前选区链接。 */

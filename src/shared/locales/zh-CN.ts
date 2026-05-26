@@ -56,6 +56,7 @@ const zhCN: EditorLocale = {
     updateLink: '更新链接',
     removeLink: '删除链接',
     linkPlaceholder: '输入或粘贴链接',
+    invalidLinkUrl: '请输入有效且安全的链接',
     highlight: '高亮',
     textColor: '文字颜色',
     superscript: '上标',

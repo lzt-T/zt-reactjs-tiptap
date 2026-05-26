@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import { isInlineCodeMarkControlDisabled } from "@/react/editor/toolbar/shared/markDisableRules";
+import { sanitizeUrlByKind } from "@/core/security/urlSecurity";
 
 /** 可复用的 inline 控件禁用键。 */
 export type InlineControlKey =
@@ -76,8 +77,7 @@ export function openLinkDraft(editor: Editor): string {
 
 /** 解析链接草稿：空字符串返回 null。 */
 export function resolveLinkDraftHref(linkDraft: string): string | null {
-  const href = linkDraft.trim();
-  return href || null;
+  return sanitizeUrlByKind(linkDraft, "link");
 }
 
 /** 提交链接草稿：空链接直接忽略。 */

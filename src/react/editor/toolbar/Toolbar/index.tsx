@@ -349,6 +349,12 @@ const Toolbar = ({
   };
 
   const inlineDisabledMap = createInlineControlDisabledState(isInsideCode);
+  // 链接草稿解析失败时，禁用提交并给出可访问性提示。
+  const resolvedLinkDraftHref = resolveLinkDraftHref(linkDraft);
+  const linkDraftError =
+    linkDraft.trim() !== "" && !resolvedLinkDraftHref
+      ? locale.toolbar.invalidLinkUrl
+      : "";
   const isHeadingDisabled = isFocusNodeOnly || isInsideCodeBlock;
   const isHighlightDisabled =
     isToolbarLocked || inlineDisabledMap.highlight;
@@ -560,6 +566,8 @@ const Toolbar = ({
             <LinkEditorPanel
               value={linkDraft}
               locale={locale}
+              errorMessage={linkDraftError}
+              submitDisabled={!resolvedLinkDraftHref}
               onChange={setLinkDraft}
               onSubmit={submitLinkDraft}
               onRemove={removeLink}

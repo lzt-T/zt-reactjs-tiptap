@@ -15,6 +15,7 @@ import { formatFileSize } from "@/shared/utils/utils";
 import type { EditorLocale } from "@/shared/locales";
 import type { EditorErrorEvent } from "@/react/editor/types";
 import { useUploadDialogFlow } from "@/react/editor/dialogs/shared/useUploadDialogFlow";
+import { sanitizeUrlByKind } from "@/core/security/urlSecurity";
 import "./index.css";
 
 interface VideoUploadDialogProps {
@@ -109,6 +110,9 @@ const VideoUploadDialog = ({
         try {
           setIsUploading(true);
           const url = await onPreUpload(file);
+          if (!sanitizeUrlByKind(url, "video")) {
+            throw new Error(locale.videoDialog.invalidVideoUrl);
+          }
           setVideoUrl(url);
         } catch (err) {
           setVideoUrl("");
@@ -158,10 +162,9 @@ const VideoUploadDialog = ({
         setError("");
         return;
       }
-      try {
-        new URL(url);
+      if (sanitizeUrlByKind(url, "video")) {
         setError("");
-      } catch {
+      } else {
         setError(locale.videoDialog.invalidVideoUrl);
       }
     },
@@ -178,11 +181,18 @@ const VideoUploadDialog = ({
       return;
     }
 
+    // 当前确认写入编辑器的安全视频地址。
+    const safeVideoUrl = sanitizeUrlByKind(videoUrl, "video");
+    if (!safeVideoUrl) {
+      setError(locale.videoDialog.invalidVideoUrl);
+      return;
+    }
+
     const title = selectedFile?.name;
-    onConfirm(videoUrl, title);
+    onConfirm(safeVideoUrl, title);
     if (uploadType === "file" && selectedFile && onUpload) {
       void Promise.resolve(
-        onUpload({ file: selectedFile, url: videoUrl, title })
+        onUpload({ file: selectedFile, url: safeVideoUrl, title })
       ).catch((err: unknown) => {
         onError?.({
           source: "video-upload",
