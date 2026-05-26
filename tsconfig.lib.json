@@ -1,11 +1,14 @@
 {
-  "extends": "./tsconfig.app.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "declaration": true,
     "declarationDir": "./dist",
     "emitDeclarationOnly": true,
     "outDir": "./dist",
     "noEmit": false,
+    "rootDir": "./src",
     "allowImportingTsExtensions": false,
     "verbatimModuleSyntax": false
   },

@@ -671,7 +671,7 @@ import 'zt-reactjs-tiptap/style.css'
 
 ## 开发
 
-本项目使用 pnpm、React 19、Vite 7、TypeScript 5.9、Tailwind CSS v4、TipTap 3.x。
+本项目使用 pnpm、React 19、Vite 7、TypeScript 6、Tailwind CSS v4、TipTap 3.x，并采用分层 `tsconfig` 配置。
 
 ```bash
 # 安装依赖
