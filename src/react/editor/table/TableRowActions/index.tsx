@@ -43,6 +43,8 @@ export interface RowActionItem {
 interface TableRowActionsProps {
   editor: Editor
   editorWrapperRef: React.RefObject<HTMLDivElement | null>
+  /** 表格菜单内容层 Portal 容器，受编辑器滚动视口约束 */
+  contentPortalContainer: HTMLDivElement | null
   locale: EditorLocale
 }
 
@@ -54,6 +56,7 @@ const ROW_BUTTON_GAP = 2
 const TableRowActions = ({
   editor,
   editorWrapperRef,
+  contentPortalContainer,
   locale,
 }: TableRowActionsProps) => {
   /** 当前焦点所在行（只渲染一个按钮，定位到该行） */
@@ -421,7 +424,9 @@ const TableRowActions = ({
   }
 
   // Popover 挂到编辑器容器内，避免挂到 document.body 破坏主题隔离。
-  const popoverContainer = editorWrapperRef.current
+  const popoverContainer = contentPortalContainer ?? editorWrapperRef.current
+  // 表格菜单碰撞边界，避免菜单脱离编辑器滚动视口后仍覆盖外层区域。
+  const popoverBoundary = editorWrapperRef.current
   const usePortal = Boolean(portalTarget && portalButtonPosition)
   const showPlusButtons = Boolean(portalTarget && tableSize)
   // 当前对齐回显目标。
@@ -472,6 +477,8 @@ const TableRowActions = ({
       </PopoverTrigger>
       <PopoverContent
         container={popoverContainer}
+        collisionBoundary={popoverBoundary}
+        hideWhenDetached
         side="top"
         align="start"
         sideOffset={8}
@@ -542,6 +549,7 @@ const TableRowActions = ({
         <TableAlignmentMenu
           locale={locale}
           container={popoverContainer}
+          collisionBoundary={popoverBoundary}
           activeTextAlign={alignmentState.textAlign}
           activeVerticalAlign={alignmentState.verticalAlign}
           onTextAlign={handleTextAlign}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { CSSProperties, RefObject } from "react";
 import type { Editor } from "@tiptap/react";
 import type { CommandItem } from "@/core/extensions/SlashCommands";
@@ -107,6 +108,9 @@ export default function EditorSurface({
   onMenuRootChange,
   onCodeBlockLanguageMenuOpenChecked,
 }: EditorSurfaceProps) {
+  // 代码块附属浮层挂载点，放在滚动容器内以跟随编辑器视口裁剪。
+  const [contentPortalContainer, setContentPortalContainer] =
+    useState<HTMLDivElement | null>(null);
   // 编辑器容器 CSS 变量样式。
   const wrapperStyle = {
     "--table-action-padding": `${config.TABLE_ACTION_BUTTON_PADDING}px`,
@@ -143,16 +147,22 @@ export default function EditorSurface({
         ref={editorWrapperRef}
         style={wrapperStyle}
       >
+        <div
+          ref={setContentPortalContainer}
+          className="zt-tiptap-content-portal"
+        />
         {editor && !disabled && isEditorFocused && (
           <>
             <TableRowActions
               editor={editor}
               editorWrapperRef={editorWrapperRef}
+              contentPortalContainer={contentPortalContainer}
               locale={locale}
             />
             <TableColumnActions
               editor={editor}
               editorWrapperRef={editorWrapperRef}
+              contentPortalContainer={contentPortalContainer}
               locale={locale}
             />
           </>
@@ -162,7 +172,7 @@ export default function EditorSurface({
           <CodeBlockLanguageMenu
             editor={editor}
             locale={locale}
-            portalContainer={portalContainer}
+            portalContainer={contentPortalContainer}
             editorWrapperRef={editorWrapperRef}
             languages={resolvedCodeBlockLanguages}
             defaultLanguage={resolvedDefaultCodeBlockLanguage}
@@ -176,7 +186,7 @@ export default function EditorSurface({
             editor={editor}
             locale={locale}
             editorWrapperRef={editorWrapperRef}
-            portalContainer={portalContainer}
+            portalContainer={contentPortalContainer}
             defaultLanguage={resolvedDefaultCodeBlockLanguage}
             onCodeBlockFormat={onCodeBlockFormat}
           />
@@ -188,6 +198,8 @@ export default function EditorSurface({
             textColorOptions={textColorOptions}
             highlightColorOptions={highlightColorOptions}
             portalContainer={portalContainer}
+            contentPortalContainer={contentPortalContainer}
+            contentPopoverBoundary={editorWrapperRef.current}
             isInsideOverlayContainer={isInsideOverlayContainer}
             onOverlayCloseOutside={onOverlayCloseOutside}
           />

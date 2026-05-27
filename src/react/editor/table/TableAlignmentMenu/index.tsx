@@ -19,6 +19,8 @@ import './index.css'
 interface TableAlignmentMenuProps {
   locale: EditorLocale
   container: HTMLElement | null
+  /** 二级菜单碰撞边界，保持与行/列操作菜单一致 */
+  collisionBoundary: HTMLElement | null
   activeTextAlign?: TableCellTextAlign | null
   activeVerticalAlign?: TableCellVerticalAlign | null
   onTextAlign: (align: TableCellTextAlign) => void
@@ -31,6 +33,7 @@ interface TableAlignmentMenuProps {
 export default function TableAlignmentMenu({
   locale,
   container,
+  collisionBoundary,
   activeTextAlign,
   activeVerticalAlign,
   onTextAlign,
@@ -51,6 +54,8 @@ export default function TableAlignmentMenu({
       </PopoverTrigger>
       <PopoverContent
         container={container}
+        collisionBoundary={collisionBoundary}
+        hideWhenDetached
         side="right"
         align="start"
         sideOffset={8}

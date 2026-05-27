@@ -104,7 +104,8 @@ examples/
 - 编辑器主题作用域类仅使用 `.zt-tiptap-theme`。
 - 库输出中不要把编辑器主题变量放到全局 `:root`。
 - 编辑器根节点必须包含 `.zt-tiptap-theme` 与 `text-foreground`。
-- Dialog/Modal 的 Portal 必须挂在编辑器容器内（通过 `portalContainer`），不要挂到 `document.body`。
+- Dialog/Modal、Toolbar/BubbleMenu 全局类菜单的 Portal 必须挂在编辑器容器内的 `.zt-tiptap-portal`（通过 `portalContainer`），不要挂到 `document.body`。
+- 代码块、表格、BubbleMenu 选区附属面板必须挂在 `.editor-wrapper` 内的 `.zt-tiptap-content-portal`，让浮层继承主题并受编辑器滚动视口裁剪。
 - 未传 `theme` 时，暗色模式需与 `html.dark` 状态保持同步；显式传入 `theme` 时以传入值为准。
 - 若改动隔离策略，必须同步更新 README 的“样式系统”说明。
 

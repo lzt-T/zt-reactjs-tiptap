@@ -22,6 +22,10 @@ interface ColorPopoverPickerProps {
   onColorSelect: (color: string) => void;
   locale: EditorLocale;
   portalContainer?: HTMLElement | null;
+  /** Popover 碰撞边界，未传时保持 Radix 默认边界。 */
+  collisionBoundary?: HTMLElement | null;
+  /** 触发器脱离边界时是否隐藏 Popover。 */
+  hideWhenDetached?: boolean;
   popoverClassName?: string;
   triggerClassName?: string;
 }
@@ -50,6 +54,8 @@ export default function ColorPopoverPicker({
   onColorSelect,
   locale,
   portalContainer,
+  collisionBoundary,
+  hideWhenDetached = false,
   popoverClassName,
   triggerClassName,
 }: ColorPopoverPickerProps) {
@@ -89,6 +95,8 @@ export default function ColorPopoverPicker({
       </PopoverTrigger>
       <PopoverContent
         container={portalContainer ?? undefined}
+        collisionBoundary={collisionBoundary}
+        hideWhenDetached={hideWhenDetached}
         side="bottom"
         align="start"
         sideOffset={8}

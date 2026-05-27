@@ -71,6 +71,10 @@ interface BubbleMenuProps {
   textColorOptions: ColorOption[];
   highlightColorOptions: ColorOption[];
   portalContainer?: HTMLElement | null;
+  /** 选区附属颜色面板的内容层 Portal 容器。 */
+  contentPortalContainer?: HTMLElement | null;
+  /** 选区附属面板碰撞边界，通常为编辑器滚动容器。 */
+  contentPopoverBoundary?: HTMLElement | null;
   isInsideOverlayContainer?: (target: EventTarget | null) => boolean;
   onOverlayCloseOutside?: () => void;
 }
@@ -142,6 +146,8 @@ const BubbleMenu = ({
   textColorOptions = config.TEXT_COLORS,
   highlightColorOptions = config.HIGHLIGHT_COLORS,
   portalContainer,
+  contentPortalContainer,
+  contentPopoverBoundary,
   isInsideOverlayContainer,
   onOverlayCloseOutside,
 }: BubbleMenuProps) => {
@@ -434,7 +440,9 @@ const BubbleMenu = ({
             </button>
           </PopoverTrigger>
           <PopoverContent
-            container={portalContainer ?? undefined}
+            container={contentPortalContainer ?? undefined}
+            collisionBoundary={contentPopoverBoundary}
+            hideWhenDetached
             side="bottom"
             align="start"
             sideOffset={8}
@@ -578,7 +586,9 @@ const BubbleMenu = ({
             </button>
           </PopoverTrigger>
           <PopoverContent
-            container={portalContainer ?? undefined}
+            container={contentPortalContainer ?? undefined}
+            collisionBoundary={contentPopoverBoundary}
+            hideWhenDetached
             side="bottom"
             align="start"
             sideOffset={8}
@@ -612,7 +622,9 @@ const BubbleMenu = ({
           onOpenChange={handleHighlightColorPickerOpenChange}
           onColorSelect={onHighlightColorSelect}
           locale={locale}
-          portalContainer={portalContainer}
+          portalContainer={contentPortalContainer}
+          collisionBoundary={contentPopoverBoundary}
+          hideWhenDetached
           popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
           triggerClassName="bubble-menu-btn"
         />
@@ -629,7 +641,9 @@ const BubbleMenu = ({
           onOpenChange={handleTextColorPickerOpenChange}
           onColorSelect={onTextColorSelect}
           locale={locale}
-          portalContainer={portalContainer}
+          portalContainer={contentPortalContainer}
+          collisionBoundary={contentPopoverBoundary}
+          hideWhenDetached
           popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
           triggerClassName="bubble-menu-btn"
         />

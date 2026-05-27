@@ -34,6 +34,17 @@
   pointer-events: auto;
 }
 
+.zt-tiptap-content-portal {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.zt-tiptap-content-portal > * {
+  pointer-events: auto;
+}
+
 .editor-wrapper {
   position: relative;
   padding: 12px 14px;
