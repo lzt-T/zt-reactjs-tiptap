@@ -63,10 +63,16 @@ const ImageUploadDialog = ({
     handleDrop,
     handleConfirmKeyDown,
   } = useUploadDialogFlow({ isUploading })
-  // 仅在上传中或已有图片结果时保留重选提示区域，避免初始空态出现多余留白
-  const shouldReserveReselectHint = uploadType === 'file' && (isUploading || Boolean(imageUrl))
   // 仅在可重选阶段展示提示文案；容器常驻用于稳定布局高度
   const shouldShowReselectHint = uploadType === 'file' && Boolean(imageUrl) && !isUploading
+  // 提示行优先显示错误，其次显示重选提示。
+  const imageUploadHint = error || (shouldShowReselectHint ? locale.imageDialog.reselectHint : '')
+  // 当前提示行是否处于错误态。
+  const isImageUploadHintError = Boolean(error)
+  // 当前提示行是否展示可见文案。
+  const shouldShowImageUploadHint = Boolean(imageUploadHint)
+  // 当前 URL 模式下可用于图片预览的安全地址。
+  const safePreviewImageUrl = uploadType === 'url' ? sanitizeUrlByKind(imageUrl, "image") : ''
   /** 上传类型切换选项。 */
   const uploadTypeOptions = [
     { label: locale.imageDialog.uploadFileTab, value: 'file' },
@@ -243,98 +249,117 @@ const ImageUploadDialog = ({
         />
 
         <div className="image-upload-content">
-          {uploadType === 'file' ? (
-            <div className="image-upload-file">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="image-upload-input-hidden"
-                id="imageFileInput"
-                disabled={isInteractionLocked}
-              />
-              <label
-                htmlFor="imageFileInput"
-                className={`image-upload-file-label ${isDragOver ? 'is-drag-over' : ''} ${imageUrl ? 'has-preview' : ''} ${isInteractionLocked ? 'is-disabled' : ''}`}
-                aria-disabled={isInteractionLocked}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, processFile)}
-              >
-                {isUploading ? (
-                  <>
-                    <div className="image-upload-file-icon">
-                      <Loader2 size={40} className="image-upload-file-icon-spin" />
-                    </div>
-                    <div className="image-upload-file-text">
-                      {locale.imageDialog.uploadingImage}
-                    </div>
-                  </>
-                ) : imageUrl ? (
-                  <div className="image-upload-file-preview">
-                    {previewLoadError ? (
-                      <div className="image-upload-file-preview-error">
-                        <ImageOff size={40} />
-                        <span>{locale.imageDialog.imageLoadFailed}</span>
+          <div className="image-upload-control">
+            {uploadType === 'file' ? (
+              <div className="image-upload-file">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="image-upload-input-hidden"
+                  id="imageFileInput"
+                  disabled={isInteractionLocked}
+                />
+                <label
+                  htmlFor="imageFileInput"
+                  className={`image-upload-file-label ${isDragOver ? 'is-drag-over' : ''} ${imageUrl ? 'has-preview' : ''} ${isInteractionLocked ? 'is-disabled' : ''}`}
+                  aria-disabled={isInteractionLocked}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, processFile)}
+                >
+                  {isUploading ? (
+                    <>
+                      <div className="image-upload-file-icon">
+                        <Loader2 size={40} className="image-upload-file-icon-spin" />
                       </div>
-                    ) : (
-                      <img
-                        src={imageUrl}
-                        alt=""
-                        onLoad={() => setPreviewLoadError(false)}
-                        onError={() => setPreviewLoadError(true)}
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    <div className="image-upload-file-icon">
-                      <ImagePlus size={40} />
-                    </div>
-                    <div className="image-upload-file-text">
-                      {locale.imageDialog.clickOrDrag}
-                    </div>
-                    <div className="image-upload-file-hint">
-                      {locale.imageDialog.supportsAndMax(
-                        formatFileSize(imageMaxSizeBytes)
+                      <div className="image-upload-file-text">
+                        {locale.imageDialog.uploadingImage}
+                      </div>
+                    </>
+                  ) : imageUrl ? (
+                    <div className="image-upload-file-preview">
+                      {previewLoadError ? (
+                        <div className="image-upload-file-preview-error">
+                          <ImageOff size={40} />
+                          <span>{locale.imageDialog.imageLoadFailed}</span>
+                        </div>
+                      ) : (
+                        <img
+                          src={imageUrl}
+                          alt=""
+                          onLoad={() => setPreviewLoadError(false)}
+                          onError={() => setPreviewLoadError(true)}
+                        />
                       )}
                     </div>
-                  </>
+                  ) : (
+                    <>
+                      <div className="image-upload-file-icon">
+                        <ImagePlus size={40} />
+                      </div>
+                      <div className="image-upload-file-text">
+                        {locale.imageDialog.clickOrDrag}
+                      </div>
+                      <div className="image-upload-file-hint">
+                        {locale.imageDialog.supportsAndMax(
+                          formatFileSize(imageMaxSizeBytes)
+                        )}
+                      </div>
+                    </>
+                  )}
+                </label>
+              </div>
+            ) : (
+              <div className="image-upload-url space-y-2">
+                <Label htmlFor="imageUrlInput">
+                  {locale.imageDialog.imageUrlLabel}
+                </Label>
+                <input
+                  ref={urlInputRef}
+                  id="imageUrlInput"
+                  type="url"
+                  placeholder={locale.imageDialog.imageUrlPlaceholder}
+                  value={imageUrl}
+                  onChange={handleUrlChange}
+                  className="image-upload-input"
+                  disabled={isInteractionLocked}
+                />
+                {safePreviewImageUrl && (
+                  <div className="image-upload-url-preview">
+                    <div className="image-upload-file-preview">
+                      {previewLoadError ? (
+                        <div className="image-upload-file-preview-error">
+                          <ImageOff size={40} />
+                          <span>{locale.imageDialog.imageLoadFailed}</span>
+                        </div>
+                      ) : (
+                        <img
+                          src={safePreviewImageUrl}
+                          alt=""
+                          onLoad={() => setPreviewLoadError(false)}
+                          onError={() => setPreviewLoadError(true)}
+                        />
+                      )}
+                    </div>
+                  </div>
                 )}
-              </label>
-              {shouldReserveReselectHint && (
-                <div
-                  className={`image-upload-file-hint image-upload-file-reselect-hint ${shouldShowReselectHint ? '' : 'is-placeholder'}`}
-                >
-                  {locale.imageDialog.reselectHint}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="image-upload-url space-y-2">
-              <Label htmlFor="imageUrlInput">
-                {locale.imageDialog.imageUrlLabel}
-              </Label>
-              <input
-                ref={urlInputRef}
-                id="imageUrlInput"
-                type="url"
-                placeholder={locale.imageDialog.imageUrlPlaceholder}
-                value={imageUrl}
-                onChange={handleUrlChange}
-                className="image-upload-input"
-                disabled={isInteractionLocked}
-              />
-            </div>
-          )}
+              </div>
+            )}
 
-          {error && (
-            <div className="image-upload-error" role="alert" aria-live="polite">
-              <AlertCircle size={16} className="image-upload-error-icon" />
-              {error}
+            <div
+              className={`image-upload-file-hint image-upload-file-reselect-hint ${shouldShowImageUploadHint ? '' : 'is-placeholder'} ${isImageUploadHintError ? 'is-error' : ''}`}
+              role={isImageUploadHintError ? 'alert' : undefined}
+              aria-live={isImageUploadHintError ? 'polite' : 'off'}
+              aria-hidden={!shouldShowImageUploadHint}
+            >
+              {isImageUploadHintError && <AlertCircle size={14} className="image-upload-hint-icon" />}
+              <span className="image-upload-hint-text">
+                {imageUploadHint || locale.imageDialog.reselectHint}
+              </span>
             </div>
-          )}
+          </div>
         </div>
 
         <DialogFooter>
