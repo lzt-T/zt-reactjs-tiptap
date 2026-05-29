@@ -4,6 +4,10 @@ export {
   createEditorFloatingOverlayPositionContext,
   useEditorFloatingOverlayPosition,
 } from "./useEditorFloatingOverlayPosition";
+export {
+  FloatingPortalPanel,
+  useFloatingPortalPanel,
+} from "./useFloatingPortalPanel";
 export { useMathDialog } from "./useMathDialog";
 export { useImageUploadDialog } from "./useImageUploadDialog";
 export { useFileUploadDialog } from "./useFileUploadDialog";
@@ -21,6 +25,12 @@ export type {
   CreateEditorFloatingOverlayPositionContextOptions,
   EditorFloatingOverlayAnchor,
   EditorFloatingOverlayHorizontalAlign,
+  EditorFloatingOverlayPlacementBoundary,
   EditorFloatingOverlayPositionContext,
   EditorFloatingOverlayVerticalMode,
 } from "./useEditorFloatingOverlayPosition";
+export type {
+  FloatingPortalPanelProps,
+  FloatingPortalPanelState,
+  UseFloatingPortalPanelOptions,
+} from "./useFloatingPortalPanel";

@@ -11,10 +11,14 @@ import {
   BetweenHorizontalStart,
 } from 'lucide-react'
 import { IconTableDeleteColumn } from '@/react/components/Icon'
-import { Popover, PopoverContent, PopoverTrigger } from '@/react/components/ui/popover'
-import { useTableInsertColumnRunAndClose } from '@/react/hooks'
+import {
+  FloatingPortalPanel,
+  useFloatingPortalPanel,
+  useTableInsertColumnRunAndClose,
+} from '@/react/hooks'
 import { config } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
+import { MenuPlacement } from '@/react/editor/types'
 import TableAlignmentMenu from '../TableAlignmentMenu'
 import { applyTableCellAlignment, getTableCellAlignmentState } from '../tableAlignment'
 import { resolveTableActionsPortalTarget, useTableActionsPositioning } from '../shared/useTableActionsPositioning'
@@ -69,10 +73,8 @@ const TableColumnActions = ({
     portalButtonPosition,
     setPortalButtonPosition,
     closeMenu: closeMenuBase,
-    handleMenuOpenChange: handleMenuOpenChangeBase,
     clearPortalState,
   } = useTableActionsPositioning<{ top: number; left: number; width: number }>()
-  const buttonRef = useRef<HTMLButtonElement>(null)
   /**
    * 打开菜单时记录目标列信息，供 useTableInsertColumnRunAndClose 用。
    * first* 指最左侧选中列（用于「插左侧」），last* 指最右侧选中列（用于「插右侧」）。
@@ -276,17 +278,27 @@ const TableColumnActions = ({
     /* 列按钮已 Portal 到 scroll wrapper 内，随表格滚动，无需监听 scroll */
   }, [editor, editorWrapperRef, updatePositions])
 
+  /** 关闭列菜单并清理当前菜单目标。 */
   const closeMenu = useCallback(() => {
     closeMenuBase(() => {
       menuTargetRef.current = null
     })
   }, [closeMenuBase])
-  // Popover 开关状态统一收敛到这里，关闭时同步清理目标引用。
-  const handleMenuOpenChange = useCallback((open: boolean) => {
-    handleMenuOpenChangeBase(open, () => {
-      menuTargetRef.current = null
-    })
-  }, [handleMenuOpenChangeBase])
+
+  // 表格菜单挂到编辑器内容 Portal，避免挂到 document.body 破坏主题隔离。
+  const popoverContainer = contentPortalContainer ?? editorWrapperRef.current
+  /** 表格列菜单浮层定位。 */
+  const columnMenuPanel = useFloatingPortalPanel({
+    open: menuOpen,
+    portalContainer: popoverContainer,
+    editorWrapper: editorWrapperRef.current,
+    defaultPlacement: MenuPlacement.Top,
+    placementBoundary: 'editor-wrapper',
+    fallbackWidth: 320,
+    fallbackHeight: 40,
+    onOutside: closeMenu,
+    ignoreOutsideSelector: '.table-alignment-submenu',
+  })
 
   const handleColumnButtonClick = useCallback(
     (e: React.MouseEvent) => {
@@ -304,9 +316,10 @@ const TableColumnActions = ({
         lastColumnFirstCellPos: currentColumn.lastColumnFirstCellPos,
         lastColumnIndex: currentColumn.lastColumnIndex,
       }
+      columnMenuPanel.updatePosition()
       setMenuOpen(true)
     },
-    [closeMenu, currentColumn, menuOpen]
+    [closeMenu, columnMenuPanel, currentColumn, menuOpen, setMenuOpen]
   )
 
   /** 「在左侧插入列」：以最左侧选中列为基准 */
@@ -395,8 +408,6 @@ const TableColumnActions = ({
     return null
   }
 
-  // Popover 挂到编辑器容器内，避免挂到 document.body 破坏主题隔离。
-  const popoverContainer = contentPortalContainer ?? editorWrapperRef.current
   // 表格菜单碰撞边界，避免菜单脱离编辑器滚动视口后仍覆盖外层区域。
   const popoverBoundary = editorWrapperRef.current
   const usePortal = Boolean(portalTarget && portalButtonPosition)
@@ -416,50 +427,46 @@ const TableColumnActions = ({
       : null
   )
 
-  // 操作按钮视觉与定位保持不变，仅将菜单实现替换为 Popover。
+  // 操作按钮视觉与定位保持不变，菜单内容单独走编辑器浮层定位。
   const singleButton = (
-    <Popover open={menuOpen} onOpenChange={handleMenuOpenChange}>
-      <PopoverTrigger asChild>
-        <button
-          ref={buttonRef}
-          type="button"
-          className="table-column-action-trigger"
-          aria-label={locale.table.columnActionsAriaLabel}
-          style={
-            usePortal && portalButtonPosition
-              ? {
-                  top: `${portalButtonPosition.top}px`,
-                  left: `${portalButtonPosition.left}px`,
-                  width: `${portalButtonPosition.width}px`,
-                  height: `${COL_BUTTON_HEIGHT}px`,
-                }
-              : {
-                  top: `${currentColumn.top}px`,
-                  left: `${currentColumn.left}px`,
-                  width: `${currentColumn.width}px`,
-                  height: `${COL_BUTTON_HEIGHT}px`,
-                }
-          }
+    <button
+      ref={columnMenuPanel.triggerRef}
+      type="button"
+      className="table-column-action-trigger"
+      aria-label={locale.table.columnActionsAriaLabel}
+      style={
+        usePortal && portalButtonPosition
+          ? {
+              top: `${portalButtonPosition.top}px`,
+              left: `${portalButtonPosition.left}px`,
+              width: `${portalButtonPosition.width}px`,
+              height: `${COL_BUTTON_HEIGHT}px`,
+            }
+          : {
+              top: `${currentColumn.top}px`,
+              left: `${currentColumn.left}px`,
+              width: `${currentColumn.width}px`,
+              height: `${COL_BUTTON_HEIGHT}px`,
+            }
+      }
+      onMouseDown={e => e.preventDefault()}
+      onClick={handleColumnButtonClick}
+    >
+      <Ellipsis className="table-column-action-icon" size={16} aria-hidden="true" />
+    </button>
+  )
+
+  /** 列菜单内容，使用编辑器浮层定位以统一滚动补偿。 */
+  const menuContent =
+    menuOpen && popoverContainer
+      ? (
+        <FloatingPortalPanel
+          panel={columnMenuPanel}
+          portalContainer={popoverContainer}
+          role="menu"
+          className="table-column-action-menu w-auto p-1"
           onMouseDown={e => e.preventDefault()}
-          onClick={handleColumnButtonClick}
         >
-          <Ellipsis className="table-column-action-icon" size={16} aria-hidden="true" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        container={popoverContainer}
-        collisionBoundary={popoverBoundary}
-        hideWhenDetached
-        side="top"
-        align="start"
-        sideOffset={8}
-        role="menu"
-        className="table-column-action-menu w-auto p-1"
-        onMouseDown={e => e.preventDefault()}
-        onOpenAutoFocus={e => e.preventDefault()}
-        // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-        onCloseAutoFocus={e => e.preventDefault()}
-      >
         <button
           type="button"
           role="menuitem"
@@ -578,13 +585,14 @@ const TableColumnActions = ({
         >
           <Trash2 size={16} />
         </button>
-      </PopoverContent>
-    </Popover>
-  )
+        </FloatingPortalPanel>
+      )
+      : null
 
   return (
     <>
       {usePortal && portalTarget ? createPortal(singleButton, portalTarget) : singleButton}
+      {menuContent}
     </>
   )
 }

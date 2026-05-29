@@ -20,6 +20,10 @@ import {
 } from "@/core/extensions/codeBlockLowlight";
 import { setCodeBlockLanguage } from "@/core/commands/editorCommands";
 import {
+  FloatingPortalPanel,
+  useFloatingPortalPanel,
+} from "@/react/hooks";
+import {
   createEditorFloatingOverlayPositionContext,
   useEditorFloatingOverlayPosition,
   type EditorFloatingOverlayPositionContext,
@@ -33,6 +37,15 @@ const CODE_BLOCK_LANGUAGE_TRIGGER_MIN_WIDTH = 132;
 
 // 语言选择器触发器的默认高度，用于首帧定位。
 const CODE_BLOCK_LANGUAGE_TRIGGER_HEIGHT = 32;
+
+// 语言下拉面板与触发器的间距，用于浮层定位。
+const CODE_BLOCK_LANGUAGE_PANEL_OFFSET = 6;
+
+// 语言下拉面板的默认宽度，用于首帧定位。
+const CODE_BLOCK_LANGUAGE_PANEL_WIDTH = 220;
+
+// 语言下拉面板的最大高度，用于首帧翻转判断。
+const CODE_BLOCK_LANGUAGE_PANEL_MAX_HEIGHT = 210;
 
 interface CodeBlockLanguageMenuProps {
   editor: Editor;
@@ -143,6 +156,40 @@ export default function CodeBlockLanguageMenu({
     input?.focus();
   }, []);
 
+  /** 关闭语言下拉，按需先把焦点恢复到当前代码块再同步焦点状态。 */
+  const closeLanguageMenu = useCallback(
+    (restoreEditorFocus = false) => {
+      setIsMenuOpen(false);
+      requestAnimationFrame(() => {
+        if (restoreEditorFocus) {
+          editor.commands.focus();
+        }
+        requestAnimationFrame(() => {
+          onMenuOpenStateChecked?.(editor.isFocused);
+        });
+      });
+    },
+    [editor, onMenuOpenStateChecked],
+  );
+
+  /** 处理语言下拉外部点击关闭。 */
+  const handleLanguagePanelOutside = useCallback(() => {
+    closeLanguageMenu(false);
+  }, [closeLanguageMenu]);
+
+  // 语言下拉面板浮层定位。
+  const languagePanel = useFloatingPortalPanel({
+    open: isMenuOpen,
+    portalContainer,
+    editorWrapper: editorWrapperRef.current,
+    placementBoundary: "editor-wrapper",
+    horizontalAlign: "end",
+    verticalOffset: CODE_BLOCK_LANGUAGE_PANEL_OFFSET,
+    fallbackWidth: CODE_BLOCK_LANGUAGE_PANEL_WIDTH,
+    fallbackHeight: CODE_BLOCK_LANGUAGE_PANEL_MAX_HEIGHT,
+    onOutside: handleLanguagePanelOutside,
+  });
+
   /** 重新计算语言选择器在编辑器内容坐标系内的位置。 */
   const updateMenuState = useCallback(() => {
     if (!enabled) {
@@ -174,7 +221,7 @@ export default function CodeBlockLanguageMenu({
       createEditorFloatingOverlayPositionContext({
         editorWrapper: editorWrapperRef.current,
         anchor: active.dom,
-        // 触发器位置固定在代码块下方，不因下拉面板可用空间而翻转。
+        // 触发器固定在代码块下方，打开后的下拉面板由统一浮层 Hook 自动翻转。
         lockPlacement: true,
         horizontalAlign: "end",
         // 语言选择器放在代码块底边外侧，而不是内容区内部。
@@ -232,14 +279,6 @@ export default function CodeBlockLanguageMenu({
 
   if (!portalContainer || !positionContext || !currentLanguage) return null;
 
-  /** 关闭语言下拉并同步编辑器焦点状态。 */
-  const closeLanguageMenu = () => {
-    setIsMenuOpen(false);
-    requestAnimationFrame(() => {
-      onMenuOpenStateChecked?.(editor.isFocused);
-    });
-  };
-
   // 当前语言展示文案。
   const currentLanguageLabel =
     resolvedLanguages.find((item) => item.value === currentLanguage)?.label ??
@@ -257,6 +296,7 @@ export default function CodeBlockLanguageMenu({
     >
       <div className="code-block-control-bar">
         <button
+          ref={languagePanel.triggerRef}
           type="button"
           className="code-block-control-language-trigger"
           aria-label={locale.codeBlock.languageButton}
@@ -266,11 +306,11 @@ export default function CodeBlockLanguageMenu({
           }}
           onClick={() => {
             if (isMenuOpen) {
-              requestAnimationFrame(() => {
-                onMenuOpenStateChecked?.(editor.isFocused);
-              });
+              closeLanguageMenu(true);
+              return;
             }
-            setIsMenuOpen(!isMenuOpen);
+            languagePanel.updatePosition();
+            setIsMenuOpen(true);
           }}
         >
           <span className="code-block-control-language-text">
@@ -280,7 +320,12 @@ export default function CodeBlockLanguageMenu({
         </button>
       </div>
       {isMenuOpen && (
-        <div className="code-block-language-select-content">
+        <FloatingPortalPanel
+          panel={languagePanel}
+          portalContainer={portalContainer}
+          className="code-block-language-select-content"
+          zIndex={46}
+        >
           <Command
             shouldFilter={false}
             className="code-block-language-command"
@@ -294,10 +339,7 @@ export default function CodeBlockLanguageMenu({
               }}
               onKeyDown={(event) => {
                 if (event.key === "Escape") {
-                  closeLanguageMenu();
-                  requestAnimationFrame(() => {
-                    editor.commands.focus();
-                  });
+                  closeLanguageMenu(true);
                 }
               }}
             />
@@ -312,10 +354,7 @@ export default function CodeBlockLanguageMenu({
                   className="code-block-language-option"
                   onSelect={() => {
                     setCodeBlockLanguage(editor, item.value);
-                    closeLanguageMenu();
-                    requestAnimationFrame(() => {
-                      editor.commands.focus();
-                    });
+                    closeLanguageMenu(true);
                     updateMenuState();
                   }}
                 >
@@ -327,7 +366,7 @@ export default function CodeBlockLanguageMenu({
               ))}
             </CommandList>
           </Command>
-        </div>
+        </FloatingPortalPanel>
       )}
     </div>
   );

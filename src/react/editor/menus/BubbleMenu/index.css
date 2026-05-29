@@ -118,6 +118,7 @@
 .bubble-block-menu {
   width: max-content;
   min-width: 156px;
+  max-height: 300px;
   background: var(--ui-text-inverse);
   border: 1px solid var(--ui-border);
   border-radius: 8px;
@@ -125,9 +126,17 @@
   box-shadow: var(--ui-shadow-xl);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.bubble-block-menu-list {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
 .bubble-block-menu-title {
+  flex: 0 0 auto;
   padding: 6px 10px 4px;
   color: var(--ui-text-muted);
   font-size: 12px;

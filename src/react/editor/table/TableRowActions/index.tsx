@@ -11,10 +11,14 @@ import {
   BetweenVerticalStart,
 } from 'lucide-react'
 import { IconTableDeleteRow } from '@/react/components/Icon'
-import { Popover, PopoverContent, PopoverTrigger } from '@/react/components/ui/popover'
-import { useTableInsertRowRunAndClose } from '@/react/hooks'
+import {
+  FloatingPortalPanel,
+  useFloatingPortalPanel,
+  useTableInsertRowRunAndClose,
+} from '@/react/hooks'
 import { config } from '@/shared/config'
 import type { EditorLocale } from '@/shared/locales'
+import { MenuPlacement } from '@/react/editor/types'
 import TableAddRowColumnButtons, { TABLE_ADD_BAR_SIZE } from '../TableAddRowColumnButtons'
 import TableAlignmentMenu from '../TableAlignmentMenu'
 import { applyTableCellAlignment, getTableCellAlignmentState } from '../tableAlignment'
@@ -71,10 +75,8 @@ const TableRowActions = ({
     portalButtonPosition,
     setPortalButtonPosition,
     closeMenu: closeMenuBase,
-    handleMenuOpenChange: handleMenuOpenChangeBase,
     clearPortalState,
   } = useTableActionsPositioning<{ top: number; left: number; height: number }>()
-  const buttonRef = useRef<HTMLButtonElement>(null)
   /**
    * 打开菜单时记录目标行信息，供 useTableInsertRowRunAndClose 用。
    * first* 指最上方选中行（用于「插上方」），last* 指最下方选中行（用于「插下方」）。
@@ -304,17 +306,27 @@ const TableRowActions = ({
     /* 按钮已 Portal 到 tableWrapper 内，随表格滚动，无需监听 scroll */
   }, [editor, editorWrapperRef, updatePositions])
 
+  /** 关闭行菜单并清理当前菜单目标。 */
   const closeMenu = useCallback(() => {
     closeMenuBase(() => {
       menuTargetRef.current = null
     })
   }, [closeMenuBase])
-  // Popover 开关状态统一收敛到这里，关闭时同步清理目标引用。
-  const handleMenuOpenChange = useCallback((open: boolean) => {
-    handleMenuOpenChangeBase(open, () => {
-      menuTargetRef.current = null
-    })
-  }, [handleMenuOpenChangeBase])
+
+  // 表格菜单挂到编辑器内容 Portal，避免挂到 document.body 破坏主题隔离。
+  const popoverContainer = contentPortalContainer ?? editorWrapperRef.current
+  /** 表格行菜单浮层定位。 */
+  const rowMenuPanel = useFloatingPortalPanel({
+    open: menuOpen,
+    portalContainer: popoverContainer,
+    editorWrapper: editorWrapperRef.current,
+    defaultPlacement: MenuPlacement.Top,
+    placementBoundary: 'editor-wrapper',
+    fallbackWidth: 320,
+    fallbackHeight: 40,
+    onOutside: closeMenu,
+    ignoreOutsideSelector: '.table-alignment-submenu',
+  })
 
   const handleRowButtonClick = useCallback(
     (e: React.MouseEvent) => {
@@ -332,9 +344,10 @@ const TableRowActions = ({
         lastRowFirstCellPos: currentRow.lastRowFirstCellPos,
         lastRowIndex: currentRow.lastRowIndex,
       }
+      rowMenuPanel.updatePosition()
       setMenuOpen(true)
     },
-    [closeMenu, currentRow, menuOpen]
+    [closeMenu, currentRow, menuOpen, rowMenuPanel, setMenuOpen]
   )
 
   /** 「在上方插入行」：以最上方选中行为基准 */
@@ -423,8 +436,6 @@ const TableRowActions = ({
     return null
   }
 
-  // Popover 挂到编辑器容器内，避免挂到 document.body 破坏主题隔离。
-  const popoverContainer = contentPortalContainer ?? editorWrapperRef.current
   // 表格菜单碰撞边界，避免菜单脱离编辑器滚动视口后仍覆盖外层区域。
   const popoverBoundary = editorWrapperRef.current
   const usePortal = Boolean(portalTarget && portalButtonPosition)
@@ -445,50 +456,47 @@ const TableRowActions = ({
       : null
   )
 
-  // 操作按钮视觉与定位保持不变，仅将菜单实现替换为 Popover。
+  // 操作按钮视觉与定位保持不变，菜单内容单独走编辑器浮层定位。
   const singleButton = (
-    <Popover key="row-action-button" open={menuOpen} onOpenChange={handleMenuOpenChange}>
-      <PopoverTrigger asChild>
-        <button
-          ref={buttonRef}
-          type="button"
-          className="table-row-action-trigger"
-          aria-label={locale.table.rowActionsAriaLabel}
-          style={
-            usePortal && portalButtonPosition
-              ? {
-                  top: `${portalButtonPosition.top}px`,
-                  left: `${portalButtonPosition.left}px`,
-                  width: `${ROW_BUTTON_WIDTH}px`,
-                  height: `${portalButtonPosition.height}px`,
-                }
-              : {
-                  top: `${currentRow.top}px`,
-                  left: `${currentRow.left}px`,
-                  width: `${ROW_BUTTON_WIDTH}px`,
-                  height: `${currentRow.height}px`,
-                }
-          }
+    <button
+      key="row-action-button"
+      ref={rowMenuPanel.triggerRef}
+      type="button"
+      className="table-row-action-trigger"
+      aria-label={locale.table.rowActionsAriaLabel}
+      style={
+        usePortal && portalButtonPosition
+          ? {
+              top: `${portalButtonPosition.top}px`,
+              left: `${portalButtonPosition.left}px`,
+              width: `${ROW_BUTTON_WIDTH}px`,
+              height: `${portalButtonPosition.height}px`,
+            }
+          : {
+              top: `${currentRow.top}px`,
+              left: `${currentRow.left}px`,
+              width: `${ROW_BUTTON_WIDTH}px`,
+              height: `${currentRow.height}px`,
+            }
+      }
+      onMouseDown={e => e.preventDefault()}
+      onClick={handleRowButtonClick}
+    >
+      <EllipsisVertical className="table-row-action-icon" size={14} aria-hidden="true" />
+    </button>
+  )
+
+  /** 行菜单内容，使用编辑器浮层定位以统一滚动补偿。 */
+  const menuContent =
+    menuOpen && popoverContainer
+      ? (
+        <FloatingPortalPanel
+          panel={rowMenuPanel}
+          portalContainer={popoverContainer}
+          role="menu"
+          className="table-row-action-menu w-auto p-1"
           onMouseDown={e => e.preventDefault()}
-          onClick={handleRowButtonClick}
         >
-          <EllipsisVertical className="table-row-action-icon" size={14} aria-hidden="true" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        container={popoverContainer}
-        collisionBoundary={popoverBoundary}
-        hideWhenDetached
-        side="top"
-        align="start"
-        sideOffset={8}
-        role="menu"
-        className="table-row-action-menu w-auto p-1"
-        onMouseDown={e => e.preventDefault()}
-        onOpenAutoFocus={e => e.preventDefault()}
-        // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-        onCloseAutoFocus={e => e.preventDefault()}
-      >
         <button
           type="button"
           role="menuitem"
@@ -603,9 +611,9 @@ const TableRowActions = ({
         >
           <Trash2 size={16} />
         </button>
-      </PopoverContent>
-    </Popover>
-  )
+        </FloatingPortalPanel>
+      )
+      : null
 
   return (
     <>
@@ -628,6 +636,7 @@ const TableRowActions = ({
             portalTarget
           )
         : singleButton}
+      {menuContent}
     </>
   )
 }

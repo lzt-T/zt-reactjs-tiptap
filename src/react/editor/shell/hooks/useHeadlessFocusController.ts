@@ -92,9 +92,14 @@ export function useHeadlessFocusController({
 
   /** 统一 blur 收口：同步焦点状态、清理可见选区并触发 TipTap blur。 */
   const finalizeBlurIfNeeded = useCallback(
-    (editorFocused: boolean) => {
+    (editorFocused: boolean, ignoreActiveLanguageMenu = false) => {
       if (!editor || editorFocused || hasBlurFinalizedRef.current) return;
-      if (isInsideLanguageMenu(document.activeElement)) return;
+      if (
+        !ignoreActiveLanguageMenu &&
+        isInsideLanguageMenu(document.activeElement)
+      ) {
+        return;
+      }
       if (isInsideFocusRetainedElement(document.activeElement)) return;
       hasBlurFinalizedRef.current = true;
       // 失焦时清空范围选区：将非空选区折叠到原选区起点。
@@ -194,10 +199,14 @@ export function useHeadlessFocusController({
 
     /** 处理容器内点击，保护 blur 链路并记录公式节点。 */
     const handleMouseDown = (event: MouseEvent) => {
-      if (
-        containerRef.current?.contains(event.target as Node) ||
-        isInsideLanguageMenu(event.target)
-      ) {
+      // 点击目标是否位于编辑器容器内。
+      const isInsideContainer = containerRef.current?.contains(
+        event.target as Node,
+      );
+      // 点击目标是否位于代码块语言菜单内。
+      const isInsideCodeBlockLanguageMenu = isInsideLanguageMenu(event.target);
+
+      if (isInsideContainer || isInsideCodeBlockLanguageMenu) {
         mouseDownInsideRef.current = true;
         setTimeout(() => {
           mouseDownInsideRef.current = false;
@@ -214,6 +223,11 @@ export function useHeadlessFocusController({
             };
           }
         }
+        return;
+      }
+
+      if (isInsideLanguageMenu(document.activeElement)) {
+        finalizeBlurIfNeeded(false, true);
       }
     };
 

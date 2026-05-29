@@ -1,8 +1,16 @@
-import type { MouseEvent, ReactNode } from "react";
+import {
+  useCallback,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import type { ColorOption } from "@/shared/config";
 import type { EditorLocale } from "@/shared/locales";
 import { cn } from "@/shared/utils/utils";
 import ColorPicker from "@/react/editor/color/ColorPicker";
+import {
+  FloatingPortalPanel,
+  useFloatingPortalPanel,
+} from "@/react/hooks";
 import {
   Popover,
   PopoverContent,
@@ -22,6 +30,8 @@ interface ColorPopoverPickerProps {
   onColorSelect: (color: string) => void;
   locale: EditorLocale;
   portalContainer?: HTMLElement | null;
+  /** 传入时使用编辑器浮层定位，未传时保持 Radix Popover。 */
+  floatingBoundary?: HTMLDivElement | null;
   /** Popover 碰撞边界，未传时保持 Radix 默认边界。 */
   collisionBoundary?: HTMLElement | null;
   /** 触发器脱离边界时是否隐藏 Popover。 */
@@ -54,16 +64,41 @@ export default function ColorPopoverPicker({
   onColorSelect,
   locale,
   portalContainer,
+  floatingBoundary,
   collisionBoundary,
   hideWhenDetached = false,
   popoverClassName,
   triggerClassName,
 }: ColorPopoverPickerProps) {
+  /** 是否启用自定义编辑器浮层定位。 */
+  const useFloatingOverlay =
+    typeof HTMLDivElement !== "undefined" &&
+    Boolean(floatingBoundary) &&
+    portalContainer instanceof HTMLDivElement;
+  /** 自定义浮层的 Portal 容器。 */
+  const floatingPortalContainer =
+    typeof HTMLDivElement !== "undefined" &&
+    useFloatingOverlay &&
+    portalContainer instanceof HTMLDivElement
+      ? portalContainer
+      : null;
+
   /** 统一处理 open 变化，禁用态下阻止打开。 */
-  const handleOpenChange = (nextOpen: boolean) => {
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
     if (nextOpen && disabled) return;
     onOpenChange(nextOpen);
-  };
+  }, [disabled, onOpenChange]);
+
+  /** 颜色面板自定义浮层定位。 */
+  const colorFloatingPanel = useFloatingPortalPanel({
+    open: useFloatingOverlay && open,
+    portalContainer: floatingPortalContainer,
+    editorWrapper: floatingBoundary,
+    placementBoundary: "editor-wrapper",
+    fallbackWidth: 214,
+    fallbackHeight: 260,
+    onOutside: () => handleOpenChange(false),
+  });
 
   /** 统一处理颜色选择后关闭 Popover。 */
   const handleColorSelect = (color: string) => {
@@ -76,6 +111,62 @@ export default function ColorPopoverPicker({
     if (isInteractiveMouseTarget(event.target)) return;
     event.preventDefault();
   };
+
+  /** 切换自定义浮层打开状态。 */
+  const handleFloatingTriggerClick = () => {
+    if (disabled) return;
+    if (open) {
+      handleOpenChange(false);
+      return;
+    }
+    colorFloatingPanel.updatePosition();
+    handleOpenChange(true);
+  };
+
+  if (useFloatingOverlay) {
+    /** 自定义浮层模式下的颜色面板。 */
+    const floatingPanel =
+      open && floatingPortalContainer
+        ? (
+            <FloatingPortalPanel
+              panel={colorFloatingPanel}
+              portalContainer={floatingPortalContainer}
+              className={popoverClassName}
+              onMouseDown={handleContentMouseDown}
+            >
+              <ColorPicker
+                type={type}
+                options={options}
+                selectedColor={selectedColor}
+                onColorSelect={handleColorSelect}
+                locale={locale}
+              />
+            </FloatingPortalPanel>
+          )
+        : null;
+
+    return (
+      <>
+        <button
+          ref={colorFloatingPanel.triggerRef}
+          type="button"
+          className={cn(
+            triggerClassName,
+            active && "is-active",
+            disabled && "is-disabled",
+          )}
+          title={title}
+          disabled={disabled}
+          aria-expanded={open}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={handleFloatingTriggerClick}
+        >
+          {icon}
+        </button>
+        {floatingPanel}
+      </>
+    );
+  }
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>

@@ -29,14 +29,6 @@ import {
   Highlighter,
   Palette,
   MoreHorizontal,
-  Superscript,
-  Subscript,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  ListIndentDecrease,
-  ListIndentIncrease,
   List,
   ListOrdered,
   ListTodo,
@@ -46,7 +38,12 @@ import {
   Type as TextIcon,
 } from "lucide-react";
 import type { HeadingLevel } from "@/core/commands/editorCommands";
-import { useEditorCommands, useScopedActiveDispatcher } from "@/react/hooks";
+import {
+  FloatingPortalPanel,
+  useEditorCommands,
+  useFloatingPortalPanel,
+  useScopedActiveDispatcher,
+} from "@/react/hooks";
 import ColorPopoverPicker from "@/react/editor/color/ColorPopoverPicker";
 import LinkEditorPanel from "@/react/editor/link";
 import {
@@ -57,12 +54,8 @@ import {
   toggleHighlightColor,
   toggleTextColor,
 } from "@/react/editor/shared/editorActionStrategies";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/react/components/ui/popover";
 import type { EditorLocale } from "@/shared/locales";
+import BubbleMoreMenu from "./BubbleMoreMenu";
 import "./index.css";
 
 interface BubbleMenuProps {
@@ -72,9 +65,9 @@ interface BubbleMenuProps {
   highlightColorOptions: ColorOption[];
   portalContainer?: HTMLElement | null;
   /** 选区附属颜色面板的内容层 Portal 容器。 */
-  contentPortalContainer?: HTMLElement | null;
+  contentPortalContainer?: HTMLDivElement | null;
   /** 选区附属面板碰撞边界，通常为编辑器滚动容器。 */
-  contentPopoverBoundary?: HTMLElement | null;
+  contentPopoverBoundary?: HTMLDivElement | null;
   isInsideOverlayContainer?: (target: EventTarget | null) => boolean;
   onOverlayCloseOutside?: () => void;
 }
@@ -145,7 +138,6 @@ const BubbleMenu = ({
   locale,
   textColorOptions = config.TEXT_COLORS,
   highlightColorOptions = config.HIGHLIGHT_COLORS,
-  portalContainer,
   contentPortalContainer,
   contentPopoverBoundary,
   isInsideOverlayContainer,
@@ -231,6 +223,7 @@ const BubbleMenu = ({
         if (active) {
           setShowBlockMenu(false);
           setShowMoreMenu(false);
+          setShowLinkEditor(false);
           setShowColorPicker("highlight");
           return;
         }
@@ -252,6 +245,7 @@ const BubbleMenu = ({
         if (active) {
           setShowBlockMenu(false);
           setShowMoreMenu(false);
+          setShowLinkEditor(false);
           setShowColorPicker("text");
           return;
         }
@@ -314,6 +308,49 @@ const BubbleMenu = ({
     removeLinkAction({ unsetLink: format.unsetLink });
     handleLinkEditorOpenChange(false);
   };
+  /** 关闭块类型下拉。 */
+  const closeBlockMenu = useCallback(() => {
+    setShowBlockMenu(false);
+  }, []);
+  /** 关闭链接编辑面板。 */
+  const closeLinkEditor = useCallback(() => {
+    handleLinkEditorOpenChange(false);
+  }, [handleLinkEditorOpenChange]);
+  /** 关闭更多菜单。 */
+  const closeMoreMenu = useCallback(() => {
+    setShowMoreMenu(false);
+  }, []);
+  /** 块类型下拉浮层定位。 */
+  const blockMenuPanel = useFloatingPortalPanel({
+    open: showBlockMenu,
+    portalContainer: contentPortalContainer,
+    editorWrapper: contentPopoverBoundary,
+    placementBoundary: "editor-wrapper",
+    fallbackWidth: 180,
+    fallbackHeight: 300,
+    onOutside: closeBlockMenu,
+  });
+  /** 链接编辑浮层定位。 */
+  const linkEditorPanel = useFloatingPortalPanel({
+    open: showLinkEditor,
+    portalContainer: contentPortalContainer,
+    editorWrapper: contentPopoverBoundary,
+    placementBoundary: "editor-wrapper",
+    fallbackWidth: 260,
+    fallbackHeight: 48,
+    onOutside: closeLinkEditor,
+  });
+  /** 更多菜单浮层定位。 */
+  const moreMenuPanel = useFloatingPortalPanel({
+    open: showMoreMenu,
+    portalContainer: contentPortalContainer,
+    editorWrapper: contentPopoverBoundary,
+    placementBoundary: "editor-wrapper",
+    horizontalAlign: "end",
+    fallbackWidth: 360,
+    fallbackHeight: 42,
+    onOutside: closeMoreMenu,
+  });
 
   // 当前块类型按钮展示文案。
   const currentBlockLabel = resolveCurrentBlockLabel(editor, locale);
@@ -402,6 +439,99 @@ const BubbleMenu = ({
     if (isFromColorPopoverContent(event.target)) return;
     event.preventDefault();
   };
+  /** 块类型下拉 Portal 内容。 */
+  const blockMenuContent =
+    showBlockMenu && contentPortalContainer
+      ? (
+          <FloatingPortalPanel
+            panel={blockMenuPanel}
+            portalContainer={contentPortalContainer}
+            className="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
+            onMouseDown={(event) => event.preventDefault()}
+          >
+            <div className="bubble-block-menu">
+              <div className="bubble-block-menu-title">
+                {locale.bubbleMenu.turnInto}
+              </div>
+              <div className="bubble-block-menu-list">
+                {blockMenuItems.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={
+                      item.active
+                        ? "bubble-block-menu-item is-active"
+                        : "bubble-block-menu-item"
+                    }
+                    onClick={() => {
+                      item.run();
+                      setShowBlockMenu(false);
+                    }}
+                    title={item.label}
+                  >
+                    <span className="bubble-block-menu-icon">{item.icon}</span>
+                    <span className="bubble-block-menu-label">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </FloatingPortalPanel>
+        )
+      : null;
+  /** 链接编辑 Portal 内容。 */
+  const linkEditorContent =
+    showLinkEditor && contentPortalContainer
+      ? (
+          <FloatingPortalPanel
+            panel={linkEditorPanel}
+            portalContainer={contentPortalContainer}
+            className="bubble-menu-popover-panel"
+          >
+            <LinkEditorPanel
+              value={linkDraft}
+              locale={locale}
+              errorMessage={linkDraftError}
+              submitDisabled={!resolvedLinkDraftHref}
+              onChange={setLinkDraft}
+              onSubmit={submitLinkDraft}
+              onRemove={removeLink}
+              onClose={() => handleLinkEditorOpenChange(false)}
+            />
+          </FloatingPortalPanel>
+        )
+      : null;
+  /** 更多菜单 Portal 内容。 */
+  const moreMenuContent =
+    showMoreMenu && contentPortalContainer
+      ? (
+          <FloatingPortalPanel
+            panel={moreMenuPanel}
+            portalContainer={contentPortalContainer}
+            className="bubble-menu-popover-panel"
+            onMouseDown={(event) => event.preventDefault()}
+          >
+            <BubbleMoreMenu
+              locale={locale}
+              isSuperscriptActive={editor.isActive("superscript")}
+              isSubscriptActive={editor.isActive("subscript")}
+              isAlignLeftActive={editor.isActive({ textAlign: "left" })}
+              isAlignCenterActive={editor.isActive({ textAlign: "center" })}
+              isAlignRightActive={editor.isActive({ textAlign: "right" })}
+              isJustifyActive={editor.isActive({ textAlign: "justify" })}
+              isSuperscriptDisabled={isSuperscriptDisabled}
+              isSubscriptDisabled={isSubscriptDisabled}
+              isDecreaseIndentDisabled={isDecreaseIndentDisabled}
+              isIncreaseIndentDisabled={isIncreaseIndentDisabled}
+              onToggleSuperscript={format.toggleSuperscript}
+              onToggleSubscript={format.toggleSubscript}
+              onSetTextAlign={format.setTextAlign}
+              onDecreaseIndent={block.decreaseIndent}
+              onIncreaseIndent={block.increaseIndent}
+              onClose={closeMoreMenu}
+            />
+          </FloatingPortalPanel>
+        )
+      : null;
 
   return (
     <>
@@ -412,72 +542,33 @@ const BubbleMenu = ({
         onMouseDown={handleBubbleMenuMouseDown}
         shouldShow={shouldShowBubbleMenu}
       >
-        <Popover
-          open={showBlockMenu}
-          onOpenChange={(open) => {
-            if (open) {
-              setShowColorPicker(null);
-              setShowMoreMenu(false);
-              setShowLinkEditor(false);
+        <button
+          ref={blockMenuPanel.triggerRef}
+          type="button"
+          className={
+            showBlockMenu
+              ? "bubble-block-trigger is-active"
+              : "bubble-block-trigger"
+          }
+          title={locale.bubbleMenu.turnInto}
+          aria-expanded={showBlockMenu}
+          onClick={() => {
+            if (showBlockMenu) {
+              setShowBlockMenu(false);
+              return;
             }
-            setShowBlockMenu(open);
+            blockMenuPanel.updatePosition();
+            setShowColorPicker(null);
+            setShowMoreMenu(false);
+            setShowLinkEditor(false);
+            setShowBlockMenu(true);
           }}
         >
-          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
-            <button
-              type="button"
-              className={
-                showBlockMenu
-                  ? "bubble-block-trigger is-active"
-                  : "bubble-block-trigger"
-              }
-              title={locale.bubbleMenu.turnInto}
-            >
-              <span className="bubble-block-trigger-label">
-                {currentBlockLabel}
-              </span>
-              <ChevronDown size={14} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            container={contentPortalContainer ?? undefined}
-            collisionBoundary={contentPopoverBoundary}
-            hideWhenDetached
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            className="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
-            onMouseDown={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <div className="bubble-block-menu">
-              <div className="bubble-block-menu-title">
-                {locale.bubbleMenu.turnInto}
-              </div>
-              {blockMenuItems.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  className={
-                    item.active
-                      ? "bubble-block-menu-item is-active"
-                      : "bubble-block-menu-item"
-                  }
-                  onClick={() => {
-                    item.run();
-                    setShowBlockMenu(false);
-                  }}
-                  title={item.label}
-                >
-                  <span className="bubble-block-menu-icon">{item.icon}</span>
-                  <span className="bubble-block-menu-label">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
+          <span className="bubble-block-trigger-label">
+            {currentBlockLabel}
+          </span>
+          <ChevronDown size={14} />
+        </button>
         <span className="separator" />
         <button
           onClick={() => {
@@ -558,56 +649,31 @@ const BubbleMenu = ({
         >
           <Code size={16} />
         </button>
-        <Popover
-          open={showLinkEditor}
-          onOpenChange={(open) => {
-            if (open) {
-              if (isLinkDisabled) return;
-              openLinkEditor();
+        <button
+          ref={linkEditorPanel.triggerRef}
+          className={
+            editor.isActive("link") && !isLinkDisabled
+              ? "bubble-menu-btn is-active"
+              : isLinkDisabled
+                ? "bubble-menu-btn is-disabled"
+                : "bubble-menu-btn"
+          }
+          title={locale.bubbleMenu.link}
+          disabled={isLinkDisabled}
+          aria-disabled={isLinkDisabled}
+          aria-expanded={showLinkEditor}
+          onClick={() => {
+            if (isLinkDisabled) return;
+            if (showLinkEditor) {
+              handleLinkEditorOpenChange(false);
               return;
             }
-            handleLinkEditorOpenChange(false);
+            linkEditorPanel.updatePosition();
+            openLinkEditor();
           }}
         >
-          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
-            <button
-              className={
-                editor.isActive("link") && !isLinkDisabled
-                  ? "bubble-menu-btn is-active"
-                  : isLinkDisabled
-                    ? "bubble-menu-btn is-disabled"
-                    : "bubble-menu-btn"
-              }
-              title={locale.bubbleMenu.link}
-              disabled={isLinkDisabled}
-              aria-disabled={isLinkDisabled}
-            >
-              <LinkIcon size={16} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            container={contentPortalContainer ?? undefined}
-            collisionBoundary={contentPopoverBoundary}
-            hideWhenDetached
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            className="bubble-menu-popover-panel"
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <LinkEditorPanel
-              value={linkDraft}
-              locale={locale}
-              errorMessage={linkDraftError}
-              submitDisabled={!resolvedLinkDraftHref}
-              onChange={setLinkDraft}
-              onSubmit={submitLinkDraft}
-              onRemove={removeLink}
-              onClose={() => handleLinkEditorOpenChange(false)}
-            />
-          </PopoverContent>
-        </Popover>
+          <LinkIcon size={16} />
+        </button>
         <span className="separator" />
         {/* 官方是免费的 */}
         <ColorPopoverPicker
@@ -623,8 +689,7 @@ const BubbleMenu = ({
           onColorSelect={onHighlightColorSelect}
           locale={locale}
           portalContainer={contentPortalContainer}
-          collisionBoundary={contentPopoverBoundary}
-          hideWhenDetached
+          floatingBoundary={contentPopoverBoundary}
           popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
           triggerClassName="bubble-menu-btn"
         />
@@ -642,178 +707,36 @@ const BubbleMenu = ({
           onColorSelect={onTextColorSelect}
           locale={locale}
           portalContainer={contentPortalContainer}
-          collisionBoundary={contentPopoverBoundary}
-          hideWhenDetached
+          floatingBoundary={contentPopoverBoundary}
           popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
           triggerClassName="bubble-menu-btn"
         />
         <span className="separator" />
-        <Popover
-          open={showMoreMenu}
-          onOpenChange={(open) => {
-            if (open) {
-              setShowBlockMenu(false);
-              setShowColorPicker(null);
+        <button
+          ref={moreMenuPanel.triggerRef}
+          className={
+            showMoreMenu ? "bubble-menu-btn is-active" : "bubble-menu-btn"
+          }
+          title={locale.bubbleMenu.more}
+          aria-expanded={showMoreMenu}
+          onClick={() => {
+            if (showMoreMenu) {
+              setShowMoreMenu(false);
+              return;
             }
-            setShowMoreMenu(open);
+            moreMenuPanel.updatePosition();
+            setShowBlockMenu(false);
+            setShowColorPicker(null);
+            setShowLinkEditor(false);
+            setShowMoreMenu(true);
           }}
         >
-          <PopoverTrigger asChild onMouseDown={(e) => e.preventDefault()}>
-            <button
-              className={
-                showMoreMenu ? "bubble-menu-btn is-active" : "bubble-menu-btn"
-              }
-              title={locale.bubbleMenu.more}
-            >
-              <MoreHorizontal size={16} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            container={portalContainer ?? undefined}
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            className="bubble-menu-popover-panel"
-            onMouseDown={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            // 阻止菜单关闭时焦点回到触发器，避免编辑器被判定为失焦。
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            <div className="more-menu">
-              <button
-                onClick={() => {
-                  if (isSuperscriptDisabled) return;
-                  format.toggleSuperscript();
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  editor.isActive("superscript") && !isSuperscriptDisabled
-                    ? "bubble-menu-btn is-active"
-                    : isSuperscriptDisabled
-                      ? "bubble-menu-btn is-disabled"
-                      : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.superscript}
-                disabled={isSuperscriptDisabled}
-                aria-disabled={isSuperscriptDisabled}
-              >
-                <Superscript size={16} />
-              </button>
-              <button
-                onClick={() => {
-                  if (isSubscriptDisabled) return;
-                  format.toggleSubscript();
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  editor.isActive("subscript") && !isSubscriptDisabled
-                    ? "bubble-menu-btn is-active"
-                    : isSubscriptDisabled
-                      ? "bubble-menu-btn is-disabled"
-                      : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.subscript}
-                disabled={isSubscriptDisabled}
-                aria-disabled={isSubscriptDisabled}
-              >
-                <Subscript size={16} />
-              </button>
-              <div className="more-menu-separator" />
-              <button
-                onClick={() => {
-                  format.setTextAlign("left");
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  editor.isActive({ textAlign: "left" })
-                    ? "bubble-menu-btn is-active"
-                    : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.alignLeft}
-              >
-                <AlignLeft size={16} />
-              </button>
-              <button
-                onClick={() => {
-                  format.setTextAlign("center");
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  editor.isActive({ textAlign: "center" })
-                    ? "bubble-menu-btn is-active"
-                    : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.alignCenter}
-              >
-                <AlignCenter size={16} />
-              </button>
-              <button
-                onClick={() => {
-                  format.setTextAlign("right");
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  editor.isActive({ textAlign: "right" })
-                    ? "bubble-menu-btn is-active"
-                    : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.alignRight}
-              >
-                <AlignRight size={16} />
-              </button>
-              <button
-                onClick={() => {
-                  format.setTextAlign("justify");
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  editor.isActive({ textAlign: "justify" })
-                    ? "bubble-menu-btn is-active"
-                    : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.justify}
-              >
-                <AlignJustify size={16} />
-              </button>
-              <div className="more-menu-separator" />
-              <button
-                onClick={() => {
-                  if (isDecreaseIndentDisabled) return;
-                  block.decreaseIndent();
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  isDecreaseIndentDisabled
-                    ? "bubble-menu-btn is-disabled"
-                    : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.decreaseIndent}
-                disabled={isDecreaseIndentDisabled}
-                aria-disabled={isDecreaseIndentDisabled}
-              >
-                <ListIndentDecrease size={16} />
-              </button>
-              <button
-                onClick={() => {
-                  if (isIncreaseIndentDisabled) return;
-                  block.increaseIndent();
-                  setShowMoreMenu(false);
-                }}
-                className={
-                  isIncreaseIndentDisabled
-                    ? "bubble-menu-btn is-disabled"
-                    : "bubble-menu-btn"
-                }
-                title={locale.bubbleMenu.increaseIndent}
-                disabled={isIncreaseIndentDisabled}
-                aria-disabled={isIncreaseIndentDisabled}
-              >
-                <ListIndentIncrease size={16} />
-              </button>
-            </div>
-          </PopoverContent>
-        </Popover>
+          <MoreHorizontal size={16} />
+        </button>
       </TiptapBubbleMenu>
+      {blockMenuContent}
+      {linkEditorContent}
+      {moreMenuContent}
     </>
   );
 };

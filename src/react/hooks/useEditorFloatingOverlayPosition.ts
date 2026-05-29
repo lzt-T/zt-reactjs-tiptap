@@ -22,6 +22,11 @@ export type EditorFloatingOverlayVerticalMode =
   | "inside-top"
   | "inside-bottom";
 
+/** 编辑器浮层展开方向的可用空间边界。 */
+export type EditorFloatingOverlayPlacementBoundary =
+  | "viewport"
+  | "editor-wrapper";
+
 /** 编辑器内容坐标系中的稳定锚点。 */
 interface EditorFloatingOverlayContentAnchor {
   /** 锚点顶部内容坐标。 */
@@ -46,6 +51,8 @@ export interface EditorFloatingOverlayPositionContext {
   defaultPlacement: MenuPlacement;
   /** 是否锁定展开方向。 */
   lockPlacement: boolean;
+  /** 展开方向可用空间的计算边界。 */
+  placementBoundary: EditorFloatingOverlayPlacementBoundary;
   /** 横向对齐方式。 */
   horizontalAlign: EditorFloatingOverlayHorizontalAlign;
   /** 纵向定位模式。 */
@@ -76,6 +83,8 @@ export interface CreateEditorFloatingOverlayPositionContextOptions {
   placementThreshold?: number;
   /** 是否锁定展开方向。 */
   lockPlacement?: boolean;
+  /** 展开方向可用空间的计算边界。 */
+  placementBoundary?: EditorFloatingOverlayPlacementBoundary;
   /** 横向对齐方式。 */
   horizontalAlign?: EditorFloatingOverlayHorizontalAlign;
   /** 纵向定位模式。 */
@@ -135,14 +144,18 @@ function resolvePlacement(
   defaultPlacement: MenuPlacement,
   rect: DOMRect,
   placementThreshold: number,
+  boundaryRect?: DOMRect,
 ): MenuPlacement {
-  // 当前视口高度。
-  const viewportHeight =
-    typeof window === "undefined" ? rect.bottom : window.innerHeight;
+  // 当前可用空间边界顶部。
+  const boundaryTop = boundaryRect?.top ?? 0;
+  // 当前可用空间边界底部。
+  const boundaryBottom =
+    boundaryRect?.bottom ??
+    (typeof window === "undefined" ? rect.bottom : window.innerHeight);
   // 锚点上方可用空间。
-  const spaceAbove = rect.top;
+  const spaceAbove = rect.top - boundaryTop;
   // 锚点下方可用空间。
-  const spaceBelow = viewportHeight - rect.bottom;
+  const spaceBelow = boundaryBottom - rect.bottom;
 
   if (defaultPlacement === MenuPlacement.Top) {
     return spaceAbove < placementThreshold && spaceBelow > spaceAbove
@@ -162,6 +175,7 @@ export function createEditorFloatingOverlayPositionContext({
   defaultPlacement = DEFAULT_PLACEMENT,
   placementThreshold = DEFAULT_PLACEMENT_THRESHOLD,
   lockPlacement = false,
+  placementBoundary = "viewport",
   horizontalAlign = "start",
   verticalMode = "outside",
   horizontalOffset = 0,
@@ -187,9 +201,15 @@ export function createEditorFloatingOverlayPositionContext({
       anchor instanceof HTMLElement
         ? anchor
         : toContentAnchor(rect, wrapperRect, editorWrapper.scrollTop, scrollLeft),
-    placement: resolvePlacement(defaultPlacement, rect, placementThreshold),
+    placement: resolvePlacement(
+      defaultPlacement,
+      rect,
+      placementThreshold,
+      placementBoundary === "editor-wrapper" ? wrapperRect : undefined,
+    ),
     defaultPlacement,
     lockPlacement,
+    placementBoundary,
     horizontalAlign,
     verticalMode,
     horizontalOffset,
@@ -272,6 +292,14 @@ function resolveOverlayCoordinates(
           anchorViewportBottom - anchorViewportTop,
         ),
         overlayHeight || DEFAULT_PLACEMENT_THRESHOLD,
+        context.placementBoundary === "editor-wrapper"
+          ? new DOMRect(
+              0,
+              wrapperRect.top,
+              1,
+              wrapperRect.height,
+            )
+          : undefined,
       );
   // 未裁切的纵向内容坐标。
   const nextTop =
@@ -280,7 +308,7 @@ function resolveOverlayCoordinates(
       : context.verticalMode === "inside-bottom"
         ? anchor.anchorBottom - overlayHeight - context.verticalOffset
         : placement === MenuPlacement.Top
-          ? anchor.anchorTop - context.verticalOffset
+          ? anchor.anchorTop - overlayHeight - context.verticalOffset
           : anchor.anchorBottom + context.verticalOffset;
   // 裁切后的纵向内容坐标。
   const clampedTop = Math.max(nextTop, context.boundaryInset);
@@ -381,8 +409,7 @@ export function useEditorFloatingOverlayPosition({
     overlay.style.position = "absolute";
     overlay.style.left = `${overlayPosition.left}px`;
     overlay.style.top = `${overlayPosition.top}px`;
-    overlay.style.transform =
-      coordinates.placement === MenuPlacement.Top ? "translateY(-100%)" : "";
+    overlay.style.transform = "";
     overlay.style.visibility = "visible";
   }, [enabled]);
 
