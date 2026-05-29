@@ -108,6 +108,7 @@
 .code-block-language-menu {
   z-index: 45;
   pointer-events: auto;
+  animation: code-block-language-menu-in 0.14s ease-out;
 }
 
 .code-block-control-bar {
@@ -206,6 +207,7 @@
   box-shadow: var(--ui-shadow-popover);
   outline: none;
   pointer-events: auto;
+  animation: code-block-language-menu-in 0.14s ease-out;
 }
 
 .code-block-language-command {
@@ -250,6 +252,25 @@
 @keyframes code-block-action-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes code-block-language-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-block-language-menu,
+  .code-block-language-select-content {
+    animation: none;
   }
 }
 

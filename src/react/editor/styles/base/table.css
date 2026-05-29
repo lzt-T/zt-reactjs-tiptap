@@ -107,4 +107,30 @@
     pointer-events: none;
 }
 
+.table-column-action-menu,
+.table-row-action-menu,
+.table-alignment-submenu {
+    animation: zt-table-action-menu-in 0.14s ease-out;
+}
+
+@keyframes zt-table-action-menu-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .table-column-action-menu,
+    .table-row-action-menu,
+    .table-alignment-submenu {
+        animation: none;
+    }
+}
+
 

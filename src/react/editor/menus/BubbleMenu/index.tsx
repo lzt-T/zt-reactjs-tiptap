@@ -446,7 +446,7 @@ const BubbleMenu = ({
           <FloatingPortalPanel
             panel={blockMenuPanel}
             portalContainer={contentPortalContainer}
-            className="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
+            className="bubble-menu-popover-panel"
             onMouseDown={(event) => event.preventDefault()}
           >
             <div className="bubble-block-menu">
@@ -690,7 +690,7 @@ const BubbleMenu = ({
           locale={locale}
           portalContainer={contentPortalContainer}
           floatingBoundary={contentPopoverBoundary}
-          popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
+          popoverClassName="bubble-menu-popover-panel"
           triggerClassName="bubble-menu-btn"
         />
         {/* 官方的需要钱 */}
@@ -708,7 +708,7 @@ const BubbleMenu = ({
           locale={locale}
           portalContainer={contentPortalContainer}
           floatingBoundary={contentPopoverBoundary}
-          popoverClassName="bubble-menu-popover-panel bubble-menu-color-popover-no-animation"
+          popoverClassName="bubble-menu-popover-panel"
           triggerClassName="bubble-menu-btn"
         />
         <span className="separator" />
