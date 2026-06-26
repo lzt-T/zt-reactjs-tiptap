@@ -1,4 +1,5 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/react/components/ui/tabs'
+import { useState } from 'react'
+import { SegmentedSwitch } from '@/react/components/SegmentedSwitch'
 import { FormulaSnippetButton } from '../FormulaSnippetButton'
 import { FORMULA_CATEGORIES, type FormulaPickerCategory } from '@/shared/config/formulaCategories'
 import './index.css'
@@ -11,28 +12,43 @@ export interface FormulaPickerProps {
   categories?: FormulaPickerCategory[]
 }
 
+/** 渲染公式片段分类选择器。 */
 export function FormulaPicker({ handlePickSnippet, categories }: FormulaPickerProps) {
+  // 当前可用的公式分类列表。
   const categoriesList = categories ?? FORMULA_CATEGORIES
-  const defaultTab = categoriesList[0]?.id ?? FORMULA_CATEGORIES[0].id
+  // 初始选中的分类 ID。
+  const initialCategoryId = categoriesList[0]?.id ?? FORMULA_CATEGORIES[0].id
+  // 当前选中的分类 ID。
+  const [currentCategoryId, setCurrentCategoryId] = useState(initialCategoryId)
+  // 当前展示的分类，外部分类变化导致 ID 失效时回退到首个分类。
+  const currentCategory =
+    categoriesList.find((category) => category.id === currentCategoryId) ??
+    categoriesList[0]
+  // 当前传给切换器的选中值，确保内容与选中态一致。
+  const selectedCategoryId = currentCategory?.id ?? currentCategoryId
+  // 分段切换选项。
+  const categoryOptions = categoriesList.map((category) => ({
+    label: category.title,
+    value: category.id,
+  }))
 
   return (
-    <Tabs defaultValue={defaultTab} className="formula-picker math-dialog-tabs">
-      <TabsList className="math-dialog-tabs-list">
-        {categoriesList.map((category) => (
-          <TabsTrigger key={category.id} value={category.id}>
-            {category.title}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-      {categoriesList.map((category) => (
-        <TabsContent key={category.id} value={category.id} className="math-dialog-tabs-content">
+    <div className="formula-picker math-dialog-tabs">
+      <SegmentedSwitch
+        className="math-dialog-tabs-list"
+        value={selectedCategoryId}
+        onChange={setCurrentCategoryId}
+        options={categoryOptions}
+      />
+      {currentCategory && (
+        <div className="math-dialog-tabs-content">
           <div className="math-dialog-snippets-grid">
-            {category.items.map((item) => (
+            {currentCategory.items.map((item) => (
               <FormulaSnippetButton key={item.id} item={item} onInsert={handlePickSnippet} />
             ))}
           </div>
-        </TabsContent>
-      ))}
-    </Tabs>
+        </div>
+      )}
+    </div>
   )
 }

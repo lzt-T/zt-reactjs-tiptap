@@ -1,6 +1,6 @@
 .bubble-menu {
   display: flex;
-  background: var(--ui-text-inverse);
+  background: var(--ui-bg-panel);
   border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 4px;
@@ -119,7 +119,7 @@
   width: max-content;
   min-width: 156px;
   max-height: 300px;
-  background: var(--ui-text-inverse);
+  background: var(--ui-bg-panel);
   border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 4px;
@@ -187,7 +187,7 @@
 
 /* 更多菜单样式 */
 .more-menu {
-  background: var(--ui-text-inverse);
+  background: var(--ui-bg-panel);
   border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 4px;

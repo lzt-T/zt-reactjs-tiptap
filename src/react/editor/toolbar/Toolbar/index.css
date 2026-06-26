@@ -78,7 +78,7 @@
   width: max-content;
   height: auto;
   min-height: 0;
-  background: var(--ui-text-inverse);
+  background: var(--ui-bg-panel);
   border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 4px;
@@ -182,7 +182,7 @@
 .editor-toolbar-table-size-popover {
   width: auto;
   padding: 0;
-  background: var(--ui-text-inverse);
+  background: var(--ui-bg-panel);
   border: 1px solid var(--ui-border);
   border-radius: 8px;
   box-shadow: var(--ui-shadow-xl);

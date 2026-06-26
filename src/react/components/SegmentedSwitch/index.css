@@ -34,3 +34,21 @@
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+.zt-tiptap-theme.dark .segmented-switch {
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg-muted);
+}
+
+.zt-tiptap-theme.dark .segmented-switch-option {
+  color: var(--ui-text-muted);
+}
+
+.zt-tiptap-theme.dark .segmented-switch-option:hover:not(:disabled) {
+  color: var(--ui-text-strong);
+}
+
+.zt-tiptap-theme.dark .segmented-switch-option.is-active {
+  color: var(--ui-text-strong);
+  background: var(--ui-bg-panel);
+}

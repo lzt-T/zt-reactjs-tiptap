@@ -43,8 +43,10 @@
   border-radius: calc(var(--radius) - 2px);
   font-size: 0.875rem;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  resize: vertical;
-  transition: all 0.2s;
+  resize: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   background: var(--background);
   color: var(--foreground);
 }
@@ -130,7 +132,7 @@
   cursor: pointer;
 }
 
-/* 常用公式 - 使用 shadcn Tabs */
+/* 常用公式分类切换。 */
 .math-dialog-tabs {
   display: flex;
   flex-direction: column;
@@ -138,42 +140,24 @@
   min-width: 0; /* 允许在窄容器内收缩，配合子元素滚动 */
 }
 
-/* 标签栏：宽度够时占满一行均分，宽度小时自动换行；显式色值避免 npm 安装后宿主 :root 覆盖变量导致颜色不对 */
+/* 标签栏：复用 SegmentedSwitch，并保留公式弹窗内的宽度约束。 */
 .math-dialog-tabs-list {
   box-sizing: border-box;
   flex-shrink: 0;
   width: 100%;
   max-width: 100%;
-  display: flex;
-  flex-wrap: wrap;
   height: auto;
   min-height: 2.25rem;
-  background: var(--muted);
-  border-radius: 0.5rem;
-  padding: 3px;
   overflow: hidden;
 }
 
-/* 每个标签：同排内均分宽度占满，有最小宽度；排不下时换行；极窄时省略号；未选中/选中用显式 fallback */
-.math-dialog-tabs-list [data-slot="tabs-trigger"] {
-  flex: 1 1 0;
+/* 公式分类文案较长时保持单行省略。 */
+.math-dialog-tabs-list .segmented-switch-option {
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--muted-foreground);
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-}
-.math-dialog-tabs-list [data-slot="tabs-trigger"]:hover {
-  color: var(--foreground);
-}
-.math-dialog-tabs-list [data-slot="tabs-trigger"][data-state="active"] {
-  background: var(--background);
-  color: var(--foreground);
-  box-shadow: var(--ui-shadow-sm);
 }
 
 .math-dialog-tabs-content {

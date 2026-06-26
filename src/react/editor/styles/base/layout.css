@@ -2,7 +2,7 @@
   position: relative;
   border: 1px solid var(--ui-border-muted);
   border-radius: 8px;
-  background: var(--ui-text-inverse);
+  background: var(--background);
   height: 100%;
   display: flex;
   flex-direction: column;
