@@ -10,6 +10,11 @@
     scrollbar-color: var(--ui-border-strong) transparent;
 }
 
+.editor-wrapper .ProseMirror .tableWrapper > [data-table-actions-wrapper="true"] {
+    box-sizing: border-box;
+    vertical-align: top;
+}
+
 .editor-wrapper .ProseMirror .tableWrapper::-webkit-scrollbar {
     height: 4px;
 }
@@ -44,6 +49,12 @@
     min-width: var(--table-cell-min-width);
     overflow-wrap: anywhere;
     word-break: break-word;
+}
+
+.editor-wrapper .ProseMirror td > p,
+.editor-wrapper .ProseMirror th > p {
+    margin: 0;
+    line-height: 1.5;
 }
 
 .editor-wrapper .ProseMirror th {

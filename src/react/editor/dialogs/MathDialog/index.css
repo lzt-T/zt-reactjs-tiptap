@@ -35,7 +35,9 @@
 
 /* LaTeX 输入框 - 使用 var() 直接引用主题色（支持 oklch/hsl） */
 .math-dialog-input {
+  display: block;
   width: 100%;
+  max-width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) - 2px);
@@ -55,6 +57,8 @@
 
 /* 预览区域 */
 .math-dialog-preview {
+  box-sizing: border-box;
+  max-width: 100%;
   min-height: 100px;
   padding: 1rem;
   background: color-mix(in oklch, var(--muted) 30%, transparent);
@@ -73,9 +77,11 @@
 }
 
 .math-dialog-preview-content {
+  box-sizing: border-box;
   text-align: center;
   font-size: 1.125rem;
   width: 100%;
+  max-width: 100%;
 }
 
 .math-dialog-preview-content .katex-display {
@@ -134,6 +140,7 @@
 
 /* 标签栏：宽度够时占满一行均分，宽度小时自动换行；显式色值避免 npm 安装后宿主 :root 覆盖变量导致颜色不对 */
 .math-dialog-tabs-list {
+  box-sizing: border-box;
   flex-shrink: 0;
   width: 100%;
   max-width: 100%;
@@ -144,12 +151,13 @@
   background: var(--muted);
   border-radius: 0.5rem;
   padding: 3px;
+  overflow: hidden;
 }
 
 /* 每个标签：同排内均分宽度占满，有最小宽度；排不下时换行；极窄时省略号；未选中/选中用显式 fallback */
 .math-dialog-tabs-list [data-slot="tabs-trigger"] {
   flex: 1 1 0;
-  min-width: 8.5rem;
+  min-width: 0;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;

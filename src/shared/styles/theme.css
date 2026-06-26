@@ -4,8 +4,12 @@
  * 被 index.css（应用）和 style.css（库）共同使用
  */
 
-/* Tailwind CSS 基础样式 */
-@import "tailwindcss";
+@config "../../../tailwind.config.ts";
+
+/* Tailwind CSS 主题与工具类，不引入 preflight，避免污染宿主页面全局样式。 */
+@layer theme, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 /* shadcn 主题变量 */
 @import "./shadcn/tailwind.css";
@@ -87,9 +91,10 @@
   --ui-image-badge-hover-bg: rgba(241, 245, 249, 0.98);
 }
 
-/* 编辑器作用域统一滚动条基线：强制覆盖各子模块局部差异样式。 */
+/* 编辑器作用域统一盒模型与滚动条基线，避免污染宿主全局样式。 */
 .zt-tiptap-theme,
 .zt-tiptap-theme * {
+  box-sizing: border-box;
   scrollbar-width: thin !important;
   scrollbar-color: var(--ui-scrollbar-thumb) transparent !important;
 }

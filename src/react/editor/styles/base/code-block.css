@@ -114,15 +114,16 @@
 .code-block-control-bar {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ui-border);
   border-radius: 0.5rem;
-  background: color-mix(in oklab, var(--background) 92%, transparent);
+  background: var(--ui-bg-panel);
+  color: var(--ui-text-strong);
   box-shadow: var(--shadow-xs);
   overflow: hidden;
 }
 
 .code-block-control-bar:focus-within {
-  border-color: var(--border);
+  border-color: var(--ui-border);
   box-shadow: var(--shadow-xs);
 }
 
@@ -155,9 +156,10 @@
 .code-block-action-bar {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ui-border);
   border-radius: 0.5rem;
-  background: color-mix(in oklab, var(--background) 92%, transparent);
+  background: var(--ui-bg-panel);
+  color: var(--ui-text-strong);
   box-shadow: var(--shadow-xs);
   overflow: hidden;
   pointer-events: auto;
@@ -179,11 +181,11 @@
 }
 
 .code-block-control-action-btn + .code-block-control-action-btn {
-  border-left: 1px solid var(--border);
+  border-left: 1px solid var(--ui-border);
 }
 
 .code-block-control-action-btn:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--muted) 58%, var(--background) 42%);
+  background: var(--ui-bg-hover-soft);
 }
 
 .code-block-control-action-btn:focus-visible {
@@ -216,14 +218,21 @@
 
 .code-block-language-command [data-slot="command-input-wrapper"] {
   height: 2rem;
+  box-sizing: border-box;
+  align-items: center;
   border-bottom: 1px solid var(--border);
   padding: 0 0.5rem;
 }
 
 .code-block-language-command [data-slot="command-input"] {
+  appearance: none;
+  border: 0;
+  box-shadow: none;
   font-size: 12px;
-  padding: 0.25rem 0;
-  height: 1.75rem;
+  height: 100%;
+  padding: 0;
+  line-height: 1.25rem;
+  outline: none;
 }
 
 .code-block-language-list {
