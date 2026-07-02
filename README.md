@@ -699,7 +699,7 @@ import 'zt-reactjs-tiptap/style.css'
 
 5. **UI 主题 Token 化**：编辑器 UI（工具栏、菜单、表格操作、弹窗、输入框、滚动条等）已统一使用主题 token。默认 `light` 视觉与旧版保持一致，切换 `theme="dark"` 时同一套 token 会自动映射为暗色值。
 
-6. **弹层/对话框**：编辑器使用两层内部 Portal。图片、视频、公式、附件弹层以及工具栏/BubbleMenu 的全局类菜单挂载到 `.zt-tiptap-portal`，继承同一套作用域变量且不挂到 `document.body`；代码块、表格、BubbleMenu 选区附属面板挂载到 `.editor-wrapper` 内的 `.zt-tiptap-content-portal`，会随编辑器滚动视口裁剪。若样式仍异常，优先检查宿主全局 reset 或高优先级选择器
+6. **弹层/对话框**：编辑器使用分层 Portal。图片、视频、公式、附件等全屏 Dialog 挂载到 `document.body` 下的 `.zt-tiptap-dialog-host` 隔离宿主，并同步 `.zt-tiptap-theme` 作用域变量，避免被父级 `overflow` 或 `transform` 裁切；工具栏/BubbleMenu 的全局类菜单仍挂载到 `.zt-tiptap-portal`；代码块、表格、BubbleMenu 选区附属面板挂载到 `.editor-wrapper` 内的 `.zt-tiptap-content-portal`，会随编辑器滚动视口裁剪。若样式仍异常，优先检查宿主全局 reset 或高优先级选择器
 
 ## 开发
 

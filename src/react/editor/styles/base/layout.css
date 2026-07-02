@@ -34,6 +34,23 @@
   pointer-events: auto;
 }
 
+.zt-tiptap-dialog-host {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+  overflow: visible;
+  background: transparent;
+  z-index: 1300;
+  pointer-events: none;
+}
+
+.zt-tiptap-dialog-host [data-slot="dialog-overlay"],
+.zt-tiptap-dialog-host [data-slot="dialog-content"] {
+  pointer-events: auto;
+}
+
 .zt-tiptap-content-portal {
   position: absolute;
   inset: 0;
